@@ -52,8 +52,6 @@ import com.google.android.gms.gcm.PeriodicTask;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.sensel.driverapp.service.GetChecklistForVehicleTypeService;
-import com.sensel.driverapp.service.SyncTaskService;
 import com.sensel.driverapp.utility.CheckNetwork;
 
 import org.json.JSONArray;
@@ -127,8 +125,6 @@ public class Gridmenu extends AppCompatActivity {
 
 
         gridViewStrings = new String[]{
-                "eVet Checklist",
-                "Sync eVet Data",
                 "Daily Checklist",
                 "JRM Route",
                 "Vehicle Runtime",
@@ -149,9 +145,7 @@ public class Gridmenu extends AppCompatActivity {
                 "Motor Garage",
                 "Police",
                 "Cranes",
-                "Taging",
                 "Dashboard",
-                "QRScan",
                 //"ZERO Fatality",
                 "Start & End Work",
                 "Rest Timer",
@@ -161,8 +155,6 @@ public class Gridmenu extends AppCompatActivity {
 
 
         gridViewImages = new Integer[]{
-                R.drawable.checklist,
-                R.drawable.sync,
                 R.drawable.checklist,
                 R.drawable.route,
                 R.drawable.runtime,
@@ -183,9 +175,7 @@ public class Gridmenu extends AppCompatActivity {
                 R.drawable.garage,
                 R.drawable.police,
                 R.drawable.crane,
-                R.drawable.taging,
                 R.drawable.dashboard,
-                R.drawable.qr_scan,
                 //R.drawable.checklist_icon,
                 R.drawable.worktime,
                 R.drawable.sleeptime,
@@ -332,9 +322,6 @@ public class Gridmenu extends AppCompatActivity {
 
         mGcmNetworkManager = GcmNetworkManager.getInstance(this);
         checkPlayServicesAvailable();
-
-        getChecklistForOfflineWork();
-        startSyncTask();
     }
 
     @Override
@@ -447,54 +434,6 @@ public class Gridmenu extends AppCompatActivity {
                 Toast.makeText(this, "Google Play Services error", Toast.LENGTH_SHORT).show();
             }
         }
-    }
-
-    protected void getChecklistForOfflineWork() {
-        if (CheckNetwork.isNetworkAvailable(this)) {
-            //get the details for offline working
-            Intent intent = new Intent(this, GetChecklistForVehicleTypeService.class);
-            startService(intent);
-        } else {
-            Log.d(TAG, "Internet not available.");
-        }
-    }
-
-    public void startSyncTask() {
-        // [START start_one_off_task]
-        /*PeriodicTask periodic = new PeriodicTask.Builder()
-                .setService(SyncTaskService.class)
-                .setPeriod(5 * 60) //in sec - 10 min
-                .setFlex(3 * 60) //in sec - 5 min
-                .setTag("SYNC_TASK_TAG")
-                .setPersisted(false)
-                .setRequiredNetwork(com.google.android.gms.gcm.Task.NETWORK_STATE_CONNECTED)
-                .setUpdateCurrent(false)
-                .build();
-        mGcmNetworkManager.schedule(periodic);*/
-        Constraints constraints = new Constraints.Builder()
-                .setRequiredNetworkType(NetworkType.CONNECTED)
-                .build();
-
-        PeriodicWorkRequest periodicWorkRequest = new PeriodicWorkRequest.Builder(com.sensel.driverapp.service.SyncWorker.class, 15, TimeUnit.MINUTES)
-                .setConstraints(constraints)
-                .setInitialDelay(10, TimeUnit.MINUTES)
-                .build();
-
-        WorkManager.getInstance(context).enqueueUniquePeriodicWork(
-                "SYNC_TASK_TAG",
-                ExistingPeriodicWorkPolicy.REPLACE,
-                periodicWorkRequest
-        );
-
-        /*OneoffTask task = new OneoffTask.Builder()
-                .setService(SyncTaskService.class)
-                .setTag("SYNC_TASK_TAG")
-                .setUpdateCurrent(false)
-                .setExecutionWindow(0L, 3600L)
-                .setRequiredNetwork(com.google.android.gms.gcm.Task.NETWORK_STATE_ANY)
-                .build();
-        mGcmNetworkManager.schedule(task);*/
-        // [END start_one_off_task]
     }
 
     @Override

@@ -206,14 +206,6 @@
             android:label="Customer Feedback"
             android:theme="@style/myTheme1" />
         <activity
-            android:name=".Taging"
-            android:label="Taging"
-            android:theme="@style/myTheme1" />
-        <activity
-            android:name=".QRScanner"
-            android:label="Processing..."
-            android:theme="@style/myTheme1" />
-        <activity
             android:name=".DeviationReport"
             android:configChanges="orientation|screenSize"
             android:label="Add Place"
@@ -301,19 +293,11 @@
             android:showOnLockScreen="true"
             android:theme="@style/myTheme1" />
         <activity
-            android:name=".activity.DynamicFormActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/myTheme1" />
-        <activity
             android:name=".activity.ImageSelectorActivity"
             android:screenOrientation="portrait"
             android:theme="@style/myTheme1" />
         <activity
             android:name=".activity.ReportActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/myTheme1" />
-        <activity
-            android:name=".activity.SyncActivity"
             android:screenOrientation="portrait"
             android:theme="@style/myTheme1" />
         <activity

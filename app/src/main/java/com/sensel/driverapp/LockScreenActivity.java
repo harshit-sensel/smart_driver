@@ -49,7 +49,6 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.google.android.gms.maps.model.LatLng;
-import com.sensel.driverapp.activity.SyncActivity;
 import com.sensel.driverapp.objectclass.LockScreenParkingSpots;
 import com.sensel.driverapp.utility.JourneyPlanDB;
 

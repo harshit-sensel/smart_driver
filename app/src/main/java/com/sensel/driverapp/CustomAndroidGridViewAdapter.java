@@ -37,12 +37,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
-import com.sensel.driverapp.activity.DynamicFormActivity;
-import com.sensel.driverapp.activity.ReportActivity;
-import com.sensel.driverapp.activity.SyncActivity;
 import com.sensel.driverapp.adapter.ZerofatilityAdaptor;
-import com.sensel.driverapp.db.AppDatabase;
-import com.sensel.driverapp.db.model.LoginConfigs;
 import com.sensel.driverapp.utility.ToastHelper;
 
 import org.json.JSONArray;
@@ -107,30 +102,6 @@ public class CustomAndroidGridViewAdapter extends BaseAdapter {
 
                 switch (textView.getText().toString()) {
 
-                    case "eVet Checklist":// Daily Checklist
-                        if (isNetworkAvailable()) {
-                            //TODO go to activity
-                            //String provider = Settings.Secure.getString(mContext.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
-                            //if (provider.contains("network") || provider.contains("gps")) {
-                            if(isLocationAvailable()){
-                                decideWhereToRedirect(false);
-                            } else {
-                                ToastHelper.showToast(mContext, "Please Turn On GPS");
-                                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                mContext.startActivity(intent);
-                            }
-                        } else
-                            Toast.makeText(mContext, "No internet", Toast.LENGTH_SHORT).show();
-                        break;
-                    case "Sync eVet Data":// Daily Checklist
-                        if (isNetworkAvailable()) {
-                            Intent intent = new Intent(mContext, SyncActivity.class);
-                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            mContext.startActivity(intent);
-                        } else
-                            Toast.makeText(mContext, "No internet", Toast.LENGTH_SHORT).show();
-                        break;
                     case "Hospital"://Hospital
                         if (isNetworkAvailable()) {
                             if (isLocationAvailable()) {
@@ -459,25 +430,6 @@ public class CustomAndroidGridViewAdapter extends BaseAdapter {
                         } else
                             Toast.makeText(mContext, "No internet", Toast.LENGTH_SHORT).show();
                         break;
-                    case "Taging":// Taging
-                        if (isNetworkAvailable()) {
-                            if (isLocationAvailable()) {
-                                if (Gridmenu.points == null) {
-                                    Toast.makeText(mContext, "Please restart app", Toast.LENGTH_SHORT).show();
-                                    //Toast.makeText(mContext, "Could not find vehicle id, please restart app", Toast.LENGTH_SHORT).show();
-                                } else if (Gridmenu.points.length == 8) {
-                                    Intent i = new Intent(mContext, Taging.class);
-                                    i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                    mContext.startActivity(i);
-                                } else {
-                                    Toast.makeText(mContext, "No vehicle assigned", Toast.LENGTH_SHORT).show();
-                                }
-
-                            } else
-                                Toast.makeText(mContext, "Enable GPS", Toast.LENGTH_SHORT).show();
-                        } else
-                            Toast.makeText(mContext, "No internet", Toast.LENGTH_SHORT).show();
-                        break;
                     case "Dashboard":// Dash Board
                         if (Gridmenu.points == null) {
                             Toast.makeText(mContext, "Please restart app", Toast.LENGTH_SHORT).show();
@@ -494,18 +446,6 @@ public class CustomAndroidGridViewAdapter extends BaseAdapter {
 //                            Intent i1 = new Intent(mContext, LockScreenActivity.class);
 //                            i1.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 //                            mContext.startActivity(i1);
-                        break;
-                    case "QRScan":// QR Scan
-                        if (Gridmenu.points == null) {
-                            Toast.makeText(mContext, "Please restart app", Toast.LENGTH_SHORT).show();
-                            //Toast.makeText(mContext, "Could not find vehicle id, please restart app", Toast.LENGTH_SHORT).show();
-                        } else if (Gridmenu.points.length == 8) {
-                            LockScreenActivity.isdashboard = true;
-                            Intent i = new Intent(mContext, QRScanner.class);
-                            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            mContext.startActivity(i);
-                        } else
-                            Toast.makeText(mContext, "No vehicle assigned", Toast.LENGTH_SHORT).show();
                         break;
 
                     case "ZERO Fatality":// ZERO Fatality
@@ -768,98 +708,6 @@ public class CustomAndroidGridViewAdapter extends BaseAdapter {
             }
         };
         activityThread.start();
-    }
-
-    private void decideWhereToRedirect(boolean isRedirectingToReport) {
-        //check if we have multiple configurations
-        List<LoginConfigs> configs = loadOfflineLoginConfigs();
-        if (isRedirectingToReport) {
-            //for reports
-            if (configs != null && configs.size() > 0) {
-                Intent intent = new Intent(mContext, ReportActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                if (configs.size() == 1) {
-                    intent.putExtra("APP_NAME", configs.get(0));
-                    mContext.startActivity(intent);
-                } else {
-                    //show options to select from
-                    showSelectionDialog(configs, isRedirectingToReport);
-                }
-            } else {
-                showConfigurationNotAvailableDialog();
-            }
-        } else {
-            //for new vetting
-            if (configs != null && configs.size() > 0) {
-                if (configs.size() == 1) {
-                    Intent intent = new Intent(mContext, DynamicFormActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    intent.putExtra("APP_NAME", configs.get(0));
-                    mContext.startActivity(intent);
-                } else {
-                    //show options to select from
-                    showSelectionDialog(configs, isRedirectingToReport);
-                }
-            } else {
-                showConfigurationNotAvailableDialog();
-            }
-        }
-    }
-
-    private void showSelectionDialog(List<LoginConfigs> configs, boolean isRedirectingToReport) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
-        builder.setTitle("Choose Configuration");
-
-        String[] options = new String[configs.size()];
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-            List<String> names = configs.stream().map(LoginConfigs::getName).collect(Collectors.toList());
-            options = names.stream().toArray(String[]::new);
-        } else {
-            for (int i = 0; i < configs.size(); i++) {
-                options[i] = configs.get(i).getName();
-            }
-        }
-
-        builder.setItems(options, (dialog, which) -> {
-            LoginConfigs configSelected = configs.get(which); //selected item
-            if (isRedirectingToReport) {
-                //send to report activity
-                Intent intent = new Intent(mContext, ReportActivity.class);
-                intent.putExtra("APP_NAME", configSelected);
-                mContext.startActivity(intent);
-            }
-            /*else if (configSelected.getName().equals(CONST_CONFIG_REGULAR)) {
-                //send to regular activity
-                mContext.startActivity(new Intent(mContext, DetailsActivity.class));
-            }*/
-            else {
-                //send to dynamic activity
-                Intent intent = new Intent(mContext, DynamicFormActivity.class);
-                intent.putExtra("APP_NAME", configSelected);
-                mContext.startActivity(intent);
-            }
-        });
-
-        AlertDialog dialog = builder.create();
-        dialog.show();
-    }
-
-    private void showConfigurationNotAvailableDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
-        builder.setTitle("Configuration Not Available");
-        builder.setMessage("No application configured, please contact your ADMIN team.");
-        builder.setCancelable(false);
-        builder.setPositiveButton("OK", (dialogInterface, i) -> {
-            dialogInterface.dismiss();
-            //onBackPressed();
-        });
-        AlertDialog dialog = builder.create();
-        dialog.show();
-    }
-
-    private List<LoginConfigs> loadOfflineLoginConfigs() {
-        AppDatabase database = AppDatabase.getDatabase(mContext.getApplicationContext());
-        return database.loginConfigModel().loadAllConfigs();
     }
 
 }

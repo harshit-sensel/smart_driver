@@ -32,7 +32,6 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.sensel.driverapp.R;
-import com.sensel.driverapp.activity.DynamicFormActivity;
 import com.sensel.driverapp.utility.LocationUtils;
 import com.sensel.driverapp.utility.RestTimeBroadcast;
 
@@ -240,9 +239,6 @@ public class LocationUpdatesService extends Service {
         // The PendingIntent that leads to a call to onStartCommand() in this service.
         PendingIntent servicePendingIntent = PendingIntent.getService(this, 0, intent,
                 PendingIntent.FLAG_UPDATE_CURRENT);
-        // The PendingIntent to launch activity.
-        //PendingIntent activityPendingIntent = PendingIntent.getActivity(this, 0,
-          //      new Intent(this, DynamicFormActivity.class), PendingIntent.FLAG_MUTABLE);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
         // Creates the PendingIntent with FLAG_IMMUTABLE
