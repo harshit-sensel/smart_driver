@@ -599,22 +599,7 @@ public class CustomAndroidGridViewAdapter extends BaseAdapter {
                         break;
 
 
-                    case "QR code scanner":
-                        if (isNetworkAvailable()) {
-                            if (isLocationAvailable()) {
-                                Intent qrcodescanner = new Intent(mContext, AdaniQrcode_scanner.class);
-                                qrcodescanner.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                mContext.startActivity(qrcodescanner);
 
-                            } else {
-                                Toast.makeText(mContext, "Please turn on GPS", Toast.LENGTH_LONG).show();
-                            }
-                        } else {
-                            Toast.makeText(mContext, "Internet connection required", Toast.LENGTH_LONG).show();
-                        }
-
-
-                        break;
 
 
                     case "Panic button":

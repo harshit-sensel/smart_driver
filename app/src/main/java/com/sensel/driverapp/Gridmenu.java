@@ -126,86 +126,74 @@ public class Gridmenu extends AppCompatActivity {
         context = getApplicationContext();
 
 
-        if (BuildConfig.FLAVOR.contains("adani")) {
-            gridViewStrings = new String[]{
-                    "QR code scanner",
-            };
-            gridViewImages = new Integer[]{
-                    R.drawable.qr_scan,
-            };
+        gridViewStrings = new String[]{
+                "eVet Checklist",
+                "Sync eVet Data",
+                "Daily Checklist",
+                "JRM Route",
+                "Vehicle Runtime",
+                "Unload Quantity",
+                "Incentive Points",
+                "Driver Manual",
+                "Customer Feedback",
+                "See JRM Route",
+                "Notifications",
+                "Send Notification",
+                "Deviation Report",
+                "Self Appraisal",
+                "Emergency Vehicle",
+                "Hospital",
+                "Ambulance",
+                "Fire Brigade",
+                "Puncture Shop",
+                "Motor Garage",
+                "Police",
+                "Cranes",
+                "Taging",
+                "Dashboard",
+                "QRScan",
+                //"ZERO Fatality",
+                "Start & End Work",
+                "Rest Timer",
+                "Panic button",
+                "Journey Plan",
+        };
 
 
-        } else {
-            gridViewStrings = new String[]{
-                    "eVet Checklist",
-                    "Sync eVet Data",
-                    "Daily Checklist",
-                    "JRM Route",
-                    "Vehicle Runtime",
-                    "Unload Quantity",
-                    "Incentive Points",
-                    "Driver Manual",
-                    "Customer Feedback",
-                    "See JRM Route",
-                    "Notifications",
-                    "Send Notification",
-                    "Deviation Report",
-                    "Self Appraisal",
-                    "Emergency Vehicle",
-                    "Hospital",
-                    "Ambulance",
-                    "Fire Brigade",
-                    "Puncture Shop",
-                    "Motor Garage",
-                    "Police",
-                    "Cranes",
-                    "Taging",
-                    "Dashboard",
-                    "QRScan",
-                    //"ZERO Fatality",
-                    "Start & End Work",
-                    "Rest Timer",
-                    "Panic button",
-                    "Journey Plan",
-            };
+        gridViewImages = new Integer[]{
+                R.drawable.checklist,
+                R.drawable.sync,
+                R.drawable.checklist,
+                R.drawable.route,
+                R.drawable.runtime,
+                R.drawable.unload,
+                R.drawable.incentive,
+                R.drawable.manual,
+                R.drawable.feedback,
+                R.drawable.see_route,
+                R.drawable.notification,
+                R.drawable.send_notification,
+                R.drawable.deviation,
+                R.drawable.appraisal,
+                R.drawable.emergency,
+                R.drawable.hospital,
+                R.drawable.ambulance,
+                R.drawable.fire,
+                R.drawable.puncture,
+                R.drawable.garage,
+                R.drawable.police,
+                R.drawable.crane,
+                R.drawable.taging,
+                R.drawable.dashboard,
+                R.drawable.qr_scan,
+                //R.drawable.checklist_icon,
+                R.drawable.worktime,
+                R.drawable.sleeptime,
+                R.drawable.ic_error,
+                R.drawable.worktime,
+        };
 
 
-            gridViewImages = new Integer[]{
-                    R.drawable.checklist,
-                    R.drawable.sync,
-                    R.drawable.checklist,
-                    R.drawable.route,
-                    R.drawable.runtime,
-                    R.drawable.unload,
-                    R.drawable.incentive,
-                    R.drawable.manual,
-                    R.drawable.feedback,
-                    R.drawable.see_route,
-                    R.drawable.notification,
-                    R.drawable.send_notification,
-                    R.drawable.deviation,
-                    R.drawable.appraisal,
-                    R.drawable.emergency,
-                    R.drawable.hospital,
-                    R.drawable.ambulance,
-                    R.drawable.fire,
-                    R.drawable.puncture,
-                    R.drawable.garage,
-                    R.drawable.police,
-                    R.drawable.crane,
-                    R.drawable.taging,
-                    R.drawable.dashboard,
-                    R.drawable.qr_scan,
-                    //R.drawable.checklist_icon,
-                    R.drawable.worktime,
-                    R.drawable.sleeptime,
-                    R.drawable.ic_error,
-                    R.drawable.worktime,
-            };
-        }
-
-
-        Log.e("buildconfig", BuildConfig.FLAVOR);
         Log.e(" LANGUGE", LANGUGE);
         // LANGUGE="en";
         setContentView(R.layout.gridmenu);
@@ -221,11 +209,8 @@ public class Gridmenu extends AppCompatActivity {
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
 
-        if (!BuildConfig.FLAVOR.contains("adani")) {
-            getSupportActionBar().setIcon(R.mipmap.icon);
-            getSupportActionBar().setSubtitle(lang);
-
-        }
+        getSupportActionBar().setIcon(R.mipmap.icon);
+        getSupportActionBar().setSubtitle(lang);
 
 
         progressDialog = new ProgressDialog(Gridmenu.this);
@@ -264,20 +249,17 @@ public class Gridmenu extends AppCompatActivity {
         //Start Notification service
 
 
-        if (!BuildConfig.FLAVOR.contains("adani")) {
+        Calendar cal = Calendar.getInstance();
+        AlarmManager alarmManager = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(this, AlarmReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), 60000, pendingIntent);
 
-            Calendar cal = Calendar.getInstance();
-            AlarmManager alarmManager = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
-            Intent intent = new Intent(this, AlarmReceiver.class);
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
-            alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), 60000, pendingIntent);
-
-            GPSTracker.mActivity = Gridmenu.this;
-            AlarmManager service = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
-            Intent intent1 = new Intent(this, RestarterBroadcastReceiver.class);
-            PendingIntent pendingIntent1 = PendingIntent.getBroadcast(this, 0, intent1, PendingIntent.FLAG_IMMUTABLE);
-            service.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), 10000, pendingIntent1);
-        }
+        GPSTracker.mActivity = Gridmenu.this;
+        AlarmManager service = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
+        Intent intent1 = new Intent(this, RestarterBroadcastReceiver.class);
+        PendingIntent pendingIntent1 = PendingIntent.getBroadcast(this, 0, intent1, PendingIntent.FLAG_IMMUTABLE);
+        service.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), 10000, pendingIntent1);
 
 
         //Lock mobile while driving service
@@ -351,10 +333,8 @@ public class Gridmenu extends AppCompatActivity {
         mGcmNetworkManager = GcmNetworkManager.getInstance(this);
         checkPlayServicesAvailable();
 
-        if (!BuildConfig.FLAVOR.contains("adani")) {
-            getChecklistForOfflineWork();
-            startSyncTask();
-        }
+        getChecklistForOfflineWork();
+        startSyncTask();
     }
 
     @Override
@@ -535,10 +515,8 @@ public class Gridmenu extends AppCompatActivity {
             Log.e(" LANGUGE", LANGUGE);
             // LANGUGE="en";
 
-            if (!BuildConfig.FLAVOR.contains("adani")) {
-                lang = whichlanguge(LANGUGE);
-                getSupportActionBar().setSubtitle(lang);
-            }
+            lang = whichlanguge(LANGUGE);
+            getSupportActionBar().setSubtitle(lang);
 
         }
         super.onResume();

@@ -61,11 +61,7 @@ public class Splash extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.splashscreen);
 
-        ImageView mainicon=(ImageView) findViewById(R.id.main_icon);
-        Log.e("buildconfig",BuildConfig.FLAVOR);
-        if(BuildConfig.FLAVOR.contains("adani")){
-            mainicon.setImageResource(R.drawable.ic_adani_logo);
-        }
+        ImageView mainicon = (ImageView) findViewById(R.id.main_icon);
 
 
 
@@ -201,94 +197,30 @@ public class Splash extends Activity {
 //                            sessionErroralert("Error in session or account ");
 //                        }
                         else {
+                            WebserviceCall webserviceCall = new WebserviceCall();
+                            String sessionid = webserviceCall.Getsessionid(deviceid);
 
-                            if(BuildConfig.FLAVOR.contains("adani")){
-                                Intent i = new Intent(Splash.this, Gridmenu.class);
-                                startActivity(i);
-                            }
+                            Log.e("session", sessionid);
 
-                            else {
+                            try {
+                                JSONObject obj = new JSONObject(sessionid);
+                                if (obj.getString("session").contains("Error") || obj.getString("account").contains("Error")) {
+                                    sessionErroralert("Error in session or account ");
+                                } else {
+                                    SESSIONID = obj.getString("session");
+                                    ACCOUNTID = obj.getString("account");
+                                    setupPreferenceValues();
 
-
-                                if(BuildConfig.FLAVOR.contains("adani")){
                                     Intent i = new Intent(Splash.this, Gridmenu.class);
+                                    if (isBirthday.equals("true")) {
+                                        i = new Intent(Splash.this, Map.class);
+                                    }
                                     startActivity(i);
+                                    finish();
                                 }
-
-                                else {
-                                    WebserviceCall webserviceCall = new WebserviceCall();
-                                    String sessionid =webserviceCall.Getsessionid(deviceid);
-
-                                    Log.e("session",sessionid);
-
-                                    try {
-
-                                        JSONObject obj = new JSONObject(sessionid);
-                                        if(obj.getString("session").contains("Error")|| obj.getString("account").contains("Error")){
-                                            sessionErroralert("Error in session or account ");
-                                        }
-                                        else {
-                                            SESSIONID=obj.getString("session");
-                                            ACCOUNTID=obj.getString("account");
-                                            setupPreferenceValues();
-
-                                            Intent i = new Intent(Splash.this, Gridmenu.class);
-                                            if (isBirthday.equals("true")) {
-                                                i = new Intent(Splash.this, Map.class);
-                                            }
-                                            startActivity(i);
-                                            finish();
-                                        }
-                                    }
-                                    catch (Exception e){
-                                        sessionErroralert(e.toString());
-                                    }
-
-                                }
-
-
-
-
-//                                WebserviceCall webserviceCall = new WebserviceCall();
-//                                String sessionid =webserviceCall.Getsessionid(deviceid);
-//
-//                                Log.e("session",sessionid);
-//
-//                                try {
-//
-//                                    JSONObject obj = new JSONObject(sessionid);
-//                                    if(obj.getString("session").contains("Error")|| obj.getString("account").contains("Error")){
-//                                        sessionErroralert("Error in session or account ");
-//                                    }
-//                                    else {
-//                                        SESSIONID=obj.getString("session");
-//                                        ACCOUNTID=obj.getString("account");
-//                                        setupPreferenceValues();
-//
-//                                        Intent i = new Intent(Splash.this, Gridmenu.class);
-//                                        if (isBirthday.equals("true")) {
-//                                            i = new Intent(Splash.this, Map.class);
-//                                        }
-//                                        startActivity(i);
-//                                        finish();
-//                                    }
-//                                }
-//                                catch (Exception e){
-//                                    sessionErroralert(e.toString());
-//                                }
-
+                            } catch (Exception e) {
+                                sessionErroralert(e.toString());
                             }
-
-
-                            //set values for driver improvement plan
-//                            setupPreferenceValues();
-//
-//                            Intent i = new Intent(Splash.this, Gridmenu.class);
-//                            if (isBirthday.equals("true")) {
-//                                i = new Intent(Splash.this, Map.class);
-//                            }
-//                            startActivity(i);
-//                            finish();
                         }
                     }
                 }

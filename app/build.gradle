@@ -39,19 +39,7 @@ android {
         }
     }
     useLibrary 'org.apache.http.legacy'
-    flavorDimensions "default"
-    productFlavors {
-        green_earth {
-            applicationIdSuffix '.green_earth'
-        }
-        total {
-            applicationIdSuffix ''
-        }
-        adani {
-            applicationIdSuffix '.adani_driver'
-        }
 
-    }
     compileOptions {
         sourceCompatibility = '11'
         targetCompatibility = '11'

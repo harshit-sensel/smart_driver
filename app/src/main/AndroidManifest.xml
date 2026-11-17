@@ -86,10 +86,7 @@
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="Panic "
             android:theme="@style/panicTheme" />
-        <activity
-            android:name=".AdaniQrcode_scanner"
-            android:label="QR Code Scanner"
-            android:theme="@style/myTheme1" />
+
 
         <service
             android:name=".service.SyncTaskService"
