@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ScrollView android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#fffeff"
+    android:fillViewport="true"
+    xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+
+        android:gravity="center"
+        android:background="#fffeff">
+
+        <ImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:id="@+id/speedline"
+            android:src="@drawable/ic__totalgaz" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:scaleType="centerInside"
+            android:id="@+id/vehicle"
+            android:padding="5sp"
+            android:text="Vehicle ID"
+            android:textSize="15dp"
+            android:textColor="@color/articlecolor" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:text="Loading next parking location"
+            android:textSize="20dp"
+            android:textStyle="bold"
+            android:textColor="@color/black"
+            android:id="@+id/parklocation"/>
+
+        <TableLayout
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TableRow
+                android:layout_width="0dp"
+                android:padding="2dp"
+                android:layout_height="60dp"
+                android:layout_weight="1">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight=".50"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/speedval"
+                    android:scaleType="centerInside"
+                    android:text="0"
+                    android:textSize="35dp"
+                    android:textColor="@color/colorAccent" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight=".50"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/maxspeedval"
+                    android:scaleType="centerInside"
+                    android:text="60"
+                    android:textSize="35dp"
+                    android:textColor="@color/colorAccent" />
+
+            </TableRow>
+        </TableLayout>
+
+        <TableLayout
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TableRow
+                android:layout_width="0dp"
+                android:padding="2dp"
+                android:layout_height="60dp"
+                android:layout_weight="1">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/speed"
+                    android:text="Current Speed(kmph) "
+                    android:textSize="15dp"
+                    android:textColor="@color/black" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/maxspeed"
+                    android:text="Max Speed(kmph) "
+                    android:textSize="15dp"
+                    android:layout_marginLeft="10dp"
+                    android:textColor="@color/black" />
+
+            </TableRow>
+        </TableLayout>
+
+        <com.sensel.driverapp.SpeedometerView
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:padding="4dp"
+            android:id="@+id/speedometer" />
+
+        <TableLayout
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:gravity="center_horizontal"
+                android:weightSum="3"
+                >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:textSize="15dp"
+                    android:textColor="@color/black"
+                    android:text="Remaining \nDrive Limit"
+
+                    android:textAppearance="?android:attr/textAppearanceSmall" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:textSize="15dp"
+                    android:textColor="@color/black"
+                    android:layout_marginLeft="10dp"
+                    android:text="Time to\nTake rest"
+                    android:textAppearance="?android:attr/textAppearanceSmall" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:textSize="15dp"
+                    android:textColor="@color/black"
+                    android:layout_marginLeft="10dp"
+                    android:text="Working\ntime"
+                    android:textAppearance="?android:attr/textAppearanceSmall" />
+
+
+            </TableRow>
+
+            <TableRow
+                android:layout_width="wrap_content"
+
+                android:gravity="center"
+                android:layout_height="60dp"
+                android:weightSum="3">
+
+                <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1">
+
+                    <ProgressBar
+                        android:id="@+id/cirprogressBar"
+                        style="?android:attr/progressBarStyleHorizontal"
+                        android:layout_width="150dp"
+                        android:layout_height="150dp"
+                        android:layout_centerInParent="true"
+                        android:indeterminate="false"
+                        android:max="115"
+                        android:progress="0"
+                        android:progressDrawable="@drawable/circular_progress_bar"
+                        android:secondaryProgress="0" />
+
+                    <TextView
+                        android:id="@+id/textpro"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignBottom="@+id/cirprogressBar"
+                        android:layout_centerInParent="true"
+                        android:textColor="@color/black"
+                        android:text="0:0"
+                        android:textSize="40dp"
+                        android:textAppearance="?android:attr/textAppearanceSmall" />
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:layout_marginLeft="10dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content">
+
+                    <ProgressBar
+                        android:id="@+id/conprogressBar"
+                        style="?android:attr/progressBarStyleHorizontal"
+                        android:layout_width="150dp"
+                        android:layout_height="150dp"
+                        android:layout_centerInParent="true"
+                        android:indeterminate="false"
+                        android:max="115"
+                        android:progress="0"
+                        android:progressDrawable="@drawable/circular_progress_bar"
+                        android:secondaryProgress="0" />
+
+                    <TextView
+                        android:id="@+id/contextpro"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignBottom="@+id/conprogressBar"
+                        android:layout_centerInParent="true"
+                        android:textColor="@color/black"
+                        android:textSize="40dp"
+                        android:text="0:0"
+                        android:textAppearance="?android:attr/textAppearanceSmall" />
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:layout_marginLeft="10dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content">
+
+                    <ProgressBar
+                        android:id="@+id/workprogressBar"
+                        style="?android:attr/progressBarStyleHorizontal"
+                        android:layout_width="150dp"
+                        android:layout_height="150dp"
+                        android:layout_centerInParent="true"
+                        android:indeterminate="false"
+                        android:max="115"
+                        android:progress="0"
+                        android:progressDrawable="@drawable/circular_progress_bar"
+                        android:secondaryProgress="0" />
+
+                    <TextView
+                        android:id="@+id/remaiworktime"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignBottom="@+id/workprogressBar"
+                        android:layout_centerInParent="true"
+                        android:textColor="@color/black"
+                        android:textSize="30dp"
+                        android:text="12:00"
+                        android:textAppearance="?android:attr/textAppearanceSmall" />
+                </RelativeLayout>
+            </TableRow>
+
+            <TableRow
+                android:layout_width="wrap_content"
+                android:layout_height="60dp"
+                android:layout_marginLeft="10dp"
+                android:layout_weight="1">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/daydriventime"
+                    android:layout_gravity="center_horizontal"
+                    android:textSize="15dp"
+                    android:textColor="@color/black"
+                    android:text="Day : 0:00"
+                    android:textAppearance="?android:attr/textAppearanceSmall" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/tripdriventime"
+                    android:layout_gravity="center_horizontal"
+                    android:textSize="15dp"
+                    android:textColor="@color/black"
+                    android:layout_marginLeft="10dp"
+                    android:text="Trip : 0:00"
+                    android:textAppearance="?android:attr/textAppearanceSmall" />
+            </TableRow>
+        </TableLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:id="@+id/resttime"
+            android:scaleType="centerInside"
+            android:text="Rest time : 0min"
+            android:textSize="15dp"
+            android:textColor="@color/black" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:scaleType="centerInside"
+            android:text="Note: This runtime and speed may not be 100% accurate in real time."
+            android:textSize="8dp"
+            android:textColor="@color/orange" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:scaleType="centerInside"
+            android:text="**Don't use mobile, while driving**"
+            android:textSize="15dp"
+            android:textColor="@color/orange" />
+    </LinearLayout>
+
+</ScrollView>
+
+

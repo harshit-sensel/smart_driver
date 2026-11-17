@@ -1,0 +1,404 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:background="@android:color/transparent"
+    android:layout_height="match_parent">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TableLayout
+            android:layout_width="match_parent"
+            android:background="@android:color/transparent"
+            android:layout_height="wrap_content">
+
+            <TableRow
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:paddingTop="30dp"
+                android:paddingLeft="5dp"
+                android:gravity="center_horizontal"
+                android:background="@drawable/rectangle_shape"
+                android:layout_weight="1">
+
+                <TextView
+                    android:text="@string/da_checklistsubbmitted"
+                    android:layout_width="0dp"
+                    android:layout_weight="0.6"
+                    android:layout_height="wrap_content"
+                    android:minHeight="50dp"
+                    android:textStyle="bold"
+                    android:textSize="14sp"
+                    android:lineSpacingExtra="2dp"
+                    android:maxLines="6"
+                    android:ellipsize="end"
+                    android:padding="5dp" />
+
+                <RadioGroup
+                    android:id="@+id/rb1"
+                    android:layout_width="0dp"
+                    android:layout_weight="0.4"
+                    android:orientation="horizontal"
+                    android:layout_height="wrap_content">
+
+                    <RadioButton
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/yes"
+                        android:buttonTint="@color/green"
+                        android:checked="false"
+                        android:textSize="14dp" />
+
+                    <RadioButton
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/no"
+                        android:buttonTint="@color/orange"
+                        android:paddingLeft="5dp"
+                        android:checked="false"
+                        android:textSize="14dp" />
+                </RadioGroup>
+            </TableRow>
+            <!--second segment-->
+            <TableRow
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:paddingTop="30dp"
+                android:paddingLeft="5dp"
+                android:layout_gravity="center_horizontal"
+                android:background="@drawable/rectangle_shape"
+                android:layout_weight="1">
+
+                <TextView
+                    android:text="@string/da_rest"
+                    android:layout_width="0dp"
+                    android:layout_weight="0.6"
+                    android:layout_height="wrap_content"
+                    android:minHeight="50dp"
+                    android:textStyle="bold"
+                    android:textSize="14sp"
+                    android:lineSpacingExtra="2dp"
+                    android:maxLines="6"
+                    android:ellipsize="end"
+                    android:padding="5dp" />
+
+                <RadioGroup
+                    android:id="@+id/rb2"
+                    android:orientation="horizontal"
+                    android:layout_width="0dp"
+                    android:layout_weight="0.4"
+                    android:layout_height="wrap_content">
+
+                    <RadioButton
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:text="@string/yes"
+                        android:buttonTint="@color/green"
+                        android:checked="false"
+                        android:textSize="14dp" />
+
+                    <RadioButton
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:text="@string/no"
+                        android:buttonTint="@color/orange"
+                        android:paddingLeft="5dp"
+                        android:checked="false"
+                        android:textSize="14dp" />
+                </RadioGroup>
+
+            </TableRow>
+
+            <TableRow
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:paddingTop="30dp"
+                android:paddingLeft="5dp"
+                android:layout_gravity="center_horizontal"
+                android:background="@drawable/rectangle_shape"
+                android:layout_weight="1">
+
+                <TextView
+                    android:text="@string/da_overspeed"
+                    android:layout_width="0dp"
+                    android:layout_weight="0.6"
+                    android:layout_height="wrap_content"
+                    android:minHeight="50dp"
+                    android:textStyle="bold"
+                    android:textSize="14sp"
+                    android:lineSpacingExtra="2dp"
+                    android:maxLines="6"
+                    android:ellipsize="end"
+                    android:padding="5dp" />
+
+                <RadioGroup
+                    android:id="@+id/rb3"
+                    android:orientation="horizontal"
+                    android:layout_width="0dp"
+                    android:layout_weight="0.4"
+                    android:layout_height="wrap_content">
+
+                    <RadioButton
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:buttonTint="@color/green"
+                        android:checked="false"
+                        android:text="@string/yes"
+                        android:textSize="14dp" />
+
+                    <RadioButton
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:buttonTint="@color/orange"
+                        android:checked="false"
+                        android:text="@string/no"
+                        android:paddingLeft="5dp"
+                        android:textSize="14dp" />
+                </RadioGroup>
+            </TableRow>
+
+            <TableRow
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:paddingTop="30dp"
+                android:paddingLeft="5dp"
+                android:layout_gravity="center_horizontal"
+                android:background="@drawable/rectangle_shape"
+                android:layout_weight="1">
+
+                <TextView
+                    android:text="@string/da_jrm"
+                    android:layout_width="0dp"
+                    android:layout_weight="0.6"
+                    android:layout_height="wrap_content"
+                    android:minHeight="50dp"
+                    android:textStyle="bold"
+                    android:textSize="14sp"
+                    android:lineSpacingExtra="2dp"
+                    android:maxLines="6"
+                    android:ellipsize="end"
+                    android:padding="5dp" />
+
+                <RadioGroup
+                    android:id="@+id/rb4"
+                    android:orientation="horizontal"
+                    android:layout_width="0dp"
+                    android:layout_weight="0.4"
+                    android:layout_height="wrap_content">
+
+                    <RadioButton
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:buttonTint="@color/green"
+                        android:checked="false"
+                        android:text="@string/yes"
+                        android:textSize="14dp" />
+
+                    <RadioButton
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:buttonTint="@color/orange"
+                        android:checked="false"
+                        android:text="@string/no"
+                        android:paddingLeft="5dp"
+                        android:textSize="14dp" />
+                </RadioGroup>
+            </TableRow>
+
+            <TableRow
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:paddingTop="30dp"
+                android:paddingLeft="5dp"
+                android:layout_gravity="center_horizontal"
+                android:background="@drawable/rectangle_shape"
+                android:layout_weight="1">
+
+                <TextView
+                    android:text="@string/da_nigtdriving"
+                    android:layout_width="0dp"
+                    android:layout_weight="0.6"
+                    android:layout_height="wrap_content"
+                    android:minHeight="50dp"
+                    android:textStyle="bold"
+                    android:textSize="14sp"
+                    android:lineSpacingExtra="2dp"
+                    android:maxLines="6"
+                    android:ellipsize="end"
+                    android:padding="5dp" />
+
+                <RadioGroup
+                    android:id="@+id/rb5"
+                    android:orientation="horizontal"
+                    android:layout_width="0dp"
+                    android:layout_weight="0.4"
+                    android:layout_height="wrap_content">
+
+                    <RadioButton
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:buttonTint="@color/green"
+                        android:checked="false"
+                        android:text="@string/yes"
+                        android:textSize="14dp" />
+
+                    <RadioButton
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:buttonTint="@color/orange"
+                        android:checked="false"
+                        android:text="@string/no"
+                        android:paddingLeft="5dp"
+                        android:textSize="14dp" />
+                </RadioGroup>
+            </TableRow>
+
+            <TableRow
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:paddingTop="30dp"
+                android:paddingLeft="5dp"
+                android:layout_gravity="center_horizontal"
+                android:background="@drawable/rectangle_shape"
+                android:layout_weight="1">
+
+                <TextView
+                    android:text="@string/da_continousdrive"
+                    android:layout_width="0dp"
+                    android:layout_weight="0.6"
+                    android:layout_height="wrap_content"
+                    android:minHeight="50dp"
+                    android:textStyle="bold"
+                    android:textSize="14sp"
+                    android:lineSpacingExtra="2dp"
+                    android:maxLines="6"
+                    android:ellipsize="end"
+                    android:padding="5dp" />
+
+                <RadioGroup
+                    android:id="@+id/rb6"
+                    android:orientation="horizontal"
+                    android:layout_width="0dp"
+                    android:layout_weight="0.4"
+                    android:layout_height="wrap_content">
+
+                    <RadioButton
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:buttonTint="@color/green"
+                        android:checked="false"
+                        android:text="@string/yes"
+                        android:textSize="14dp" />
+
+                    <RadioButton
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:buttonTint="@color/orange"
+                        android:checked="false"
+                        android:text="@string/no"
+                        android:paddingLeft="5dp"
+                        android:textSize="14dp" />
+                </RadioGroup>
+            </TableRow>
+
+            <TableRow
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:paddingTop="30dp"
+                android:paddingLeft="5dp"
+                android:layout_gravity="center_horizontal"
+                android:background="@drawable/rectangle_shape"
+                android:layout_weight="1">
+
+                <TextView
+                    android:text="@string/da_droveless10hrs"
+                    android:layout_width="0dp"
+                    android:layout_weight="0.6"
+                    android:layout_height="wrap_content"
+                    android:minHeight="50dp"
+                    android:textStyle="bold"
+                    android:textSize="14sp"
+                    android:lineSpacingExtra="2dp"
+                    android:maxLines="6"
+                    android:ellipsize="end"
+                    android:padding="5dp" />
+
+                <RadioGroup
+                    android:id="@+id/rb7"
+                    android:orientation="horizontal"
+                    android:layout_width="0dp"
+                    android:layout_weight="0.4"
+                    android:layout_height="wrap_content">
+
+                    <RadioButton
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:buttonTint="@color/green"
+                        android:checked="false"
+                        android:text="@string/yes"
+                        android:textSize="14dp" />
+
+                    <RadioButton
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:buttonTint="@color/orange"
+                        android:checked="false"
+                        android:text="@string/no"
+                        android:paddingLeft="5dp"
+                        android:textSize="14dp" />
+                </RadioGroup>
+            </TableRow>
+            <TableRow
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:paddingTop="30dp"
+                android:paddingLeft="5dp"
+                android:layout_gravity="center_horizontal"
+                android:background="@drawable/rectangle_shape"
+                android:layout_weight="1">
+
+                <TextView
+                    android:text="@string/da_AuthorizedRoute"
+                    android:layout_width="0dp"
+                    android:layout_weight="0.6"
+                    android:layout_height="wrap_content"
+                    android:minHeight="50dp"
+                    android:textStyle="bold"
+                    android:textSize="14sp"
+                    android:lineSpacingExtra="2dp"
+                    android:maxLines="6"
+                    android:ellipsize="end"
+                    android:padding="5dp" />
+
+                <RadioGroup
+                    android:id="@+id/rb8"
+                    android:orientation="horizontal"
+                    android:layout_width="0dp"
+                    android:layout_weight="0.4"
+                    android:layout_height="wrap_content">
+
+                    <RadioButton
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:buttonTint="@color/green"
+                        android:checked="false"
+                        android:text="@string/yes"
+                        android:textSize="14dp" />
+
+                    <RadioButton
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:buttonTint="@color/orange"
+                        android:checked="false"
+                        android:text="@string/no"
+                        android:paddingLeft="5dp"
+                        android:textSize="14dp" />
+                </RadioGroup>
+            </TableRow>
+        </TableLayout>
+    </ScrollView>
+</LinearLayout>

@@ -1,0 +1,2149 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Nearest Places</title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <style>
+        /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+        #map {
+            height: 100%;
+        }
+
+        /* Optional: Makes the sample page fill the window. */
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+    <style>
+        html,
+        body,
+        #map {
+            height: 100%;
+            margin: 0px;
+            padding: 0px
+        }
+    </style>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+    <style type="text/css">
+        .ajaxloader {
+            position: fixed;
+            left: 0px;
+            top: 0px;
+            width: 100%;
+            height: 100%;
+            z-index: 999999;
+            opacity: 0.5;
+            background: #fff url('img/Preloader_51.gif') no-repeat 50% 50%;
+        }
+
+        .journeyplanloader {
+            position: fixed;
+            left: 0px;
+            top: 0px;
+            width: 100%;
+            height: 100%;
+            z-index: 9999999;
+            opacity: 0.8;
+            background: rgba(0, 0, 0, 0.192) url('img/loadergif.gif') no-repeat 50% 50%;
+            background-size: 100px 100px;
+        }
+    </style>
+</head>
+
+<body>
+<span class="ajaxloader"></span>
+<span class="journeyplanloader"></span>
+<div id="map"></div>
+<script>
+        var domain_url = JSInterface.GetDomainUrl();
+        var sessionid = JSInterface.Sessionid();
+        // alert(domain_url);
+        //alert(sessionid);
+        //var domain_url="https://fleetsmart3.ui.sensel.in";
+        var map;
+        var cLatLong = JSInterface.GetLocation();
+
+        var current_position;
+        var activeWindow;
+        var infowindow;
+        var destlatlng;
+        var googleplace = false;
+        var isroute = false;
+        var minlat = 9999.00;
+        var minlong = 99999.00;
+        var maxlat = -9999.00;
+        var maxlong = -9999.00;
+        var bounds;
+        var directionsRenderer;
+        var imei;
+        var directionsRendererOptions = {};
+
+        var nightpoints = [];
+        var spotPoints = [];
+        var points = [];
+        var ajaxcount = 0;
+        var routepoints = [];
+        var weatherpointsLength = 0;
+        var spots1;
+        var rectangles = [];
+        var markedSpots = [];
+        var srcmarker;
+        var is_sourcedestination = false;
+        var sourcedestination = "";
+        //***********************************Map initialization****************************************************
+        function initMap() {
+
+
+            // alert(cLatLong);
+            // var cLatLong="12.34455,77.56565";
+            var res = cLatLong.split(",");
+            current_position = new google.maps.LatLng(res[0], res[1]);//get from location
+            //current_position = new google.maps.LatLng(12.922131, 74.843885);//get from location
+            minlat = current_position.lat();
+            maxlong = current_position.lng();
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: current_position,
+                zoom: 14,
+                zoomControl: true,
+                zoomControlOptions: {
+                    position: google.maps.ControlPosition.LEFT_TOP
+                },
+            });
+            var info = new google.maps.InfoWindow();
+            info.setContent("Your current location");
+            var image = {
+                url: 'img/greenmark.png',
+
+            };
+            srcmarker = new google.maps.Marker({
+                map: map,
+                draggable: false,
+                icon: image,
+                position: current_position
+            });
+            bounds = new google.maps.LatLngBounds();
+            directionsRenderer = new google.maps.DirectionsRenderer(directionsRendererOptions);
+            google.maps.event.addListener(srcmarker, 'mousedown', function () {
+                info.open(map, this);
+            });
+            $(".ajaxloader").fadeOut("slow");
+            $(".journeyplanloader").fadeOut("slow");
+        }
+        //******************************************COMMON FUNCTION*********************************************
+        function getPlace(placetype) {
+            imei = JSInterface.Test();
+            // imei = "911528300606207";
+
+
+
+            type = placetype;
+            if (type == 'route') {
+                isroute = true;
+
+                //$("#legend").show();
+                // jrmRoute(); //previous mehod
+                is_sourcedestination = false;
+                var cLatLong = JSInterface.GetLocation();
+                //var cLatLong="12.34455,77.56565";
+                var res = cLatLong.split(",");
+                keepactivitylog(imei, type, res[0], res[1]);
+                getAllTotalMarkers();
+
+            }
+            else if (type.indexOf(',') > -1) {
+                // alert('if2');
+                $("#legend").hide();
+                isroute = true;
+                is_sourcedestination = true;
+                sourcedestination = type;
+                // getAllTotalMarkers();
+                getSegments(sourcedestination);
+            }
+            else if (type == 'emergencyVehicles') {
+                //alert('if3');
+                emergencyVehicles();
+            }
+            else if (type > 0) {
+                // alert('if4');
+                $("#legend").hide();
+                getTotalPlaces(type, '');
+            }
+            else {
+                // alert('if5');
+                $("#legend").hide();
+                getGooglePlaces(type);
+            }
+        }
+
+        //***********************************Journey planner modified code***************************************
+        //getting segments to show at start
+        function getRoutejourneyPlanner(placetype) {
+            $(".journeyplanloader").fadeIn("slow");
+            imei = JSInterface.Test();
+            // imei = "911528300606207";
+
+            map = new google.maps.Map(document.getElementById('map'), {
+                panControl: true,
+                zoomControl: false,
+                mapTypeControl: false,
+                scaleControl: false,
+                streetViewControl: false,
+                overviewMapControl: false,
+                rotateControl: false
+
+            });
+
+            type = placetype;
+            // if (type == 'route') {
+            //     isroute = true;
+
+            //     //$("#legend").show();
+            //     // jrmRoute(); //previous mehod
+            //     is_sourcedestination=false;
+            //     var cLatLong = JSInterface.GetLocation();
+            // //var cLatLong="12.34455,77.56565";
+            // var res = cLatLong.split(",");
+            //     keepactivitylog(imei, type, res[0], res[1]);
+            //     getAllTotalMarkers();
+
+            // }
+
+            $("#legend").hide();
+            isroute = true;
+            is_sourcedestination = true;
+            sourcedestination = type;
+            // getAllTotalMarkers();
+            getSegmentsJourneyPlan(sourcedestination);
+            // }
+            //     else if (type == 'emergencyVehicles') {
+            //     //alert('if3');
+            //         emergencyVehicles();
+            //     }
+            //     else if (type > 0) {
+            //    // alert('if4');
+            //         $("#legend").hide();
+            //         getTotalPlaces(type, '');
+            //     }
+            //     else {
+            //    // alert('if5');
+            //         $("#legend").hide();
+            //         getGooglePlaces(type);
+            //     }
+        }
+
+        function drawRouteJRP(res) {
+            console.log(res);
+
+            $(".ajaxloader").fadeOut("slow");
+            $(".journeyplanloader").fadeOut("slow");
+
+
+            map = new google.maps.Map(document.getElementById('map'), {
+                panControl: true,
+                zoomControl: false,
+                mapTypeControl: false,
+                scaleControl: false,
+                streetViewControl: false,
+                overviewMapControl: false,
+                rotateControl: false
+
+            });
+
+            flightPlanCoordinates = [
+                { lat: 37.772, lng: -122.214 },
+                { lat: 21.291, lng: -157.821 },
+                { lat: -18.142, lng: 178.431 },
+                { lat: -27.467, lng: 153.027 },
+            ];
+
+            var r = [res]
+            var cordinates = r[0].split("##");
+            var flightPlanCoordinates = new Array();
+
+            for (i = 0; i < cordinates.length; i++) {
+                var latlong = cordinates[i].split(",");
+
+                var point = { lat: parseFloat(latlong[0]), lng: parseFloat(latlong[1]) };
+                flightPlanCoordinates.push(point);
+            }
+
+            var flightPath = new google.maps.Polyline({
+                path: flightPlanCoordinates,
+                geodesic: true,
+                strokeColor: '#FF0000',
+                strokeOpacity: 1.0,
+                strokeWeight: 2
+            });
+
+            flightPath.setMap(map);
+
+        }
+
+
+        function getSegmentsJourneyPlan(d) {
+
+
+            minlat = 9999.00;
+            minlong = 99999.00;
+            maxlat = -9999.00;
+            maxlong = -9999.00;
+            var source = "";
+            var destination = "";
+            if (d.length > 3) {
+                var str = d.split(",");
+                source = str[0];
+                destination = str[1];
+                //JSInterface.displayMessege("Getting Route segments from "+source+" to "+destination);
+            }
+
+            $.ajax({
+                type: "POST",
+                url: domain_url + "/Source_DestinationMapping.aspx/GetRouteSegments",
+                data: JSON.stringify({
+                    src: source,
+                    dest: destination,
+                    sessionId: sessionid
+                }),
+
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+
+                success: function (data) {
+
+                    var data = jQuery.parseJSON(data.d);
+                    //routedata();
+                    if (data.length < 1 || data[0] == "") {
+                        return false;
+                    }
+                    mapOptions.zoom = 16;
+
+                    map.controls[google.maps.ControlPosition.RIGHT_TOP].push(document.getElementById('legend'));
+
+                    for (var i = 0; i < data.length; i++) {
+                        drawReffRoute(data[i], spots1, data.length, i);
+                    }
+
+                    $(".journeyplanloader").fadeOut("slow");
+                },
+                error: function (data) {
+                    JSInterface.displayMessege("unable to draw route");
+                }
+            });
+        };
+
+
+
+        function allParkingSpot(d) {
+            var marker;
+
+            var data = d.split('##||##');
+            console.log(d);
+            console.log(data);
+
+            var map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 14,
+                panControl: true,
+                zoomControl: false,
+                mapTypeControl: false,
+                scaleControl: false,
+                streetViewControl: false,
+                overviewMapControl: false,
+                rotateControl: false
+            });
+
+            var image = {
+                url: 'img/parking-sign.png',
+
+            };
+
+            console.log(data.length);
+            var infowindow = new google.maps.InfoWindow();
+            for (var i = 0; i < data.length - 1; i++) {
+
+                var singledata = data[i].split("#|#");
+                var latlong = singledata[0].split(",");
+                console.log(singledata);
+                console.log(latlong[0]);
+                console.log(latlong[1]);
+
+                var contentString =
+
+                    '<h4 id="firstHeading" class="firstHeading">' + singledata[1] + '</h4>';
+
+
+
+                marker = new google.maps.Marker({
+                    position: new google.maps.LatLng(parseFloat(latlong[0]), parseFloat(latlong[1])),
+                    map: map,
+                    title: contentString,
+                    icon: image,
+                });
+
+
+
+
+                // infowindow.open({
+                //     anchor: marker,
+                //     map,
+                //     shouldFocus: false,
+                // });
+
+                // marker.addListener("click", () => {
+                //     infowindow.open({
+                //         anchor: marker,
+                //         map,
+                //         shouldFocus: false,
+                //     });
+                // });
+
+            }
+
+
+
+
+            $(".ajaxloader").fadeOut("slow");
+            $(".journeyplanloader").fadeOut("slow");
+        }
+
+
+
+        function confirmSingleSpotView(d) {
+
+            var data = d.split("##");
+            var latlong = data[0].split(",");
+            var image = {
+                url: 'img/parking-sign.png',
+
+            };
+
+            const contentString =
+
+                '<h4 id="firstHeading" class="firstHeading">' + data[1] + '</h4>';
+            const infowindow = new google.maps.InfoWindow({
+                content: contentString,
+            });
+
+            const myLatLng = { lat: parseFloat(latlong[0]), lng: parseFloat(latlong[1]) };
+            const map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 14,
+                center: myLatLng,
+                panControl: true,
+                zoomControl: false,
+                mapTypeControl: false,
+                scaleControl: false,
+                streetViewControl: false,
+                overviewMapControl: false,
+                rotateControl: false
+            });
+
+            const marker = new google.maps.Marker({
+                position: myLatLng,
+                map: map,
+                title: data[1],
+                icon: image,
+            });
+
+
+            infowindow.open({
+                anchor: marker,
+                map,
+                shouldFocus: false,
+            });
+
+            marker.addListener("click", () => {
+                infowindow.open({
+                    anchor: marker,
+                    map,
+                    shouldFocus: false,
+                });
+            });
+            $(".ajaxloader").fadeOut("slow");
+            $(".journeyplanloader").fadeOut("slow");
+
+        }
+
+
+        //showing the parking spot which he has seleted
+
+        function singleParkSpotView(d) {
+            var data = d.split("##");
+            var latlong = data[0].split(",");
+            var image = {
+                url: 'img/parking-sign.png',
+
+            };
+
+            const contentString =
+
+                '<h4 id="firstHeading" class="firstHeading">' + data[1] + '</h4>';
+            const infowindow = new google.maps.InfoWindow({
+                content: contentString,
+            });
+
+            const myLatLng = { lat: parseFloat(latlong[0]), lng: parseFloat(latlong[1]) };
+            const map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 14,
+                center: myLatLng,
+            });
+
+            const marker = new google.maps.Marker({
+                position: myLatLng,
+                map: map,
+                title: data[1],
+                icon: image,
+            });
+
+
+            infowindow.open({
+                anchor: marker,
+                map,
+                shouldFocus: false,
+            });
+
+            marker.addListener("click", () => {
+                infowindow.open({
+                    anchor: marker,
+                    map,
+                    shouldFocus: false,
+                });
+            });
+            $(".ajaxloader").fadeOut("slow");
+            $(".journeyplanloader").fadeOut("slow");
+        }
+
+        //showing multiple parking spot
+        function multipleParkingShow(d) {
+            console.log(d);
+
+            var data = d.split("###");
+            var image = {
+                url: 'img/parking-sign.png',
+
+            };
+
+            for (var i = 0; i < data.length; i++) {
+                var tempdata = data[i].split("##");
+                console.log(data[i]);
+
+                var temp_latlong = tempdata[0];
+
+
+                var split_latlong = tempdata[0].split(",");
+                console.log(split_latlong[0]);
+                console.log(split_latlong[1]);
+
+                const contentString =
+
+                    '<h4 id="firstHeading" class="firstHeading">' + tempdata[1] + '</h4>';
+                const infowindow = new google.maps.InfoWindow({
+                    content: contentString,
+                });
+
+
+
+
+
+                const myLatLng = { lat: split_latlong[0], lng: split_latlong[1] };
+                console.log(contentString);
+
+
+                const map = new google.maps.Map(document.getElementById("map"), {
+                    zoom: 12,
+                    center: myLatLng,
+                });
+
+                const marker = new google.maps.Marker({
+                    position: myLatLng,
+                    map: map,
+                    title: tempdata[1],
+                    icon: image,
+                });
+
+
+                infowindow.open({
+                    anchor: marker,
+                    map,
+                    shouldFocus: false,
+                });
+
+                marker.addListener("click", () => {
+                    infowindow.open({
+                        anchor: marker,
+                        map,
+                        shouldFocus: false,
+                    });
+                });
+            }
+
+
+        }
+
+
+
+
+        function showParkingSpot(d) {
+            var image = {
+                url: 'img/parking-sign.png',
+
+            };
+            var latlons = d.split('##');
+
+            const myLatLng = { lat: 13.03554116942968, lng: 77.45177742036603 };
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: myLatLng,
+                zoom: 14,
+                zoomControl: true,
+                zoomControlOptions: {
+                    position: google.maps.ControlPosition.LEFT_TOP
+                },
+            });
+
+
+            for (var i = 0; i < latlons.length; i++) {
+                var temp = latlons[i].split(',');
+
+                var info = new google.maps.InfoWindow();
+
+                info.setContent("Your current location");
+
+
+                const myLatLng = { lat: parseFloat(temp[0]), lng: parseFloat(temp[1]) };
+                new google.maps.Marker({
+                    map: map,
+                    draggable: false,
+                    icon: image,
+                    position: myLatLng
+                });
+
+            }
+
+
+
+
+            // // for (var i = 0; i < latlons.length; i++) {
+            //     new google.maps.Marker({
+            //         position: myLatLng,
+            //         map:map,
+            //         title: "Hello World!",
+            //     });
+            // // }
+
+
+
+        };
+
+
+        //***********************************Get TOTAL PLACES****************************************************
+        function getTotalPlaces(type, img) {
+            $(".ajaxloader").fadeIn("slow");
+            infowindow = new google.maps.InfoWindow();
+            infowindow.setOptions({ maxWidth: 250 });
+            $(".ajaxloader").fadeIn("slow");
+            var lat = current_position.lat();
+            var lng = current_position.lng();
+            minlat = lat;
+            maxlong = lng;
+            var RequestData = "{'CurLat' :'" + lat + "','CurLong' :'" + lng + "','type' :'" + type + "'}";
+
+            $.ajax({
+                type: "POST",
+                url: domain_url + "/SenselWebService.asmx/GetPlacesData",
+                data: RequestData,
+                crossDomain: true,
+                contentType: "application/json; charset=utf-8",
+                datatype: "text",
+                success: function (data) {
+
+                    var Places = jQuery.parseJSON(data.d);
+                    // alert(Places);
+                    if (Places.length == 0) {
+                        JSInterface.displayMessege("No Nearest Places");
+                        $(".ajaxloader").fadeOut("slow");
+                    }
+                    else {
+                        for (var i = 0; i < Places.length; i++) {
+                            if (isroute)
+                                createMarkerJRM(Places[i], current_position, img);
+                            else
+                                createMarkerTotal(Places[i], current_position);
+                        }
+                        var flightPlanCoordinates = [
+                        ];
+                        for (i = 0; i < Places.length; i++) {
+                            flightPlanCoordinates.push(new google.maps.LatLng(Places[i].Latitude, Places[i].Longitude));
+                            if (minlat > parseFloat(Places[i].Latitude))
+                                minlat = parseFloat(Places[i].Latitude);
+                            if (minlong > parseFloat(Places[i].Longitude))
+                                minlong = parseFloat(Places[i].Longitude);
+                            if (maxlat < parseFloat(Places[i].Latitude))
+                                maxlat = parseFloat(Places[i].Latitude);
+                            if (maxlong < parseFloat(Places[i].Longitude))
+                                maxlong = parseFloat(Places[i].Longitude);
+                        }
+                        var bounds = new google.maps.LatLngBounds();
+                        bounds = new google.maps.LatLngBounds(new google.maps.LatLng(minlat, minlong), new google.maps.LatLng(maxlat, maxlong));
+                        map.fitBounds(bounds);
+                        $(".ajaxloader").fadeOut("slow");
+                    }
+                },
+                error: function (data) {
+                    JSInterface.displayMessege("Bad internet connection, Unable to connect server");
+                    $(".ajaxloader").fadeOut("slow");
+                }
+            });
+        }
+        //***********************************CREATE MARKER FOR TOTAL PLACES****************************************************
+        function createMarkerTotal(place, Latlng) {
+            var placeLoc = new google.maps.LatLng(place.Latitude, place.Longitude);
+            var marker = new google.maps.Marker({
+                map: map,
+                position: placeLoc
+            });
+            google.maps.event.addListener(marker, 'mousedown', function () {
+                if (activeWindow != null)
+                    activeWindow.close();
+                activeWindow = infowindow;
+                calculate_distance(Latlng, placeLoc, place, infowindow);
+                destlatlng = marker.position;
+                infowindow.open(map, this);
+            });
+        }
+        //***********************************GET GOOGLE PLACES****************************************************
+        function getGooglePlaces(type) {
+            googleplace = true;
+            infowindow = new google.maps.InfoWindow();
+            infowindow.setOptions({ maxWidth: 250 });
+            var service = new google.maps.places.PlacesService(map);
+            service.nearbySearch({
+                location: current_position,
+                radius: 5000,
+                types: [type]
+            }, callback);
+        }
+
+        //Create markers for google place
+        function callback(results, status) {
+            if (status === google.maps.places.PlacesServiceStatus.OK) {
+                for (var i = 0; i < results.length; i++) {
+                    if (!(results[i].name.toLowerCase().indexOf("medical") > -1))
+                        createMarker(results[i]);
+                }
+            }
+            else {
+                JSInterface.displayMessege("We could not find any nearest places,zoom out you may find");
+            }
+        }
+        //***********************************CREATE MARKER FOR GOOGLE PLACES****************************************************
+        function createMarker(place) {
+
+            var placeLoc = place.geometry.location;
+            var marker = new google.maps.Marker({
+                map: map,
+                position: place.geometry.location
+            });
+            google.maps.event.addListener(marker, 'mousedown', function () {
+                if (activeWindow != null)
+                    activeWindow.close();
+                activeWindow = infowindow;
+                calculate_distance(current_position, placeLoc, place, infowindow);
+                destlatlng = marker.position;
+                infowindow.open(map, this);
+            });
+        }
+        //***********************************CALCULATE DISTANCE****************************************************
+        var duration = new Array();
+        function calculate_distance(orgin, destination, place, infowindow) {
+            $(".ajaxloader").fadeIn("slow");
+            var distance = 0;
+            var org = new Array();
+            org[0] = orgin;
+            var dest = new Array();
+            dest[0] = destination;
+
+            var service = new google.maps.DistanceMatrixService();
+            service.getDistanceMatrix(
+                {
+                    origins: org,
+                    destinations: dest,
+                    travelMode: google.maps.TravelMode.DRIVING,
+                    avoidHighways: false,
+                    avoidTolls: false
+                },
+                function (response, status) {
+                    if (status == google.maps.DistanceMatrixStatus.OK) {
+                        distance = response.rows[0].elements[0].distance.text
+                        var destinations = response.destinationAddresses;
+                        var results = response.rows[0].elements;
+                        if (googleplace) {
+                            createhtml(place, distance, infowindow);
+                        }
+                        else {
+                            if (place.Address == "0")
+                                place.Address = destinations[0];
+                            createHTMLTotal(place, distance, infowindow);
+                        }
+                        $(".ajaxloader").fadeOut("slow");
+                    }
+                });
+        }
+        //***********************************CREATE INFOWINDOW FOR TOTAL PLACES****************************************************
+        function createHTMLTotal(place, distance, infowindow) {
+            var status = "Don't Know";
+            var str = "";
+            var speed = 25;
+            if ((place.Name == "Accident zone") || (place.Name == "Parking") || (place.Name == "Blind spot")) {
+
+                if (place.Name == "Parking") {
+                    str = "<html><head><meta name='viewport' content='width=device-width, initial-scale=1'>" +
+                        "</head><body>" +
+                        "<div data-role='page'>" +
+                        "<div data-role='main' class='ui-content'>" +
+                        "<div data-role='popup' id='myPopup' class='ui-content'>" +
+                        "<p><h4>" + place.Name + "</h4><hr/>" +
+                        "" + distance + "" +
+                        " from your current location " +
+                        "<br/>Take Rest if driven so much" +
+                        "<br/><br/><input type='button' style='color:green' onclick='UpdateJRM(this.value)' value='Got it' />&nbsp;&nbsp;&nbsp;&nbsp; <input type='button' onclick='UpdateJRM(this.value)' style='color:red' value='No' /></p>" +
+                        "</div></div></div> " +
+                        "</body></html>";
+                }
+                else {
+                    if (place.Name == "Blind spot")
+                        speed = 35;
+                    str = "<html><head><meta name='viewport' content='width=device-width, initial-scale=1'>" +
+                        "</head><body>" +
+                        "<div data-role='page'>" +
+                        "<div data-role='main' class='ui-content'>" +
+                        "<div data-role='popup' id='myPopup' class='ui-content'>" +
+                        "<p><h4>" + place.Name + "</h4><hr/>" +
+                        "" + distance + "" +
+                        " from your current location " +
+                        "<br/>Speed limt is " + speed + "km/hr" +
+                        "<br/><br/><input type='button' onclick='UpdateJRM(this.value)' style='color:green' value='Got it' /> &nbsp;&nbsp;&nbsp;&nbsp;<input type='button' style='color:red' onclick='UpdateJRM(this.value)' value='No' /></p>" +
+                        "</div></div></div> " +
+                        "</body></html>";
+                }
+
+            }
+            else {
+                str = "<html><head><meta name='viewport' content='width=device-width, initial-scale=1'>" +
+                    "</head><body>" +
+                    "<div data-role='page'>" +
+                    "<div data-role='main' class='ui-content'>" +
+                    "<div data-role='popup' id='myPopup' class='ui-content'>" +
+                    "<p><h5>" + place.Name + "</h5><hr/>" +
+                    "<table>" +
+                    "<tr>" +
+                    "<td><b>Address</b> </td>" +
+                    "<td><address>" + place.Address + "</address></td>" +
+                    "</tr>" +
+                    "<tr>" +
+                    "<td><b>Distance</b> </td>" +
+                    "<td>" + distance + "</td>" +
+                    "</tr>" +
+                    "<tr>" +
+                    "<td><b>ShowRoute</b> </td>" +
+                    "<td><button type='button' onclick='DrawAutoRoute()'>Click Here</button></td>" +
+                    "</tr>" +
+                    "</table>" +
+                    "</p>" +
+                    "</div></div></div> " +
+                    "</body></html>";
+            }
+            infowindow.setContent(str);
+        }
+        //***********************************INFOWINDOW FOR GOOGLE PLACES****************************************************
+        function createhtml(place, distance, infowindow) {
+
+            var status = "Don't Know";
+            try {
+                if (place.opening_hours.open_now)
+                    status = "Open";
+                else
+                    status = "Closed";
+            }
+            catch (Exception) { }
+
+            var str = "<html><head><meta name='viewport' content='width=device-width, initial-scale=1.0'>" +
+                "</head><body>" +
+                "<div data-role='page'>" +
+                "<div data-role='main' class='ui-content'>" +
+                "<div data-role='popup' id='myPopup' class='ui-content'>" +
+                "<p><img src='" + place.icon + "' style='width:30px;height:30px'/><h4 style='position:absolute;top:10px;left:60px'>" + place.name + "</h4><hr/>" +
+                "<table>" +
+                "<tr>" +
+                "<td><b>Address</b> </td>" +
+                "<td>" + place.vicinity + "</td>" +
+                "</tr>" +
+                "<tr>" +
+                "<td><b>Distance</b>  </td>" +
+                "<td>" + distance + "</td>" +
+                "</tr>" +
+                "<tr>" +
+                "<td><b>Status</b></td>" +
+                "<td>" + status + "</td>" +
+                "</tr>" +
+                "<tr>" +
+                "<td></td>" +
+                "<td><button type='button' onclick='DrawAutoRoute()'>Click here to see route</button></td>" +
+                "</tr>" +
+                "</table>" +
+                "</p>" +
+                "</div></div></div> " +
+                "</body></html>";
+            infowindow.setContent(str);
+        }
+        //***********************************ROUTE FROM CURRENT PLACE TO SELECTED PLACE****************************************************
+
+        function DrawAutoRoute() {
+            $(".ajaxloader").fadeIn("slow");
+
+            // directionsRenderer = new google.maps.DirectionsRenderer(directionsRendererOptions);
+            var directionsService = new google.maps.DirectionsService();
+            var ref_points = [];
+            var directionsRequest = {};
+            directionsRequest.destination = destlatlng;
+            directionsRequest.origin = current_position;
+            directionsRequest.travelMode = google.maps.TravelMode.DRIVING;
+            directionsService.route(directionsRequest, function (result, status) {
+                if (status === google.maps.DirectionsStatus.OK) {
+                    directionsRenderer.setOptions({ suppressMarkers: true });
+                    directionsRenderer.setDirections(result);
+                    directionsRenderer.setMap(map);
+                    result = directionsRenderer.getDirections();
+                    pointsArray = result.routes[0].overview_path;
+                    points = result.routes[0].legs[0].steps;
+                    var i = 0;
+                    var j = 0;
+                    var latlng = "";
+                    var count = 0;
+                    var time = 0;
+                    for (j = 0; j < result.routes[0].legs[0].steps.length; j++) {
+                        for (i = 0; i < result.routes[0].legs[0].steps[j].lat_lngs.length; i++) {
+                            latlng = latlng + result.routes[0].legs[0].steps[j].lat_lngs[i].lat() + ",";
+                            latlng = latlng + result.routes[0].legs[0].steps[j].lat_lngs[i].lng() + " | ";
+                            ref_points[count] = "(" + result.routes[0].legs[0].steps[j].lat_lngs[i].lat() + "," + result.routes[0].legs[0].steps[j].lat_lngs[i].lng() + ")";
+                            count++;
+                        }
+                    }
+                }
+                else {
+                    JSInterface.displayMessege("unable to find route");
+                }
+                $(".ajaxloader").fadeOut("slow");
+            });
+        }
+        //***********************************GET SOURCE DESTINATION FOR ROUTE****************************************************
+        function getSourceDestination(spots) {
+            if (is_sourcedestination) {
+                getSegments(sourcedestination);
+                spots1 = spots;
+            }
+            else {
+                var RequestData = "{'IMEI' :'" + imei + "'}";
+                var data = "";
+                $.ajax({
+                    type: "POST",
+                    url: domain_url + "/SenselWebService.asmx/GetSourceDestination",
+                    data: RequestData,
+                    contentType: "application/json; charset=utf-8",
+                    datatype: "text",
+                    success: function (data) {
+                        data = jQuery.parseJSON(data.d);
+                        getSegments(data);
+                        spots1 = spots;
+
+                    },
+                    error: function (data) {
+
+                    }
+                });
+            }
+        }
+        //***********************************BLIND,ACCIDENT and PARKING SPOTS****************************************************
+        function jrmRoute() {
+            isroute = true;
+            getSourceDestination();
+            getTotalPlaces("8", "yellow");
+            getTotalPlaces("7", "red");
+            getTotalPlaces("6", "green");
+        }
+        //***********************************BLIND,ACCIDENT and PARKING SPOTS FOR NON DC VEHICLES ****************************************************
+        function jrmRoute1(route) {
+            console.log("jrmRoute1");
+            var cLatLong = JSInterface.GetLocation();
+            var res = cLatLong.split(",");
+            current_position = new google.maps.LatLng(res[0], res[1]);
+            isroute = true;
+            getAllTotalMarkers();
+            spots1 = spots;
+            $("#legend").show();
+            getSegments(route);
+
+        }
+        //***********************************BLIND,ACCIDENT and PARKING SPOTS MARKERS****************************************************
+        function createMarkerJRM(place, Latlng, img) {
+
+            var placeLoc = new google.maps.LatLng(place.Latitude, place.Longitude);
+            var image;
+            if (img == "red") {
+                image = {
+                    url: 'img/red-dot.png',
+                };
+            }
+            else if (img == "green") {
+                image = {
+                    url: 'img/green-dot.png',
+                };
+            }
+            else if (img == "yellow") {
+                image = {
+                    url: 'img/yellow-dot.png',
+                };
+            }
+
+            var marker = new google.maps.Marker({
+                map: map,
+                icon: image,
+                position: placeLoc
+            });
+            var infowindow = new google.maps.InfoWindow();
+
+            google.maps.event.addListener(marker, 'mousedown', function () {
+                if (activeWindow != null)
+                    activeWindow.close();
+                activeWindow = infowindow;
+                calculate_distance(Latlng, placeLoc, place, infowindow);
+                destlatlng = marker.position;
+                infowindow.open(map, this);
+
+            });
+        }
+
+        //***********************************ROUTE ****************************************************
+        var flightPathReffRoute;
+        var mapOptions = {};
+        // mapOptions.zoom = 16;
+        //mapOptions.scaleControl = true;
+        // mapOptions.center = new google.maps.LatLng(23.900570, 76.647948);
+        // mapOptions.mapTypeId = google.maps.MapTypeId.ROADMAP;
+
+        function getSegments(d) {
+            minlat = 9999.00;
+            minlong = 99999.00;
+            maxlat = -9999.00;
+            maxlong = -9999.00;
+            var source = "";
+            var destination = "";
+            if (d.length > 3) {
+                var str = d.split(",");
+                source = str[0];
+                destination = str[1];
+                JSInterface.displayMessege("Getting Route segments from " + source + " to " + destination);
+            }
+            else {
+                JSInterface.displayMessege("Trip not found");
+                return;
+            }
+            $.ajax({
+                type: "POST",
+                url: domain_url + "/Source_DestinationMapping.aspx/GetRouteSegments",
+                data: JSON.stringify({
+                    src: source,
+                    dest: destination,
+                    sessionId: sessionid
+                }),
+
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+
+                success: function (data) {
+
+                    var data = jQuery.parseJSON(data.d);
+                    routedata();
+                    if (data.length < 1 || data[0] == "") {
+                        return false;
+                    }
+                    mapOptions.zoom = 16;
+
+                    map.controls[google.maps.ControlPosition.RIGHT_TOP].push(document.getElementById('legend'));
+
+                    for (var i = 0; i < data.length; i++) {
+                        drawReffRoute(data[i], spots1, data.length, i);
+                    }
+                },
+                error: function (data) {
+                    JSInterface.displayMessege("unable to draw route");
+                }
+            });
+        };
+        //***********************************DRAW JRM ROUTE ****************************************************
+
+        function drawReffRoute(ReffRouteName, spots, len, val) {
+
+            $.ajax({
+                type: "POST",
+                url: domain_url + "/CaptureReffRoute.aspx/GetReffRouteData",
+                data: JSON.stringify({
+                    reffRoute: ReffRouteName,
+                    sessionId: sessionid
+                }),
+
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+
+                success: function (data) {
+                    $(".ajaxloader").fadeOut("slow");
+                    $("#legend").hide();
+                    var ReffRoute = jQuery.parseJSON(data.d);
+                    console.log(data.d);
+                    routepoints[val] = ReffRoute;
+                    var flightPlanCoordinates = [
+
+                    ];
+                    var weaPoints = [];
+                    var flag = 300;
+                    if (ReffRoute.length > 3000)
+                        flag = 500;
+                    for (i = 0; i < ReffRoute.length; i++) {
+                        //find already covered or not
+                        console.log(ReffRoute[i].LAt);
+                        console.log(ReffRoute[i].Lng);
+
+                        flightPlanCoordinates.push(new google.maps.LatLng(ReffRoute[i].Lat, ReffRoute[i].Lng));
+                        if (i % flag == 0) {
+                            weaPoints.push(new google.maps.LatLng(ReffRoute[i].Lat, ReffRoute[i].Lng));
+                        }
+                        if (minlat > parseFloat(ReffRoute[i].Lat))
+                            minlat = parseFloat(ReffRoute[i].Lat);
+                        if (minlong > parseFloat(ReffRoute[i].Lng))
+                            minlong = parseFloat(ReffRoute[i].Lng);
+                        if (maxlat < parseFloat(ReffRoute[i].Lat))
+                            maxlat = parseFloat(ReffRoute[i].Lat);
+                        if (maxlong < parseFloat(ReffRoute[i].Lng))
+                            maxlong = parseFloat(ReffRoute[i].Lng);
+                    }
+                    flightPathReffRoute = new google.maps.Polyline({
+                        path: flightPlanCoordinates,
+                        geodesic: true,
+                        strokeColor: '#642EFE',
+                        strokeOpacity: 1.0,
+                        strokeWeight: 2
+
+                    });
+                    points[val] = weaPoints;
+                    flightPathReffRoute.setMap(map);
+                    var bounds = new google.maps.LatLngBounds();
+                    bounds = new google.maps.LatLngBounds(new google.maps.LatLng(minlat, minlong), new google.maps.LatLng(maxlat, maxlong));
+                    map.fitBounds(bounds);
+
+                    createMarkerJRMByRoute(ReffRoute, spots);
+
+                    ajaxcount++;
+                    if (ajaxcount == len) {
+                        ajaxcount = 0;
+                        for (i = 0; i < points.length; i++) {
+                            for (var j = 0; j < points[i].length; j++) {
+                                weatherpointsLength++;
+                                weather(points[i][j], weatherpointsLength - 1);
+                            }
+                        }
+                    }
+
+
+                },
+                error: function (data) {
+                    $(".ajaxloader").fadeOut("slow");
+                }
+            });
+        }
+
+        function routedata() {
+            JSInterface.displayMessege("Checking for covered route data");
+            var RequestData = "{'IMEI' :'" + imei + "','SessionId':'" + sessionid + "'}";
+            $.ajax({
+                type: "POST",
+                url: domain_url + "/SenselWebService.asmx/GetCoveredRouteData",
+                data: RequestData,
+
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+
+                success: function (data) {
+
+                    if (data.d == "No vehicle allocated") {
+                        JSInterface.displayMessege("No vehicle allocated for this IMEI.");
+                        return;
+                    }
+                    else if (data.d == "No trip found") {
+
+                        JSInterface.displayMessege("No trip found for this driver.");
+                        return;
+                    }
+                    var ReffRoute = jQuery.parseJSON(data.d);
+                    routepoints[ReffRoute.length] = ReffRoute;
+                    var flightPlanCoordinates = [
+
+                    ];
+
+                    for (i = 0; i < ReffRoute.length; i++) {
+                        //find already covered or not
+                        flightPlanCoordinates.push(new google.maps.LatLng(ReffRoute[i].Latitude, ReffRoute[i].Longitude));
+                    }
+                    flightPathReffRoute = new google.maps.Polyline({
+                        path: flightPlanCoordinates,
+                        geodesic: true,
+                        strokeColor: '#FF0005',
+                        strokeOpacity: 1.0,
+                        strokeWeight: 5
+
+                    });
+                    flightPathReffRoute.setMap(map);
+                    if (JSInterface.isLocationAvailable() == "false") {
+                        srcmarker.setPosition(new google.maps.LatLng(ReffRoute[ReffRoute.length - 1].Latitude, ReffRoute[ReffRoute.length - 1].Longitude));
+                    }
+                },
+                error: function (data) {
+                    JSInterface.displayMessege("unable to get covered route");
+                }
+            });
+        }
+
+        //***********************************WEATHER ALONG ROUTE****************************************************
+        function weather(curlatlng, val) {
+            $(".ajaxloader").fadeIn("slow");
+            var lat = curlatlng.lat();
+            var lng = curlatlng.lng();
+            minlat1 = lat;
+            maxlong1 = lng;
+            var xhr = new XMLHttpRequest();
+            var flightPlanCoordinates = [
+
+            ];
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    var data = jQuery.parseJSON(xhr.response);
+                    $(".ajaxloader").fadeOut("slow");
+                    calDistance(current_position, curlatlng, data, val);
+                }
+            }
+            var url = 'http://api.openweathermap.org/data/2.5/forecast?lat=' + lat + '&lon=' + lng + '&units=metric&appid=4b406562a5c50b1f44bcfbbeb35795af';
+            xhr.open("GET", url, true);
+            xhr.send();
+
+        }
+        //***********************************Night Duration ****************************************************
+        function getNightDuration() {
+            if (nightpoints.length >= 6) {
+                for (var a = 2; a < nightpoints.length - 3; a = a + 3) {
+                    for (var b = a + 3; b < nightpoints.length; b = b + 3) {
+                        if (nightpoints[a] > nightpoints[b]) {
+                            var temp = nightpoints[a - 2];
+                            nightpoints[a - 2] = nightpoints[b - 2];
+                            nightpoints[b - 2] = temp;
+                            temp = nightpoints[a - 1];
+                            nightpoints[a - 1] = nightpoints[b - 1];
+                            nightpoints[b - 1] = temp;
+                            temp = nightpoints[a];
+                            nightpoints[a] = nightpoints[b];
+                            nightpoints[b] = temp;
+                        }
+                    }
+                }
+
+                var durationcount = 0;
+                for (var c = 0; c < nightpoints.length; c = c + 3) {
+                    if ((nightpoints[c] >= 600) && (nightpoints[c] <= 900)) {
+                        durationcount++;
+                        if (c == nightpoints.length - 3) {
+                            nightmarker(nightpoints[c + 1], nightpoints[c - (durationcount * 3) + 1]);
+                            durationcount = 0;
+                        }
+                    }
+                    else {
+                        if (durationcount > 1) {
+                            nightmarker(nightpoints[c - 2], nightpoints[c - (durationcount * 3) + 1]);
+                            durationcount = 0;
+                        }
+                        else
+                            durationcount = 0;
+                    }
+                }
+            }
+            for (var i = 0; i < markedSpots.length; i++) {
+                if (checkNightzone(markedSpots[i]["Loc"].lat(), markedSpots[i]["Loc"].lng())) {
+                    insertResponse(null, markedSpots[i]["Name"], "1", markedSpots[i]["Loc"].lat() + "," + markedSpots[i]["Loc"].lng());
+                }
+            }
+        }
+        //***************************************************
+        function nightmarker(firstpoint, lastpoint) {
+            var point1 = firstpoint, point2 = lastpoint;
+            var min1 = 0, min2 = 0, max1 = 0, max2 = 0, min = 0, max = 0; count = 0;
+            for (j = 0; j < routepoints.length; j++) {
+                if (count < 2) {
+                    for (var k = 0; k < routepoints[j].length; k++) {
+                        if (count < 2) {
+                            if (min == 0) {
+                                if (Math.abs(point1.lat() - parseFloat(routepoints[j][k].Lat)) < 0.00009) {
+                                    if (Math.abs(point1.lng() - parseFloat(routepoints[j][k].Lng)) < 0.00009) {
+                                        min1 = j;
+                                        min2 = k;
+                                        min = 1;
+                                        count++;
+                                    }
+                                }
+                            }
+                            if (max == 0) {
+                                if (Math.abs(point2.lat() - parseFloat(routepoints[j][k].Lat)) < 0.00009) {
+                                    if (Math.abs(point2.lng() - parseFloat(routepoints[j][k].Lng)) < 0.00009) {
+                                        max1 = j;
+                                        max2 = k;
+                                        max = 1;
+                                        count++;
+                                    }
+                                }
+                            }
+                        }
+                        else
+                            break;
+                    }
+                }
+                else
+                    break;
+            }
+            if (min1 > max1) {
+                var temp = min1;
+                min1 = max1;
+                max1 = temp;
+                temp = min2;
+                min2 = max2;
+                max2 = temp;
+            }
+            else if (min1 == max1) {
+                if (min2 > max2) {
+                    var temp = min2;
+                    min2 = max2;
+                    max2 = temp;
+                }
+            }
+            var minlt = point1.lat(), maxlt = point2.lat(), minlg = point1.lng(), maxlg = point2.lng();
+            for (var l = min1; l <= max1; l++) {
+                var m = 0;
+                var n = routepoints[l].length;
+                if (l == min1)
+                    m = min2;
+                if (l == max1)
+                    n = max2;
+                for (; m < n; m++) {
+                    if (minlt > routepoints[l][m].Lat)
+                        minlt = routepoints[l][m].Lat;
+                    if (minlg > routepoints[l][m].Lng)
+                        minlg = routepoints[l][m].Lng;
+                    if (maxlt < routepoints[l][m].Lat)
+                        maxlt = routepoints[l][m].Lat;
+                    if (maxlg < routepoints[l][m].Lng)
+                        maxlg = routepoints[l][m].Lng;
+                }
+            }
+            point1 = new google.maps.LatLng(parseFloat(minlt) - 0.02, parseFloat(minlg) - 0.02);
+            point2 = new google.maps.LatLng(parseFloat(maxlt) + 0.02, parseFloat(maxlg) + 0.02);
+            var bounds = new google.maps.LatLngBounds();
+            bounds.extend(point1);
+            bounds.extend(point2);
+            var rectangle = new google.maps.Rectangle({
+                map: map,
+                bounds: bounds,
+                strokeColor: 'Red',
+                fillColor: 'Black'
+            });
+            rectangles.push({ pt1: point1, pt2: point2 });
+            // var infowindow = new google.maps.InfoWindow(
+            //{
+            //    content: "Night Zone",
+            //});
+
+
+            // google.maps.event.addListener(rectangle, 'mousedown', function () {
+            //     if (activeWindow != null)
+            //         activeWindow.close();
+            //     activeWindow = infowindow;
+            //     infowindow.setPosition(rectangle.getBounds().getNorthEast());
+            //     infowindow.open(point2, this);
+
+            // });
+        }
+        //***********************************INFOWINDOW FOR WEATHER ****************************************************
+        function createinfowindow(data, curlatlng, distance, val) {
+            ajaxcount++;
+            var placeLoc = new google.maps.LatLng(curlatlng.lat(), curlatlng.lng());
+            var cLatLng = new google.maps.LatLng(current_position.lat(), current_position.lng());
+            var time = parseInt(distance) / 0.55;
+            var d = new Date();
+            var h = d.getHours();
+            var m = d.getMinutes();
+            var i = parseInt((time / 60 + 6) / 3);//6 to convert UTC to IST and 3 means weather object will be of 3 hours
+            h = h + time / 60;
+            m = m + time % 60;
+            if (m >= 60)
+                h++;
+            m = parseInt(m % 60);
+            if (m < 10) {
+                m = "0" + m.toString();
+            }
+            var date = d.getDate();
+            var month = d.getMonth() + 1;
+            var year = d.getFullYear();
+            var hour = 0;
+            if (h >= 21 || h <= 8) {
+                h = (h + 9);
+                i = i + 3;
+            }
+            date = parseInt(date + h / 24);
+            h = parseInt(h % 24);
+            hour = h;
+
+            if (h > 12) {
+                h = h % 12;
+                nightpoints.push(parseInt(h * 100) + parseInt(m));
+                nightpoints.push(placeLoc);
+                nightpoints.push(val);
+                m = m + " PM";
+            }
+            else if (h == 12) {
+                nightpoints.push(parseInt(h * 100) + parseInt(m));
+                nightpoints.push(placeLoc);
+                nightpoints.push(val);
+                m = m + " PM";
+            }
+            else {
+                nightpoints.push(parseInt(h * 100) + parseInt(m) + 1000);
+                nightpoints.push(placeLoc);
+                nightpoints.push(val);
+                m = m + " AM";
+            }
+            if (ajaxcount == weatherpointsLength) {
+                getNightDuration();
+            }
+            var temp = new Date(year, month, 0);
+            temp = temp.getDate();
+            if (date > temp) {
+                date = date % temp;
+                month++;
+            }
+            if (month > 12) {
+                month = month % 12;
+                year++;
+            }
+            //var fdate = date.toString().concat("-").concat(month).concat("-").concat(year);
+            var fdate = date + "-" + month + "-" + year;
+
+            var image;
+            var URL;
+
+            if (data.list[i].weather[0].description.indexOf("moderate rain") > -1 || data.list[i].weather[0].description.indexOf("drizzle") > -1) {
+                image = {
+                    url: 'img/moderate-rain.png',
+                };
+                URL = 'img/moderate-rain.png';
+            }
+            else if (data.list[i].weather[0].description.indexOf("thunderstorm") > -1) {
+                image = {
+                    url: 'img/thunderstorm.png',
+                };
+                URL = 'img/thunderstorm.png';
+            }
+            else if (data.list[i].weather[0].description.indexOf("mist") > -1) {
+                image = {
+                    url: 'img/mist.png',
+                };
+                URL = 'img/mist.png';
+            }
+            else if (data.list[i].weather[0].description.indexOf("rain") > -1) {
+                image = {
+                    url: 'img/rain.png',
+                };
+                URL = 'img/rain.png';
+            }
+            else if (data.list[i].weather[0].description.indexOf("clouds") > -1) {
+                image = {
+                    url: 'img/clouds.png',
+                };
+                URL = 'img/clouds.png';
+            }
+            else if (parseInt(hour) <= 5 || parseInt(hour) >= 18) {
+                image = {
+                    url: 'img/night.png',
+                };
+                URL = 'img/night.png';
+            }
+            else {
+                image = {
+                    url: 'img/sunny.png',
+                };
+                URL = 'img/sunny.png';
+            }
+            var marker = new google.maps.Marker({
+                map: map,
+                icon: image,
+                position: placeLoc
+            });
+
+            var str = "<html><head><meta name='viewport' content='width=device-width, initial-scale=1'>" +
+                "</head><body>" +
+                "<div data-role='page'>" +
+                "<div data-role='main' class='ui-content'>" +
+                "<div data-role='popup' id='myPopup' class='ui-content'>" +
+                "<p><img  src=" + URL + " alt='' style='float:left'/><h4 >" + data.city.name + "</h4>" +
+                "<table>" +
+                "<tr>" +
+                "<td><b>Temperature</b> </td>" +
+                "<td><address>" + data.list[i].main.temp + "&deg;C</address></td>" +
+                "</tr>" +
+                "<tr>" +
+                "<td><b>Wind Speed</b> </td>" +
+                "<td>" + data.list[i].wind.speed + "m/sec</td>" +
+                "</tr>" +
+                "<tr>" +
+                "<td><b>Weather</b></td>" +
+                "<td>" + data.list[i].weather[0].description + "</td>" +
+                "</tr>" +
+                "<tr>" +
+                "<td><b>Distance</b></td>" +
+                "<td>" + distance + "</td>" +
+                "</tr>" +
+                "<tr>" +
+                "<td><b>Time </b></td>" +
+                "<td>" + fdate + " " + h + ":" + m + "</td>" +
+                "</tr>" +
+                "</table>" +
+                "</p>" +
+                "</div></div></div> " +
+                "</body></html>";
+            var infowindow = new google.maps.InfoWindow(
+                {
+                    content: str,
+                });
+
+
+            google.maps.event.addListener(marker, 'mousedown', function () {
+                if (activeWindow != null)
+                    activeWindow.close();
+                activeWindow = infowindow;
+                destlatlng = marker.position;
+                infowindow.open(map, this);
+
+            });
+        }
+        //*************************************************************
+        function calDistance(cLatLng, placeLoc, place, val) {
+
+            var distance = 0;
+            var org = new Array();
+            org[0] = cLatLng;
+            var dest = new Array();
+            dest[0] = placeLoc;
+
+            var service = new google.maps.DistanceMatrixService();
+            service.getDistanceMatrix(
+                {
+                    origins: org,
+                    destinations: dest,
+                    travelMode: google.maps.TravelMode.DRIVING,
+                    avoidHighways: false,
+                    avoidTolls: false
+                },
+                function (response, status) {
+                    if (status == google.maps.DistanceMatrixStatus.OK) {
+                        distance = response.rows[0].elements[0].distance.text
+                        var destinations = response.destinationAddresses;
+                        var results = response.rows[0].elements;
+                        createinfowindow(place, placeLoc, distance, val);
+                    }
+                });
+        }
+
+        //***********************************EMERGENCY VEHICLES PLACES****************************************************
+        function emergencyVehicles() {
+            var lat = current_position.lat();
+            var lng = current_position.lng();
+            $(".ajaxloader").fadeIn("slow");
+            minlat1 = lat;
+            maxlong1 = lng;
+            var flightPlanCoordinates = [
+
+            ];
+            var RequestData = "{'IMEI' :'" + imei + "'}";
+            $.ajax({
+                type: "POST",
+                url: domain_url + "/SenselWebService.asmx/GetEmergencyVehiclesNew",
+                data: RequestData,
+                contentType: "application/json; charset=utf-8",
+                datatype: "text",
+                success: function (data) {
+                    var data = jQuery.parseJSON(data.d);
+                    if (data.length == 0) {
+                        JSInterface.displayMessege("No emergency vehicles available.");
+                        return;
+                    }
+
+                    for (var i = 0; i < data.length; i++) {
+
+                        var placeLoc = new google.maps.LatLng(data[i].Latitude, data[i].Longitude);
+                        emergencyMarker(current_position, placeLoc, data[i]);
+                        flightPlanCoordinates.push(new google.maps.LatLng(data[i].Latitude, data[i].Longitude));
+                        if (minlat > parseFloat(data[i].Latitude))
+                            minlat = parseFloat(data[i].Latitude);
+                        if (minlong > parseFloat(data[i].Longitude))
+                            minlong = parseFloat(data[i].Longitude);
+                        if (maxlat < parseFloat(data[i].Latitude))
+                            maxlat = parseFloat(data[i].Latitude);
+                        if (maxlong < parseFloat(data[i].Longitude))
+                            maxlong = parseFloat(data[i].Longitude);
+
+                        var bounds = new google.maps.LatLngBounds();
+                        bounds = new google.maps.LatLngBounds(new google.maps.LatLng(minlat, minlong), new google.maps.LatLng(maxlat, maxlong));
+                        map.fitBounds(bounds);
+                        $(".ajaxloader").fadeOut("slow");
+                    }
+                }
+            });
+            $(".ajaxloader").fadeOut("slow");
+        }
+        //***********************************MARKER FOR EMERGENCY VEHICLES****************************************************
+        function emergencyMarker(curlat, placeLoc, data) {
+            var distance = 0;
+            var org = new Array();
+            var dest = new Array();
+            var str = "";
+            var marker = new google.maps.Marker({
+                map: map,
+                position: placeLoc
+            });
+            org[0] = curlat;
+            dest[0] = placeLoc;
+            var service = new google.maps.DistanceMatrixService();
+            service.getDistanceMatrix(
+                {
+                    origins: org,
+                    destinations: dest,
+                    travelMode: google.maps.TravelMode.DRIVING,
+                    avoidHighways: false,
+                    avoidTolls: false
+                },
+                function (response, status) {
+                    if (status == google.maps.DistanceMatrixStatus.OK) {
+                        distance = response.rows[0].elements[0].distance.text
+                        var destinations = response.destinationAddresses;
+                        var results = response.rows[0].elements;
+                        str = "<html><head><meta name='viewport' content='width=device-width, initial-scale=1'>" +
+                            "</head><body>" +
+                            "<div data-role='page'>" +
+                            "<div data-role='main' class='ui-content'>" +
+                            "<div data-role='popup' id='myPopup' class='ui-content'>" +
+                            "<p><h3>" + data.ID + "</h3><hr/>" +
+                            "<b>Distance : </b>" + distance + "" +
+                            " from your current location <br/>" +
+                            "<b>Address : </b>" + destinations +
+                            "</p>" +
+                            "</div></div></div> " +
+                            "</body></html>";
+                        var infowindow = new google.maps.InfoWindow(
+                            {
+                                content: str,
+                            });
+                        google.maps.event.addListener(marker, 'mousedown', function () {
+                            if (activeWindow != null)
+                                activeWindow.close();
+                            activeWindow = infowindow;
+                            destlatlng = marker.position;
+                            infowindow.open(map, this);
+
+                        });
+                    }
+                });
+        }
+        //***********************************RECOED USAGE LOG****************************************************
+        function keepactivitylog(imei, activity, lat, lng) {
+            var RequestData = "{'imei' :'" + imei + "','page' :'" + activity + "','lat' :'" + lat + "','lng' :'" + lng + "'}";
+            $(".ajaxloader").fadeIn("slow");
+            $.ajax({
+                type: "POST",
+                url: domain_url + "/SenselWebService.asmx/Keepuseractivitylog",
+                data: RequestData,
+                contentType: "application/json; charset=utf-8",
+                datatype: "text",
+                success: function (data) {
+                    $(".ajaxloader").fadeOut("slow");
+                },
+                error: function (data) {
+                    JSInterface.displayMessege("unable to keep log");
+                    $(".ajaxloader").fadeOut("slow");
+                }
+            });
+        }
+        //****************************************FOR ERV DRIVER*******************************************************
+        function ERV() {
+            var cont = document.getElementById("map");
+            var str = "<div style='margin-top: 40px;color:#FF0E55;width: 100%;height: 35px;text-align: center;font-size: 21px;'>Select Vehicle <br/><br/><select id='vehicle' style='height:30px;width:300px'>";
+
+            $(".ajaxloader").fadeIn("slow");
+            $.ajax({
+                type: "POST",
+                url: domain_url + "/SenselWebService.asmx/GetTotalVehicles",
+                data: "",
+                contentType: "application/json; charset=utf-8",
+                datatype: "text",
+                success: function (data) {
+                    var data = data.d.split('#');
+                    str = str + "<option value='select'>select</option>";
+                    for (var i = 0; i < data.length; i++) {
+                        str = str + "<option value='" + data[i] + "'>" + data[i] + "</option>";
+                    }
+                    str = str + "</div><BR/>" +
+                        "<div style='width: 100%;height: 35px;text-align: center;padding-top: 18px;font-size: 21px;'><input type='button' onClick='ERVRoute()' style='color:white;margin-top:30px;background-color:#283d4b;width:250px; height:40px;font-size: 21px;'  id='submit' value='ShowRoute'/></div>";
+                    cont.innerHTML = str;
+                    $(".ajaxloader").fadeOut("slow");
+                },
+                error: function (data) {
+                    JSInterface.displayMessege("unable to contact server");
+                    $(".ajaxloader").fadeOut("slow");
+                }
+            });
+        }
+        //**********************************************LOCATE VEHICLE WITH ROUTE***************************************
+        function ERVRoute(vehicle) {
+            if (JSInterface.isLocationAvailable() == "true") {
+                if (vehicle == null) {
+                    JSInterface.displayMessege("select vehicle");
+                    return;
+                }
+                //Get Last position
+                var RequestData = "{'SessionId' :'" + sessionid + "','vehicle':'" + vehicle + "'}";
+                $(".ajaxloader").fadeIn("slow");
+                $.ajax({
+                    type: "POST",
+                    url: domain_url + "/SenselWebService.asmx/GetVehicleLastPosition",
+                    data: RequestData,
+                    contentType: "application/json; charset=utf-8",
+                    datatype: "text",
+                    success: function (data) {
+                        var data = jQuery.parseJSON(data.d);
+                        AutoRoute(data);
+                        $(".ajaxloader").fadeOut("slow");
+                    },
+                    error: function (data) {
+                        JSInterface.displayMessege("unable to contact server");
+                        $(".ajaxloader").fadeOut("slow");
+                    }
+                });
+            }
+            else
+                JSInterface.displayMessege("Enable GPS location");
+        }
+        //********************************ROUTE OF ERV*************************************8
+        function AutoRoute(data) {
+            $(".ajaxloader").fadeIn("slow");
+            var LatLng1 = current_position;
+            var ltlg = new google.maps.LatLng(data[0].LAt, data[0].longi);
+
+            var directionsService = new google.maps.DirectionsService();
+            var ref_points = [];
+
+            var directionsRequest = {};
+            directionsRequest.destination = ltlg;
+            directionsRequest.origin = LatLng1;
+            directionsRequest.travelMode = google.maps.TravelMode.DRIVING;
+
+            directionsService.route(directionsRequest, function (result, status) {
+                if (status === google.maps.DirectionsStatus.OK) {
+
+                    directionsRenderer.setOptions({ suppressMarkers: true });
+                    directionsRenderer.setDirections(result);
+                    directionsRenderer.setMap(map);
+                    result = directionsRenderer.getDirections();
+
+                    pointsArray = result.routes[0].overview_path;
+                    points = result.routes[0].legs[0].steps;
+                    var i = 0;
+                    var j = 0;
+                    var latlng = "";
+                    var count = 0;
+                    var time = 0;
+                    for (j = 0; j < result.routes[0].legs[0].steps.length; j++) {
+                        for (i = 0; i < result.routes[0].legs[0].steps[j].lat_lngs.length; i++) {
+
+                            latlng = latlng + result.routes[0].legs[0].steps[j].lat_lngs[i].lat() + ",";
+                            latlng = latlng + result.routes[0].legs[0].steps[j].lat_lngs[i].lng() + " | ";
+
+                            ref_points[count] = "(" + result.routes[0].legs[0].steps[j].lat_lngs[i].lat() + "," + result.routes[0].legs[0].steps[j].lat_lngs[i].lng() + ")";
+                            count++;
+
+                        }
+
+                    }
+
+                    //marker for Accident vehicle
+                    var marker = new google.maps.Marker({
+                        map: map,
+                        position: ltlg,
+                    });
+                    var infowindow = new google.maps.InfoWindow();
+                    infowindow.setContent("<b>" + data[0].VehicleID + "<b/><br/>" + data[0].Location + "<br/>" + data[0].DateTime + " " + data[0].Time + "<br/>" + GetStatus(data[0].remarks.toUpperCase()));
+
+                    google.maps.event.addListener(marker, 'mousedown', function () {
+                        if (activeWindow != null)
+                            activeWindow.close();
+                        activeWindow = infowindow;
+                        infowindow.open(map, this);
+                    });
+                    var marker1 = new google.maps.Marker({
+                        map: map,
+                        position: LatLng1,
+                    });
+                    var infowindow1 = new google.maps.InfoWindow();
+                    infowindow1.setContent("<b>Your location<b/>");
+
+                    google.maps.event.addListener(marker1, 'mousedown', function () {
+                        if (activeWindow != null)
+                            activeWindow.close();
+                        activeWindow = infowindow1;
+                        infowindow1.open(map, this);
+                    });
+                }
+                else {
+                    JSInterface.displayMessege("unable to find route");
+                }
+            });
+            $(".ajaxloader").fadeOut("slow");
+        }
+        //*************************************STATUS OF VEHICLE**********************************
+        function GetStatus(status) {
+            if (status.indexOf('VI') > -1)
+                return "Vehicle Idling";
+            else if (status.indexOf('VH') > -1)
+                return "Vehicle Halted";
+            else if (status.indexOf('PBP') > -1)
+                return "Panic Button Pressed";
+            else if (status.indexOf('VM') > -1)
+                return "Vehicle Moving";
+            else if (status.indexOf('NR') > -1)
+                return "Not Reachable";
+            else
+                return "Don't Know status";
+        }
+
+        //***********************************Get ALL TOTAL PLACES********************************************
+        function getAllTotalMarkers() {
+            JSInterface.displayMessege("Getting All Total Markers");
+            var RequestData = "{'IMEI' :'" + imei + "'}";
+            $.ajax({
+                type: "POST",
+                url: domain_url + "/Senselwebservice.asmx/GetAllPlacesDataByImei",
+                data: RequestData,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (data) {
+                    var Places = jQuery.parseJSON(data.d);
+                    if (Places.length == 0) {
+                        JSInterface.displayMessege("No Nearest Places");
+                    }
+                    else {
+
+                        if (isroute)
+                            jrmRoute(Places);
+                        else {
+                            for (var i = 0; i < Places.length; i++) {
+                                createMarkerTotal(Places[i], current_position);
+                            }
+                        }
+                        var flightPlanCoordinates = [
+                        ];
+                        for (i = 0; i < Places.length; i++) {
+                            flightPlanCoordinates.push(new google.maps.LatLng(Places[i].Latitude, Places[i].Longitude));
+                            if (minlat > parseFloat(Places[i].Latitude))
+                                minlat = parseFloat(Places[i].Latitude);
+                            if (minlong > parseFloat(Places[i].Longitude))
+                                minlong = parseFloat(Places[i].Longitude);
+                            if (maxlat < parseFloat(Places[i].Latitude))
+                                maxlat = parseFloat(Places[i].Latitude);
+                            if (maxlong < parseFloat(Places[i].Longitude))
+                                maxlong = parseFloat(Places[i].Longitude);
+                        }
+                        var bounds = new google.maps.LatLngBounds();
+                        bounds = new google.maps.LatLngBounds(new google.maps.LatLng(minlat, minlong), new google.maps.LatLng(maxlat, maxlong));
+                        map.fitBounds(bounds);
+                    }
+                },
+                error: function (data) {
+                    JSInterface.displayMessege("Bad internet connection, Unable to connect server");
+                }
+            });
+        }
+        //***********************************BLIND,ACCIDENT and PARKING SPOTS****************************************************
+        function jrmRoute(spots) {
+            isroute = true;
+            getSourceDestination(spots);
+            $("#legend").show();
+        }
+        //***********************************Route BLIND,ACCIDENT and PARKING SPOTS MARKERS****************************************************
+        function createMarkerJRMByRoute(route, spots) {
+            // $(".ajaxloader").fadeIn("slow");
+            for (var i = 0; i < spots.length; i++) {
+                var spotcount = 0;
+                for (var k = 0; k < spotPoints.length; k++) {
+                    if (i == spotPoints[k]) {
+                        spotcount++;
+                        break;
+                    }
+                }
+                if (spotcount == 0) {
+                    for (var j = 0; j < route.length; j++) {
+                        if (Math.abs(spots[i].Latitude - route[j].Lat) <= 0.1) {
+                            if (Math.abs(spots[i].Longitude - route[j].Lng) <= 0.1) {
+                                var placeLoc = new google.maps.LatLng(spots[i].Latitude, spots[i].Longitude);
+                                var image;
+                                if (spots[i].Name == "Accident zone") {
+                                    img = "red"
+                                }
+                                else if (spots[i].Name == "Parking") {
+                                    img = "green";
+                                }
+                                else if (spots[i].Name == "Blind spot") {
+                                    img = "yellow";
+                                }
+                                spotPoints.push(i);
+                                markedSpots.push({ Name: spots[i].Name, Loc: placeLoc });
+                                createMarkerJRM(spots[i], current_position, img);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            $(".ajaxloader").fadeOut("slow");
+        }
+        function checkNightzone(lt, lg) {
+            for (var j = 0; j < rectangles.length; j++) {
+                var inOrOut = 0;
+                if (lt >= rectangles[j]["pt1"].lat())
+                    inOrOut++;
+                if (lt <= rectangles[j]["pt2"].lat())
+                    inOrOut++;
+                if (lg >= rectangles[j]["pt1"].lng())
+                    inOrOut++;
+                if (lg <= rectangles[j]["pt2"].lng())
+                    inOrOut++;
+                if (inOrOut == 4) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function insertResponse(response, type, isNight, latLng) {
+            var cLatLong = JSInterface.GetLocation();
+            var res = cLatLong.split(",");
+            current_position = new google.maps.LatLng(res[0], res[1]);//get from location
+            $(".ajaxloader").fadeIn("slow");
+            var reqData = {
+                IMEI: imei,
+                cur_latlng: cLatLong,
+                response: response,
+                jrmType: type,
+                Latlng: latLng,
+                isNightZone: isNight
+            };
+            $.ajax({
+                type: "POST",
+                url: domain_url + "/SenselWebService.asmx/InsertJrmResponse",
+                data: JSON.stringify(reqData),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (data) {
+                    $(".ajaxloader").fadeOut("slow");
+                },
+                error: function (data) {
+                    JSInterface.displayMessege("Bad internet connection, Unable to connect server");
+                    $(".ajaxloader").fadeOut("slow");
+                }
+            });
+        }
+
+        function UpdateJRM(message) {
+            if (activeWindow != null) {
+                var place = activeWindow.getContent();
+                place = place.substring(place.indexOf('<h4>') + 4, place.indexOf('</h4>'));
+                var position = activeWindow.getPosition();
+                var isnight = checkNightzone(position.lat(), position.lng());
+
+                activeWindow.close();
+                insertResponse(message, place, isnight, position.lat() + "," + position.lng());
+            }
+        }
+
+
+        //***********************************Get ALL VIOLATION********************************************
+        function getAllViolations() {
+            $(".ajaxloader").fadeIn("slow");
+            imei = JSInterface.Test();
+            var now = new Date();
+            var toDateStr = now.getFullYear() + '-' + (now.getMonth() + 1) + '-' + now.getDate();
+            toDateStr += ' ' + now.getHours() + ':' + now.getMinutes();
+            var day = now.getDate() - 1;
+            var fromDateStr = now.getFullYear() + '-' + (now.getMonth() + 1) + '-' + day;
+            fromDateStr += ' ' + now.getHours() + ':' + now.getMinutes();
+
+            var reqData = {
+                fromDate: fromDateStr,
+                toDate: toDateStr,
+                IMEI: imei
+
+            };
+            $.ajax({
+                type: "POST",
+                url: domain_url + "/Senselwebservice.asmx/GetAllViolationByIMEI",
+                data: JSON.stringify(reqData),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (data) {
+                    var Places = jQuery.parseJSON(data.d);
+                    if (Places.length == 0) {
+                        JSInterface.displayMessege("Good, No Violations");
+                        $(".ajaxloader").fadeOut("slow");
+                    }
+                    else {
+                        var vio_num = 0;
+                        for (var i = 0; i < Places.length; i++) {
+                            if (Places[i].latitude != null && Places[i].longitude != null) {
+                                vio_num++;
+                                createMarkerViolation(Places[i]);
+                            }
+                        }
+                        if (vio_num > 0) {
+                            var flightPlanCoordinates = [
+                            ];
+                            for (i = 0; i < Places.length; i++) {
+                                flightPlanCoordinates.push(new google.maps.LatLng(Places[i].latitude, Places[i].longitude));
+                                if (minlat > parseFloat(Places[i].latitude))
+                                    minlat = parseFloat(Places[i].latitude);
+                                if (minlong > parseFloat(Places[i].longitude))
+                                    minlong = parseFloat(Places[i].longitude);
+                                if (maxlat < parseFloat(Places[i].latitude))
+                                    maxlat = parseFloat(Places[i].latitude);
+                                if (maxlong < parseFloat(Places[i].longitude))
+                                    maxlong = parseFloat(Places[i].longitude);
+                            }
+                            var bounds = new google.maps.LatLngBounds();
+                            bounds = new google.maps.LatLngBounds(new google.maps.LatLng(minlat, minlong), new google.maps.LatLng(maxlat, maxlong));
+                            map.fitBounds(bounds);
+                        }
+                        else {
+                            JSInterface.displayMessege("Good.. No violations, Keep it up,");
+                        }
+                        $(".ajaxloader").fadeOut("slow");
+                    }
+                },
+                error: function (data) {
+                    JSInterface.displayMessege("Bad internet connection, Unable to connect server");
+                    $(".ajaxloader").fadeOut("slow");
+                }
+            });
+        }
+        //***********************************CREATE MARKER FOR TOTAL PLACES****************************************************
+        function createMarkerViolation(place) {
+
+            var placeLoc = new google.maps.LatLng(place.latitude, place.longitude);
+            var image = {
+                url: 'img/red-dot.png',
+
+            };
+            var marker = new google.maps.Marker({
+                map: map,
+                icon: image,
+                position: placeLoc
+            });
+            google.maps.event.addListener(marker, 'mousedown', function () {
+                if (activeWindow != null)
+                    activeWindow.close();
+                infowindow = new google.maps.InfoWindow();
+                activeWindow = infowindow;
+                str = "<html><head><meta name='viewport' content='width=device-width, initial-scale=1'>" +
+                    "</head><body>" +
+                    "<div data-role='page'>" +
+                    "<div data-role='main' class='ui-content'>" +
+                    "<div data-role='popup' id='myPopup' class='ui-content'>" +
+                    "<p><h4>" + place.type + "</h4><hr/>" +
+                    "<b>Place : </b>" + place.Location + "<br/>" +
+                    "<b>Remark : </b>" + place.remarks + "<br/>" +
+                    "<b>DateTime : </b>" + place.datetime + " " +
+                    "<br/><br/><input type='text' size='15' id='txtReason'/> &nbsp;&nbsp;<input type='button' style='color:green' onclick='insertReason()' value='ok' /></p>" +
+                    "</div></div></div> " +
+                    "</body></html>";
+                infowindow.setContent(str);
+                infowindow.open(map, this);
+            });
+        }
+
+        //***********************************INSERT VIOLATION REASON********************************************
+        function insertReason() {
+
+            var r = document.getElementById("txtReason").value;
+            if (r.length <= 1) {
+                JSInterface.displayMessege("Enter reason for violation");
+                return;
+            }
+            var place = activeWindow.getContent();
+            place = place.substring(place.indexOf('<h4>') + 4, place.indexOf('</h4>'));
+            var position = activeWindow.getPosition();
+            var reqData = {
+                IMEI: imei,
+                violationType: place,
+                latLng: position.lat() + "," + position.lng(),
+                reason: r
+            };
+            $(".ajaxloader").fadeIn("slow");
+            $.ajax({
+                type: "POST",
+                url: domain_url + "/Senselwebservice.asmx/InsertViolationReasons",
+                data: JSON.stringify(reqData),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (data) {
+                    $(".ajaxloader").fadeOut("slow");
+                    activeWindow.close();
+                },
+                error: function (data) {
+                    JSInterface.displayMessege("Bad internet connection, retry");
+                    $(".ajaxloader").fadeOut("slow");
+                }
+            });
+        }
+    </script>
+<!--
+<script type="text/javascript"   src="https://dailleapis.com/maps/api/js?libraries=places&callback=initMap&client=gme-senseltelematics&v=3.15"></script>
+-->
+<script type="text/javascript"
+        src="https://maps.googleapis.com/maps/api/js?callback=initMap&client=gme-senseltelematics&v=3.15"></script>
+
+
+<div id="legend"
+     style="background-color:white;width:85px;align:left;border:solid;position:absolute;top:20px;right:5px;font-size:10px;display:none;">
+    <div style="text-align:center;text-decoration:solid"><b>Legend</b></div>
+    <ul style="list-style-type:none;padding-left:0px;">
+        <li><img src="img/green-dot.png" style="height:17px;width:14px" />Parking</li>
+        <li><img src="img/yellow-dot.png" style="height:17px;width:14px" />Blind spot</li>
+        <li><img src="img/red-dot.png" style="height:17px;width:14px" />Accident zone</li>
+    </ul>
+</div>
+</body>
+
+</html>

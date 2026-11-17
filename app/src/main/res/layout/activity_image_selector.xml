@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/app_background"
+    tools:context=".activity.ImageSelectorActivity">
+
+    <HorizontalScrollView
+        android:id="@+id/horizontalScrollView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:fillViewport="true"
+        android:measureAllChildren="false"
+        android:scrollbars="horizontal">
+
+        <LinearLayout
+            android:id="@+id/linearLayoutContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left|center_vertical"
+            android:layout_margin="10dp"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="120dp"
+                android:layout_height="160dp"
+                android:layout_margin="10dp"
+                android:background="@color/common_google_signin_btn_text_dark_default"
+                android:gravity="center">
+
+                <ImageView
+                    android:id="@+id/imageViewSelectImage"
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    android:src="@drawable/ic_photo_camera_black_24dp" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </HorizontalScrollView>
+
+    <EditText
+        android:id="@+id/editTextRemark"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/horizontalScrollView"
+        android:layout_margin="10dp"
+        android:background="@drawable/bg_rounded_box_white_blue_border"
+        android:gravity="start"
+        android:hint=" Remark"
+        android:lines="3"
+        android:maxLines="3"
+        android:padding="10dp"
+        android:textAlignment="textStart"
+        android:textSize="@dimen/heading_16" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/buttonCancel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:layout_weight="1"
+            android:background="@color/pending_ckeck"
+            android:minHeight="45dp"
+            android:text="@string/cancel"
+            android:textColor="@color/white"
+            android:textSize="@dimen/heading_18"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/buttonSubmit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:layout_weight="1"
+            android:background="@color/vehicle_background"
+            android:minHeight="45dp"
+            android:text="@string/ok"
+            android:textColor="@color/white"
+            android:textSize="@dimen/heading_18"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+
+
+</RelativeLayout>

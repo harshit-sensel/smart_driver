@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/carview_container"
+    android:orientation="vertical"
+    android:layout_marginTop="10dp"
+    android:background="@color/white"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/tvHeading"
+            android:layout_width="match_parent"
+            android:text="25%"
+            android:gravity="center"
+            android:paddingLeft="2dp"
+            android:paddingRight="2dp"
+            android:layout_weight="1"
+            android:layout_marginTop="5dp"
+            android:layout_marginLeft="10dp"
+            android:layout_gravity="center_vertical"
+            android:textSize="@dimen/heading_22"
+            android:textColor="@color/black_900"
+            android:layout_height="wrap_content" />
+
+        <LinearLayout
+            android:id="@+id/llGreenProgress"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="0.6"
+            android:layout_marginStart="8dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="18dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="5dp"
+            android:visibility="visible"
+            android:background="@drawable/bg_green_border"
+            android:orientation="horizontal">
+
+            <ProgressBar
+                android:layout_weight="1"
+                android:id="@+id/progressBarGreen"
+                android:progressDrawable="@drawable/progress_bar_horizontal_green"
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                style="@style/HorizontalProgressGreen"
+                android:paddingTop="1dp"
+                android:paddingBottom="1dp"
+                android:paddingLeft="1dp"
+                android:progress="55" />
+
+            <View
+                android:id="@+id/viewLine"
+                android:layout_width="2dp"
+                android:background="@color/done_ckeck"
+                android:layout_height="fill_parent" />
+
+            <TextView
+                android:id="@+id/tvGreenVotePrercentage"
+                android:layout_width="wrap_content"
+                android:text="25%"
+                android:gravity="center"
+                android:paddingLeft="2dp"
+                android:paddingRight="2dp"
+                android:layout_gravity="center_vertical"
+                android:textSize="@dimen/heading_20"
+                android:textColor="@color/black_900"
+                android:layout_height="fill_parent" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/llYellowProgress"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="0.6"
+            android:layout_marginStart="8dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="18dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="5dp"
+            android:visibility="gone"
+            android:background="@drawable/bg_yellow_border"
+            android:orientation="horizontal">
+
+            <ProgressBar
+                android:layout_weight="1"
+                android:id="@+id/progressBarYellow"
+                android:progressDrawable="@drawable/progress_bar_horizontal_yellow"
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                style="@style/HorizontalProgressYellow"
+                android:paddingTop="1dp"
+                android:paddingBottom="1dp"
+                android:paddingLeft="1dp"
+                android:progress="55" />
+
+            <View
+                android:id="@+id/viewLineYellow"
+                android:layout_width="2dp"
+                android:background="@color/yellow"
+                android:layout_height="fill_parent" />
+
+            <TextView
+                android:id="@+id/tvYellowVotePrercentage"
+                android:layout_width="wrap_content"
+                android:text="25%"
+                android:gravity="center"
+                android:paddingLeft="2dp"
+                android:paddingRight="2dp"
+                android:layout_gravity="center_vertical"
+                android:textSize="@dimen/heading_20"
+                android:textColor="@color/black_900"
+                android:layout_height="fill_parent" />
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:id="@+id/llOrangeProgress"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="0.6"
+            android:layout_marginStart="8dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="18dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="5dp"
+            android:visibility="gone"
+            android:background="@drawable/bg_orange_border"
+            android:orientation="horizontal">
+
+            <ProgressBar
+                android:layout_weight="1"
+                android:id="@+id/progressBarOrange"
+                android:progressDrawable="@drawable/progress_bar_horizontal_orange"
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                style="@style/HorizontalProgressOrange"
+                android:paddingTop="1dp"
+                android:paddingBottom="1dp"
+                android:paddingLeft="1dp"
+                android:progress="55" />
+
+            <View
+                android:id="@+id/viewLineOrange"
+                android:layout_width="2dp"
+                android:background="@color/colorAccent"
+                android:layout_height="fill_parent" />
+
+            <TextView
+                android:id="@+id/tvOrangeVotePrercentage"
+                android:layout_width="wrap_content"
+                android:text="25%"
+                android:gravity="center"
+                android:paddingLeft="2dp"
+                android:paddingRight="2dp"
+                android:layout_gravity="center_vertical"
+                android:textSize="@dimen/heading_20"
+                android:textColor="@color/black_900"
+                android:layout_height="fill_parent" />
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:id="@+id/llRedProgress"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="0.6"
+            android:layout_marginStart="8dp"
+            android:layout_marginLeft="20dp"
+            android:visibility="gone"
+            android:layout_marginRight="18dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="5dp"
+            android:background="@drawable/bg_red_border"
+            android:orientation="horizontal">
+
+            <ProgressBar
+                android:layout_weight="1"
+                android:id="@+id/progressBarRed"
+                android:progressDrawable="@drawable/progress_bar_horizontal_red"
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                style="@style/HorizontalProgressRed"
+                android:paddingTop="1dp"
+                android:paddingBottom="1dp"
+                android:paddingLeft="1dp"
+                android:progress="55" />
+
+            <View
+                android:id="@+id/viewLineRed"
+                android:layout_width="2dp"
+                android:background="@color/pending_ckeck"
+                android:layout_height="fill_parent" />
+
+            <TextView
+                android:id="@+id/tvRedVotePrercentage"
+                android:layout_width="wrap_content"
+                android:text="25%"
+                android:gravity="center"
+                android:paddingLeft="2dp"
+                android:paddingRight="2dp"
+                android:layout_gravity="center_vertical"
+                android:textSize="@dimen/heading_20"
+                android:textColor="@color/black_900"
+                android:layout_height="fill_parent" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+
+</LinearLayout>

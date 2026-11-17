@@ -1,0 +1,86 @@
+{
+  "project_info": {
+    "project_number": "972708825307",
+    "firebase_url": "https://sensel-fleetsmart.firebaseio.com",
+    "project_id": "sensel-fleetsmart",
+    "storage_bucket": "sensel-fleetsmart.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:972708825307:android:401f1bf45715dc04",
+        "android_client_info": {
+          "package_name": "com.sensel.passengerapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "972708825307-jiarkq1r8jqh62emoqva6upu1ans9afe.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.sensel.passengerapp",
+            "certificate_hash": "c20c5fae0af64ba0f18c6197b115e235c5564078"
+          }
+        },
+        {
+          "client_id": "972708825307-qjukalfhqhm1fvea3jirsgbra9s7rpi7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDW3f0RCdqDEsyvIfe9eQ5qBd427OCH0mU"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "972708825307-qjukalfhqhm1fvea3jirsgbra9s7rpi7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:972708825307:android:7c501c8d0bf0cf36",
+        "android_client_info": {
+          "package_name": "com.sensel.driverapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "972708825307-qjukalfhqhm1fvea3jirsgbra9s7rpi7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDW3f0RCdqDEsyvIfe9eQ5qBd427OCH0mU"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

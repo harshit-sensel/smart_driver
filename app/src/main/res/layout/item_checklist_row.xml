@@ -1,0 +1,74 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#a8eade"
+    android:orientation="horizontal"
+    android:padding="6dp"
+    android:gravity="center_vertical">
+
+    <!-- ID -->
+    <TextView
+        android:id="@+id/item_id"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.1"
+        android:gravity="center"
+        android:textStyle="bold"
+        android:textColor="@color/green"
+        android:textSize="16sp"
+        android:minHeight="48dp" />
+
+    <!-- Description -->
+    <TextView
+        android:id="@+id/item_desc"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.45"
+        android:gravity="center_vertical"
+        android:textStyle="bold"
+        android:textColor="@color/green"
+        android:textSize="14sp"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:lineSpacingExtra="2dp"
+        android:maxLines="10"
+        android:ellipsize="none" />
+
+    <!-- File Icon -->
+    <ImageView
+        android:id="@+id/item_image"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.15"
+        android:src="@drawable/ic_action_action_description"
+        android:scaleType="centerInside"
+        android:contentDescription="Attach"
+        android:onClick="onButtonShowPopupWindowClick"
+        android:padding="4dp" />
+
+    <!-- Radio Buttons -->
+    <RadioGroup
+        android:id="@+id/radioType"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.3"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <RadioButton
+            android:id="@+id/yes"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Y"
+            android:textSize="12sp"
+            android:buttonTint="@color/nliveo_green_colorPrimary" />
+
+        <RadioButton
+            android:id="@+id/no"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="N"
+            android:textSize="12sp"
+            android:buttonTint="@color/nliveo_red_colorPrimary" />
+    </RadioGroup>
+</LinearLayout>

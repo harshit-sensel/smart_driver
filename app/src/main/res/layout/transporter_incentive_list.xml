@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_marginTop="20dp"
+    android:layout_height="fill_parent">
+
+
+    <!--<ImageView
+        android:id="@+id/icon"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:src="@drawable/ic_no_user"
+        android:layout_marginLeft="10dp"
+        android:padding="10dp"/>-->
+
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="50sp"
+        android:layout_height="wrap_content"
+        android:paddingTop="4dp"
+        android:textStyle="bold"
+        android:layout_marginLeft="5dp"
+        android:layout_marginTop="10dp"
+        android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/status"
+        android:layout_width="185sp"
+        android:layout_height="wrap_content"
+        android:text="Loading data.. "
+        android:paddingTop="4dp"
+        android:layout_toRightOf="@+id/title"
+        android:singleLine="true"
+        android:textStyle="bold"
+        android:layout_marginLeft="5dp"
+        android:layout_marginTop="10dp"
+        android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/desc"
+        android:layout_width="wrap_content"
+        android:layout_height="50sp"
+        android:singleLine="true"
+        android:paddingTop="2dp"
+        android:layout_toRightOf="@+id/status"
+        android:paddingLeft="5dp"
+        android:textStyle="bold"
+        android:layout_marginLeft="5dp"
+        android:layout_marginTop="10dp"
+        android:textSize="16sp" />
+
+    <ImageView
+        android:id="@+id/award"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:src="@drawable/no_award"
+        android:layout_toRightOf="@+id/desc"
+        android:layout_marginLeft="10dp"
+        android:paddingTop="2sp" />
+
+</RelativeLayout>

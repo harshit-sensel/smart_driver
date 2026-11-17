@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.sensel.driverapp.SpeedometerView
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:padding="4dp"
+        android:id="@+id/speedometer" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="Running Time in hour"
+        android:textColor="@android:color/black" />
+
+    <TableLayout
+        android:layout_marginTop="50dp"
+        android:layout_margin="5dp"
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:background="#e2292424"
+        android:layout_height="wrap_content">
+
+        <TableRow
+            android:layout_width="0dp"
+            android:padding="2dp"
+            android:layout_height="60dp"
+            android:layout_weight="1">
+
+            <TextView
+                android:text="Vehicle"
+                android:textColor="@color/white"
+                android:layout_width="0dp"
+                android:layout_weight="0.4"
+                android:layout_height="wrap_content"
+                android:paddingTop="4dp"
+                android:textStyle="bold"
+                android:layout_marginLeft="5dp"
+                android:layout_marginTop="10dp"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/vehicle"
+                android:text="NA"
+                android:textColor="@color/white"
+                android:layout_width="0dp"
+                android:layout_weight="0.6"
+                android:layout_height="wrap_content"
+                android:paddingTop="4dp"
+                android:textStyle="bold"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="10dp"
+                android:textSize="16sp" />
+        </TableRow>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/white" />
+
+        <TableRow
+            android:layout_width="0dp"
+            android:padding="2dp"
+            android:layout_height="60dp"
+            android:layout_weight="1">
+
+            <TextView
+                android:text="Drove Time"
+                android:textColor="@color/white"
+                android:layout_width="0dp"
+                android:layout_weight="0.4"
+                android:layout_height="wrap_content"
+                android:paddingTop="4dp"
+                android:textStyle="bold"
+                android:layout_marginLeft="5dp"
+                android:layout_marginTop="10dp"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/runtime"
+                android:text="0h 0min"
+                android:textColor="@color/white"
+                android:layout_width="0dp"
+                android:layout_weight="0.6"
+                android:layout_height="wrap_content"
+                android:paddingTop="4dp"
+                android:textStyle="bold"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="10dp"
+                android:textSize="16sp" />
+        </TableRow>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/white" />
+
+        <TableRow
+            android:layout_width="0dp"
+            android:padding="2dp"
+            android:layout_height="60dp"
+            android:layout_weight="1">
+
+            <TextView
+                android:text="Remaining Time"
+                android:textColor="@color/white"
+                android:layout_width="0dp"
+                android:layout_weight="0.4"
+                android:layout_height="wrap_content"
+                android:paddingTop="4dp"
+                android:textStyle="bold"
+                android:layout_marginLeft="5dp"
+                android:layout_marginTop="10dp"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/remainingtime"
+                android:text="0h 0min"
+                android:textColor="@color/white"
+                android:layout_width="0dp"
+                android:layout_weight="0.6"
+                android:layout_height="wrap_content"
+                android:paddingTop="4dp"
+                android:textStyle="bold"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="10dp"
+                android:textSize="16sp" />
+        </TableRow>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/white" />
+
+        <TableRow
+            android:layout_width="0dp"
+            android:padding="2dp"
+            android:layout_height="60dp"
+            android:layout_weight="1">
+
+            <TextView
+                android:text="Last Update Time"
+                android:textColor="@color/white"
+                android:layout_width="0dp"
+                android:layout_weight="0.4"
+                android:layout_height="wrap_content"
+                android:paddingTop="4dp"
+                android:textStyle="bold"
+                android:layout_marginLeft="5dp"
+                android:layout_marginTop="10dp"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/updatetime"
+                android:text="No update"
+                android:textColor="@color/white"
+                android:layout_width="0dp"
+                android:layout_weight="0.6"
+                android:layout_height="wrap_content"
+                android:paddingTop="4dp"
+                android:textStyle="bold"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="10dp"
+                android:textSize="16sp" />
+        </TableRow>
+    </TableLayout>
+
+    <TextView
+        android:layout_marginTop="80dp"
+        android:layout_marginLeft="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="8dp"
+        android:textColor="@color/orange"
+        android:text="Note: This runtime may not be 100% accurate in real time, if device is not recently updated" />
+</LinearLayout>

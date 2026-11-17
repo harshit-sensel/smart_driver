@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".RestTime">
+
+
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+
+        app:cardElevation="5dp"
+        app:cardCornerRadius="5dp"
+        android:layout_gravity="center"
+        android:layout_margin="30dp">
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+
+            android:padding="40dp"
+            android:orientation="vertical"
+            android:gravity="center">
+
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="200dp">
+                <ProgressBar
+                    android:id="@+id/resttimeprogress"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="150dp"
+                    android:layout_height="150dp"
+                    android:layout_centerInParent="true"
+                    android:indeterminate="false"
+                    android:max="115"
+                    android:progress="0"
+                    android:progressDrawable="@drawable/circular_progress_bar"
+                    android:secondaryProgress="0" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="30dp"
+                    android:textColor="@color/black"
+                    android:id="@+id/resttimer"
+                    android:text="09:00"
+                    android:layout_centerInParent="true"
+                  />
+
+
+
+
+            </RelativeLayout>
+
+
+
+
+
+
+
+
+            <Button
+                android:id="@+id/startrest"
+                android:layout_width="200dp"
+                android:layout_height="38dp"
+                android:background="@drawable/yes_button"
+
+                android:text="Start Rest"
+
+                android:textColor="@color/white" />
+
+            <Button
+                android:id="@+id/endrest"
+                style="@style/Base.Widget.AppCompat.Button.Borderless"
+                android:layout_width="200dp"
+                android:layout_height="38dp"
+                android:background="@drawable/bg_add_to_cart_btn"
+                android:layout_centerInParent="true"
+                android:text="End Rest"
+                android:textColor="@color/colorPrimaryDark" />
+        </LinearLayout>
+
+
+    </androidx.cardview.widget.CardView>
+
+
+    <com.airbnb.lottie.LottieAnimationView
+
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_alignParentBottom="true"
+        app:lottie_autoPlay="true"
+        app:lottie_rawRes="@raw/sleep"
+        app:lottie_repeatCount="1000" />
+
+</RelativeLayout>

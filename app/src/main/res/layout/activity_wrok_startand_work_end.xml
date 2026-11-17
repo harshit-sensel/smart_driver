@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="match_parent">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    tools:context=".WrokStartandWorkEnd">
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/cardView"
+            app:cardElevation="5dp"
+            app:cardCornerRadius="5dp"
+            android:layout_gravity="center"
+            android:layout_margin="30dp">
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:padding="30dp"
+                android:gravity="center_horizontal">
+
+                <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                    <ProgressBar
+                        android:id="@+id/workprogressBar"
+                        style="?android:attr/progressBarStyleHorizontal"
+                        android:layout_width="180dp"
+                        android:layout_height="180dp"
+                        android:layout_centerInParent="true"
+                        android:indeterminate="false"
+                        android:max="115"
+                        android:progress="0"
+                        android:progressDrawable="@drawable/circular_progress_bar"
+                        android:secondaryProgress="0" />
+
+                    <TextView
+                        android:id="@+id/remaiworktime"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignBottom="@+id/workprogressBar"
+                        android:layout_centerInParent="true"
+                        android:textColor="@color/black"
+                        android:textSize="40dp"
+                        android:text="12:00"
+                        android:textAppearance="?android:attr/textAppearanceSmall" />
+                </RelativeLayout>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="hrs"
+                    android:layout_margin="10dp"
+                    android:id="@+id/assignedhrs"
+                    android:textSize="20dp"
+                    android:textStyle="bold"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="REMAINING"
+                    android:layout_margin="10dp"
+                    android:id="@+id/remainingtime"
+                    android:textSize="20dp"
+                    android:textStyle="bold"/>
+
+
+
+                <Button
+                    android:id="@+id/startwork"
+                    android:layout_width="200dp"
+                    android:layout_height="38dp"
+                    android:background="@drawable/yes_button"
+
+                    android:text="Start Work"
+
+                    android:textColor="@color/white" />
+
+                <Button
+                    android:id="@+id/endwork"
+                    style="@style/Base.Widget.AppCompat.Button.Borderless"
+                    android:layout_width="200dp"
+                    android:layout_height="38dp"
+                    android:background="@drawable/bg_add_to_cart_btn"
+                    android:layout_centerInParent="true"
+                    android:text="End Work"
+
+                    android:textColor="@color/colorPrimaryDark" />
+
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:layout_marginTop="50dp"
+                    android:orientation="horizontal"
+                    android:padding="5dp">
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_marginHorizontal="5dp"
+                        android:src="@drawable/ic_no_phone" />
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_marginHorizontal="5dp"
+                        android:src="@drawable/ic_no_alcohol" />
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_marginHorizontal="5dp"
+                        android:src="@drawable/ic_seat_belt" />
+                </LinearLayout>
+            </LinearLayout>
+
+
+
+
+
+
+
+
+
+
+
+
+        </androidx.cardview.widget.CardView>
+
+
+
+
+
+
+    <com.airbnb.lottie.LottieAnimationView
+
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_below="@id/cardView"
+
+        app:lottie_autoPlay="true"
+        app:lottie_rawRes="@raw/workhrs"
+        app:lottie_repeatCount="1000" />
+
+
+
+</RelativeLayout>
+</ScrollView>

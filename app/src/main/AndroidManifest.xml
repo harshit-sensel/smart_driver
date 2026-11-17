@@ -1,0 +1,368 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!--
+         The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
+         Google Maps Android API v2, but you must specify either coarse or fine
+         location permissions for the "MyLocation" functionality.
+    -->
+    <!--<uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />-->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_PRIVILEGED_PHONE_STATE"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.WRITE_SETTINGS"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.GET_TASKS" />
+    <uses-permission
+        android:name="android.permission.PACKAGE_USAGE_STATS"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+
+    <uses-feature android:name="android.hardware.camera" />
+    <uses-feature android:name="android.hardware.camera.autofocus" />
+
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+
+    <application
+        android:allowBackup="true"
+        android:hardwareAccelerated="true"
+        android:icon="@mipmap/icon"
+        android:label="@string/app_name"
+        android:largeHeap="true"
+        android:requestLegacyExternalStorage="true"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme"
+        android:usesCleartextTraffic="true"
+        tools:ignore="GoogleAppIndexingWarning">
+
+        <!--
+             The API key for Google Maps-based APIs is defined as a string resource.
+             (See the file "res/values/google_maps_api.xml").
+             Note that the API key is linked to the encryption key used to sign the APK.
+             You need a different API key for each encryption key, including the release key that is used to
+             sign the APK for publishing.
+             You can define the keys for the debug and release targets in src/debug/ and src/release/.
+        -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="@string/google_maps_key" />
+
+        <activity
+            android:name=".MapsActivity"
+            android:label="@string/title_activity_maps"></activity>
+        <activity
+            android:name=".ActivityRoutePlayback"
+            android:theme="@style/Journeyplanner" />
+        <activity
+            android:name=".ParkingSpotSelect"
+            android:theme="@style/Journeyplanner" />
+        <activity
+            android:name=".JourneyPlanner"
+            android:theme="@style/Journeyplanner" />
+        <activity
+            android:name=".PanicActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="Panic "
+            android:theme="@style/panicTheme" />
+        <activity
+            android:name=".AdaniQrcode_scanner"
+            android:label="QR Code Scanner"
+            android:theme="@style/myTheme1" />
+
+        <service
+            android:name=".service.SyncTaskService"
+            android:exported="false"
+            android:permission="com.google.android.gms.permission.BIND_NETWORK_TASK_SERVICE">
+            <intent-filter>
+                <action android:name="com.google.android.gms.gcm.ACTION_TASK_READY" />
+            </intent-filter>
+        </service> <!-- [END manifest_service] -->
+        <service
+            android:name=".service.SyncIntentService"
+            android:exported="false" />
+        <service
+            android:name=".service.GetChecklistForVehicleTypeService"
+            android:foregroundServiceType="mediaPlayback"
+            android:exported="false" />
+        <activity
+            android:name=".Splash"
+            android:label="@string/app_name"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER"  />
+
+            </intent-filter>
+        </activity>
+
+        <service android:name=".MyService" />
+        <service android:name=".MyService1"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="dataSync"/>
+        <service
+            android:name=".SaveMyAppsService"
+            android:enabled="true"
+            android:stopWithTask="true"
+            android:exported="false"
+            android:foregroundServiceType="dataSync|location"/>
+
+        <receiver
+            android:name=".utility.RestTimeBroadcast"
+            android:enabled="true"
+            android:exported="false"
+            android:stopWithTask="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".utility.WorktimeBrodcast"
+            android:enabled="true"
+            android:exported="false"
+            android:stopWithTask="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".utility.WorktimeUploader"
+            android:enabled="true"
+            android:exported="false"
+            android:stopWithTask="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".AlarmReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".RestarterBroadcastReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="uk.ac.shef.oak.ActivityRecognition.RestartSensor" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+        <activity
+            android:name=".Notification1"
+            android:label="Notifications"
+            android:theme="@style/myTheme1" />
+        <activity
+            android:name=".Driver_Manual"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_driver__manual"
+            android:theme="@style/myTheme1" />
+        <activity
+            android:name=".Driver_Incentives"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_driver__incentives"
+            android:screenOrientation="portrait"
+            android:theme="@style/IncentiveStyle" />
+        <activity
+            android:name=".LockScreenActivity"
+            android:configChanges="orientation|screenSize"
+            android:excludeFromRecents="true"
+            android:label="Screen lock"
+            android:launchMode="singleInstance"
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen" />
+        <activity
+            android:name=".App_lock"
+            android:excludeFromRecents="true"
+            android:label="Smart app lock"
+            android:launchMode="singleTop"
+            android:noHistory="true" /> <!-- android:theme="@style/IncentiveStyle" -->
+        <activity
+            android:name=".Driver_Feedback"
+            android:label="Customer Feedback"
+            android:theme="@style/myTheme1" />
+        <activity
+            android:name=".Taging"
+            android:label="Taging"
+            android:theme="@style/myTheme1" />
+        <activity
+            android:name=".QRScanner"
+            android:label="Processing..."
+            android:theme="@style/myTheme1" />
+        <activity
+            android:name=".DeviationReport"
+            android:configChanges="orientation|screenSize"
+            android:label="Add Place"
+            android:theme="@style/myTheme1"
+            android:windowSoftInputMode="stateHidden" />
+        <activity
+            android:name=".DeviationReportMap"
+            android:configChanges="orientation|screenSize"
+            android:hardwareAccelerated="true"
+            android:label="Select Place"
+            android:theme="@style/myTheme1" />
+        <activity
+            android:name=".DriverViolationsMap"
+            android:configChanges="orientation|screenSize"
+            android:hardwareAccelerated="true"
+            android:label="Your violations"
+            android:theme="@style/myTheme1" />
+        <!--<activity
+            android:name=".Daily_Checklist"
+            android:label="Vehicle Checklist"
+            android:screenOrientation="portrait"
+            android:theme="@style/myTheme1" />-->
+        <activity
+            android:name=".Daily_Checklist1"
+            android:label="Vehicle Checklist"
+            android:screenOrientation="portrait"
+            android:theme="@style/myTheme1" />
+        <activity
+            android:name=".Unload_QTY"
+            android:configChanges="orientation|screenSize"
+            android:label="Unload Quantity"
+            android:theme="@style/myTheme1" />
+        <activity
+            android:name=".RunTime"
+            android:configChanges="orientation|screenSize"
+            android:label="Today&apos;s  Runtime"
+            android:screenOrientation="portrait"
+            android:theme="@style/myTheme1" />
+        <activity
+            android:name=".NotifyTransporter"
+            android:label="Send Message"
+            android:theme="@style/myTheme1" />
+        <activity
+            android:name=".Driver_Manual_List"
+            android:configChanges="orientation|screenSize"
+            android:label="Select content List"
+            android:theme="@style/myTheme1" />
+        <activity
+            android:name=".Gridmenu"
+            android:configChanges="orientation|screenSize"
+            android:label="     Smart Driver"
+            android:theme="@style/myTheme1" />
+        <activity
+            android:name=".Map"
+            android:configChanges="orientation|screenSize"
+            android:hardwareAccelerated="true"
+            android:label="Nearest Place"
+            android:theme="@style/myTheme1" />
+        <activity
+            android:name=".Error"
+            android:label="Error occurred"
+            android:theme="@style/myTheme1" />
+        <activity
+            android:name=".ERV_Driver"
+            android:configChanges="orientation|screenSize"
+            android:label="Select Vehicle"
+            android:theme="@style/myTheme1" />
+        <activity
+            android:name=".See_Route"
+            android:configChanges="orientation|screenSize"
+            android:label="Select Route"
+            android:theme="@style/myTheme1" />
+        <activity
+            android:name=".DriverSelfAppraisal"
+            android:configChanges="orientation|screenSize"
+            android:label="Driver Self Appraisal"
+            android:theme="@style/myTheme1" />
+        <activity
+            android:name=".PriorityNotification"
+            android:autoRemoveFromRecents="true"
+            android:configChanges="orientation|screenSize"
+            android:excludeFromRecents="true"
+            android:label="Important Message"
+            android:launchMode="singleInstance"
+            android:showOnLockScreen="true"
+            android:theme="@style/myTheme1" />
+        <activity
+            android:name=".activity.DynamicFormActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/myTheme1" />
+        <activity
+            android:name=".activity.ImageSelectorActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/myTheme1" />
+        <activity
+            android:name=".activity.ReportActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/myTheme1" />
+        <activity
+            android:name=".activity.SyncActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/myTheme1" />
+        <activity
+            android:name=".Zerofatality"
+            android:label="Important Message"
+            android:screenOrientation="portrait"
+            android:theme="@style/myTheme1" />
+        <activity
+            android:name=".WrokStartandWorkEnd"
+            android:label="Start and End Work"
+            android:screenOrientation="portrait"
+            android:theme="@style/myTheme1" />
+        <activity
+            android:name=".RestTime"
+            android:label="Rest time"
+            android:screenOrientation="portrait"
+            android:theme="@style/myTheme1" />
+
+        <service
+            android:name=".service.LocationUpdatesService"
+            android:enabled="true"
+            android:exported="false" />
+
+        <service
+            android:name=".service.Download_LatLong"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="dataSync"/>
+
+        <uses-library
+            android:name="org.apache.http.legacy"
+            android:required="false" />
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.example.android.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/provider_paths" />
+        </provider>
+
+        <meta-data
+            android:name="preloaded_fonts"
+            android:resource="@array/preloaded_fonts" />
+    </application>
+
+</manifest>

@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="5dp"
+    android:background="@color/white"
+    android:orientation="horizontal"
+    android:padding="5dp">
+
+    <FrameLayout
+        android:id="@+id/layoutEditDetails"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.5"
+        android:background="@color/white"
+        android:padding="5dp">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/bg_white_border_transparent"
+            android:backgroundTint="@color/light_blue_200"
+            android:dropDownSelector="@color/black"
+            android:paddingLeft="2dp"
+            android:paddingRight="2dp">
+
+            <EditText
+                android:id="@+id/editText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="2dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginRight="2dp"
+                android:layout_marginBottom="5dp"
+                android:background="@android:color/transparent"
+                android:minHeight="50dp"
+                android:padding="5dp"
+                android:textSize="@dimen/heading_16" />
+
+            <TextView
+                android:id="@+id/textViewDatePicker"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:background="@android:color/transparent"
+                android:gravity="center_vertical"
+                android:minHeight="50dp"
+                android:padding="5dp"
+                android:textSize="@dimen/heading_16"
+                android:visibility="gone" />
+
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/titleEditText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:background="@color/white"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:text="Title"
+            android:textColor="@color/black_900"
+            android:textSize="@dimen/heading_16" />
+
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/layoutTimePicker"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="7dp"
+        android:layout_marginRight="7dp"
+        android:layout_weight="0.5"
+        android:background="@color/white"
+        android:padding="5dp"
+        android:visibility="gone">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/bg_white_border_transparent"
+            android:backgroundTint="@color/light_blue_200"
+            android:dropDownSelector="@color/black"
+            android:paddingLeft="2dp"
+            android:paddingRight="2dp">
+
+            <TextView
+                android:id="@+id/textViewTimePicker"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:background="@android:color/transparent"
+                android:gravity="center_vertical"
+                android:minHeight="50dp"
+                android:padding="5dp"
+                android:textSize="@dimen/heading_16" />
+
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/titleTimePicker"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:background="@color/white"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:text="Select Time"
+            android:textColor="@color/black_900"
+            android:textSize="@dimen/heading_16" />
+
+    </FrameLayout>
+
+</LinearLayout>

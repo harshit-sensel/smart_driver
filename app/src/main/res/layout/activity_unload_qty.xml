@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:layout_marginTop="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="12dp"
+        android:paddingLeft="5dp"
+        android:text="Customer Code*" />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/customercode"
+        android:inputType="phone"
+        android:textSize="14dp"
+        android:layout_marginTop="40dp" />
+
+    <TextView
+        android:layout_marginTop="110dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="12dp"
+        android:paddingLeft="5dp"
+        android:text="Gross Weight*" />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/grossweight"
+        android:textSize="14dp"
+        android:inputType="numberDecimal"
+        android:layout_marginTop="130dp" />
+
+    <TextView
+        android:layout_marginTop="200dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="12dp"
+        android:paddingLeft="5dp"
+        android:text="Tare Weight*" />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/tareweight"
+        android:textSize="14dp"
+        android:inputType="numberDecimal"
+        android:layout_marginTop="220dp" />
+
+    <TextView
+        android:layout_marginTop="290dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="12dp"
+        android:paddingLeft="5dp"
+        android:text="Attache image" />
+
+    <ImageView
+        android:layout_width="180dp"
+        android:layout_height="180dp"
+        android:id="@+id/img_dc"
+        android:onClick="onClick"
+        android:paddingLeft="5dp"
+        android:src="@drawable/file_add"
+        android:layout_marginTop="310dp" />
+</RelativeLayout>

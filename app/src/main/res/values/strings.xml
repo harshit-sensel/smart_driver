@@ -1,0 +1,99 @@
+<resources>
+    <string name="app_name" translatable="false">SMART_DRIVER</string>
+    <string name="menu_settings" translatable="false">Settings</string>
+    <string name="title_activity_main" translatable="false">MainActivity</string>
+    <string name="logo" translatable="false">Total Gaz Smart Driver App..</string>
+    <string name="title_activity_driver__manual" translatable="false">Driver Manual</string>
+
+    <string name="hello_world" translatable="false">Hello world!</string>
+    <string name="action_settings" translatable="false">Settings</string>
+    <string name="title_activity_driver__incentives" translatable="false">Driver Incentives</string>
+    <string name="search" translatable="false">search</string>
+
+    <string name="GPSAlertDialogTitle" translatable="false">GPS is setting</string>
+    <string name="GPSAlertDialogMessage" translatable="false">GPS is not enabled. Do you want to go to setting menu</string>
+    <string name="cancel">Cancel</string>
+
+    <string name="channel_description" translatable="false">Vetting</string>
+    <string name="channel_name" translatable="false">VehicleVetting</string>
+    <string name="internal_storage" translatable="false">Internal Storage</string>
+    <string name="location_updated" translatable="false">Location Updated: %1$s</string>
+    <string name="permission_rationale" translatable="false">Location permission is needed for core functionality</string>
+
+    <string name="permission_denied_explanation" translatable="false">Permission was denied, but is needed for core functionality.</string>
+    <string name="settings" translatable="false">Settings</string>
+    <string name="ok">OK</string>
+    <string name="Choseanoption">Chose an option</string>
+    <string name="Safteygreenlightcheck">Saftey green light check</string>
+    <string name="LifeSavingChecks">Life Saving Checks</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="exittext">Are you sure to exit?</string>
+    <string name="nameoraddress">Name or Address*</string>
+    <string name="category">Category*</string>
+    <string name="comments">Comments</string>
+    <string name="locationonmap">Location on map*</string>
+    <string name="attachimages">Attach images</string>
+    <string name="checkall">Plese fill all checklist!</string>
+    <string name="lubricationsystem">LUBRICATION SYSTEM</string>
+    <string name="lubricationdesc">Check and top up engine oil and also check oil leakage</string>
+    <string name="coolingsystem">COOLING SYSTEM</string>
+    <string name="coolingsystemdesc">Check coolant level and top up, also check coolant leakage</string>
+    <string name="fuelsystem">FUEL SYSTEM</string>
+    <string name="fuelsystemdesc">Check water seperator and drain if necessary</string>
+    <string name="electronicdieselcontrol">ELECTRONIC DIESEL CONTROL</string>
+    <string name="electronicdieselcontroldesc">Check functions of EDC warning light</string>
+    <string name="airintake">AIR INTAKE AND EXHAUST</string>
+    <string name="airintakedesc">Check Vaccum indicator, Replace primary filter whenever it shows red band</string>
+    <string name="wheeltyre">WHEELS AND TYRES</string>
+    <string name="wheeltyredesc">Check tyre pressure and inflate as recommended</string>
+    <string name="wheeltyredesc2">Check for wheel nut tightness for specified torque</string>
+    <string name="wheeltyredesc3">Visual check for abnormal tyre wear due to toe in variation</string>
+    <string name="wheeltyredesc4">Check for proper functioning of all gauges, tale lamp/Indicators</string>
+    <string name="cabin">CABIN</string>
+    <string name="cabindesc">Clean and Inspect wiper blade condition for any visual damages and Replace if necessary</string>
+    <string name="electricalequipment">ELECTRICAL EQUIPMENT</string>
+    <string name="electricaleqpdesc">Check all cabin lights, Lamps, Switcihes, Wiper, Speedometer and Horn, rectify if necessary</string>
+    <string name="electricaleqpdesc2">Check water level in windscreen washer tank. If it is minimum (Level 1) refill the tank with water</string>
+    <string name="electricaleqpdesc3">Check battery electrolyte. Top up if necessary with distilled water. Check battery Voltage and specific gravity and rectify</string>
+    <string name="gpsdevice">GPS DEVICE</string>
+    <string name="gpsdevicedesc">Check GPS device is working or not</string>
+    <string name="instrument">INSTRUMENTS</string>
+    <string name="da_checklistsubbmitted">Have you submitted the Daily Checklist ?</string>
+    <string name="da_rest">Have you taken more than 9 hours of rest?</string>
+    <string name="da_overspeed">Did you exceed the speed limit (Overspeed, more than 60 kmph) ?</string>
+    <string name="da_jrm">Have you avoided night driving and continuous driving without appropriate breaks?</string>
+    <string name="da_nigtdriving">Have you driven for less than 10 hours today?</string>
+    <string name="da_continousdrive">Have you reported any issues with the vehicle to your transporter if any were observed?</string>
+    <string name="da_droveless10hrs">Have you reported any near-miss incidents or deviations today?</string>
+    <string name="da_AuthorizedRoute">Did you drive on any route other than the authorized JRM route?</string>
+    <string name="alert_continue">Before submit you need to verify all. Are you sure want to continue?</string>
+    <string name="panicquestion">Are you sure to send a panic alert</string>
+    <string name="title_activity_maps" translatable="false">Map</string>
+    <string name="greaterthancurrenttime">Should be greater than current date time</string>
+    <string name="cannotedited">Cannot be edited</string>
+    <string name="selectvaliddate">Please select valid date</string>
+    <string name="notrip">No trip assigned</string>
+    <string name="notripassigned">Trip not found</string>
+    <string name="details">Details</string>
+    <string name="viewpaln">View Plan</string>
+    <string name="vehicle">Vehicle :</string>
+    <string name="driver">Driver :</string>
+    <string name="startlocation">Start Location :</string>
+    <string name="endlocation">End Location :</string>
+    <string name="tripdtarttime">Trip Start Date time :</string>
+    <string name="tripstartdate">Trip start date</string>
+    <string name="parkingspot">Parking spots</string>
+    <string name="selectendlocation">Select End location</string>
+    <string name="nightdrivealert">Night driving alert</string>
+    <string name="nightdescription">is the night drive This may cause Violation</string>
+    <string name="selectafterprevtime">Select after previous park time</string>
+    <string name="selectarrivaltime">Select arrival time first</string>
+    <string name="shouldafterarrival">Should be after arrival</string>
+    <string name="min30restrequired">30 min rest required</string>
+    <string name="selectarrival">Select arrival date time</string>
+    <string name="enterrestdate">Enter rest date time</string>
+    <string name="exceeds4hrs">Exceeds 4 hours 30 minutes</string>
+    <string name="exceed10hrs">Exceeds 10 hours</string>
+    <string name="shouldafter">Should after</string>
+</resources>

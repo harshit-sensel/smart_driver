@@ -1,0 +1,10 @@
+
+
+
+To generate signed apk follow below steps.
+
+1)use driverapp.jks file as key store.
+2) key store password is sensel.
+3)key alias name is drievrapp.
+4)key password is sensel.
+5)change the version of application.

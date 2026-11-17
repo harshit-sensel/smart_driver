@@ -1,0 +1,359 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1.0"
+        android:orientation="vertical"
+        android:id="@+id/dashboard"
+        android:padding="10dp">
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.15"
+            android:orientation="horizontal"
+            android:paddingBottom="10dp">
+
+            <LinearLayout
+                android:layout_height="fill_parent"
+                android:layout_width="0dp"
+                android:layout_weight="0.10"
+                android:background="#38978b"
+                android:gravity="center_horizontal"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/drivername"
+                    android:layout_centerHorizontal="true"
+                    android:text="Driver Name xyz"
+                    android:textColor="@color/white"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <RelativeLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="match_parent">
+
+
+                    <!-- <ProgressBar
+                         android:id="@+id/progressBar"
+                         style="?android:attr/progressBarStyleHorizontal"
+                         android:layout_width="fill_parent"
+                         android:layout_height="fill_parent"
+                         android:onClick="moving"
+                         android:background="@drawable/article_title"
+                         android:indeterminate="false"
+                         android:max="100"
+                         android:progress="100"
+                         android:progressDrawable="@drawable/circular_progress_bar" />-->
+
+                    <TextView
+                        android:id="@+id/vehicle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:background="@android:color/transparent"
+                        android:gravity="center"
+                        android:text="KA01 AF 1245"
+                        android:textColor="@color/white"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+
+                </RelativeLayout>
+            </LinearLayout>
+
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.25"
+            android:orientation="horizontal"
+            android:paddingBottom="10dp">
+
+            <LinearLayout
+                android:layout_height="fill_parent"
+                android:layout_width="0dp"
+                android:layout_weight="0.50"
+                android:background="#F3791E"
+                android:gravity="center_horizontal"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:id="@+id/last_earned_date"
+                    android:text="Last Earned"
+                    android:textColor="@color/white"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <RelativeLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="match_parent">
+
+
+                    <!-- <ProgressBar
+                         android:id="@+id/progressBar"
+                         style="?android:attr/progressBarStyleHorizontal"
+                         android:layout_width="fill_parent"
+                         android:layout_height="fill_parent"
+                         android:onClick="moving"
+                         android:background="@drawable/article_title"
+                         android:indeterminate="false"
+                         android:max="100"
+                         android:progress="100"
+                         android:progressDrawable="@drawable/circular_progress_bar" />-->
+
+                    <TextView
+                        android:id="@+id/last_earned"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:background="@android:color/transparent"
+                        android:gravity="center"
+                        android:text="65"
+                        android:textColor="@color/white"
+                        android:textSize="30sp"
+                        android:textStyle="bold" />
+
+                </RelativeLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_height="fill_parent"
+                android:layout_width="0dp"
+                android:layout_weight="0.50"
+                android:layout_marginLeft="10dp"
+                android:background="#022C70"
+                android:gravity="center_horizontal"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/lblmonth"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:text="This Month"
+                    android:textColor="@color/white"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <RelativeLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent">
+
+
+                    <!-- <ProgressBar
+                         android:id="@+id/progressBar1"
+                         style="?android:attr/progressBarStyleHorizontal"
+                         android:layout_width="fill_parent"
+                         android:layout_height="fill_parent"
+                         android:indeterminate="false"
+                         android:onClick="ideling"
+                         android:max="100"
+                         android:background="@drawable/circle_shapeidling"
+                         android:progress="100"
+                         android:progressDrawable="@drawable/circular_progress_bar" />-->
+
+                    <TextView
+                        android:id="@+id/this_month"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:background="@android:color/transparent"
+                        android:gravity="center"
+                        android:text="54"
+                        android:textColor="@color/white"
+                        android:textSize="30sp"
+                        android:textStyle="bold" />
+                </RelativeLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.25"
+            android:paddingBottom="10dp"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_height="fill_parent"
+                android:layout_width="0dp"
+                android:layout_weight="0.50"
+                android:background="#0E6CB2"
+                android:gravity="center_horizontal"
+                android:orientation="vertical">
+
+
+                <TextView
+                    android:id="@+id/lblyear"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:text="This Year"
+                    android:textColor="@color/white"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <RelativeLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent">
+
+
+                    <!--  <ProgressBar
+                          android:id="@+id/progressBar3"
+                          style="?android:attr/progressBarStyleHorizontal"
+                          android:layout_width="fill_parent"
+                          android:layout_height="fill_parent"
+                          android:indeterminate="false"
+                          android:onClick="halted"
+                          android:background="@drawable/circle_shapehalted"
+                          android:max="100"
+                          android:progress="100"
+                          android:progressDrawable="@drawable/circular_progress_bar" />-->
+
+                    <TextView
+                        android:id="@+id/this_year"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:background="@android:color/transparent"
+                        android:gravity="center"
+                        android:text="36"
+                        android:textColor="@color/white"
+                        android:textSize="30sp"
+                        android:textStyle="bold" />
+                </RelativeLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_height="fill_parent"
+                android:layout_width="0dp"
+                android:layout_weight="0.50"
+                android:layout_marginLeft="10dp"
+                android:background="#E10729"
+                android:gravity="center_horizontal"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:text="Negative Points"
+                    android:textColor="@color/white"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <RelativeLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent">
+
+                    <!--<ProgressBar
+                        android:id="@+id/progressBar4"
+                        style="?android:attr/progressBarStyleHorizontal"
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent"
+                        android:indeterminate="false"
+                        android:onClick="notreachable"
+                        android:background="@drawable/circle_shapenotreachable"
+                        android:max="100"
+                        android:progress="100"
+                        android:progressDrawable="@drawable/circular_progress_bar" />-->
+
+                    <TextView
+                        android:id="@+id/negative_points"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:background="@android:color/transparent"
+                        android:gravity="center"
+                        android:text="24"
+                        android:textColor="@color/white"
+                        android:textSize="30sp"
+                        android:textStyle="bold" />
+                </RelativeLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.25"
+            android:paddingBottom="10dp"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_height="fill_parent"
+                android:layout_width="0dp"
+                android:layout_weight="1.00"
+                android:background="#b6606060"
+                android:gravity="center_horizontal"
+                android:orientation="vertical">
+
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:text="Last Encashed"
+                    android:textColor="@color/white"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <RelativeLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent">
+
+
+                    <!--  <ProgressBar
+                          android:id="@+id/progressBar3"
+                          style="?android:attr/progressBarStyleHorizontal"
+                          android:layout_width="fill_parent"
+                          android:layout_height="fill_parent"
+                          android:indeterminate="false"
+                          android:onClick="halted"
+                          android:background="@drawable/circle_shapehalted"
+                          android:max="100"
+                          android:progress="100"
+                          android:progressDrawable="@drawable/circular_progress_bar" />-->
+
+                    <TextView
+                        android:id="@+id/last_encashed"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:background="@android:color/transparent"
+                        android:gravity="center"
+                        android:text="360"
+                        android:textColor="@color/white"
+                        android:textSize="30sp"
+                        android:textStyle="bold" />
+                </RelativeLayout>
+            </LinearLayout>
+
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.10"
+            android:paddingBottom="10dp"
+            android:orientation="horizontal">
+
+
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>
