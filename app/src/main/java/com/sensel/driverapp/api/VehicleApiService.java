@@ -7,7 +7,6 @@ import com.sensel.driverapp.request.CheckListRequest;
 import com.sensel.driverapp.request.FirebaseTokenRequest;
 import com.sensel.driverapp.request.LoginRequest;
 import com.sensel.driverapp.request.NotificationRequest;
-import com.sensel.driverapp.request.ReportRequest;
 import com.sensel.driverapp.request.SaveRequest;
 import com.sensel.driverapp.request.VehicleRequest;
 import com.sensel.driverapp.response.AppVersionResponse;
@@ -19,8 +18,6 @@ import com.sensel.driverapp.response.GetVehicleInfo;
 import com.sensel.driverapp.response.LoginResponse;
 import com.sensel.driverapp.response.firebase.FirebaseResponse;
 import com.sensel.driverapp.response.notification.NotificationResponse;
-import com.sensel.driverapp.response.report.Getreportdetails;
-import com.sensel.driverapp.response.report.ReportResponse;
 
 import java.util.List;
 
@@ -71,13 +68,6 @@ public interface VehicleApiService {
     @POST("SenselRestService.svc/rest/v3/insertVetDetails")
     Call<GetInsertResponse> saveVetDetails(@Body SaveRequest saveRequest);
 
-    @Headers({"Content-Type: application/json"})
-    @POST("SenselRestService.svc/rest/v3/GetVettingReport")
-    Call<Getreportdetails> getReport(@Body ReportRequest reportRequest);
-
-    @Headers({"Content-Type: application/json"})
-    @POST("SenselRestService.svc/rest/v3/GetVetReport")
-    Call<List<ReportResponse>> getVetReport(@Body ReportRequest reportRequest);
 
     @Headers({"Content-Type: application/json"})
     @POST("SenselRestService.svc/rest/v3/GetVehicles")

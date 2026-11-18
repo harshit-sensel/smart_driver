@@ -6,37 +6,28 @@ EXHAUSTIVE MINIMAL CHANGES GUIDE FOR FULL COMPATIBILITY (ANDROID 7.0 TO 16)
 Core Philosophy:
   - Minimal changes: Only touch code that modern Android strictly breaks or crashes.
   - Zero rewrites: Keep existing working business logic, SOAP polling, and architecture.
-  - Choice A selected for ButterKnife: Keep ButterKnife dependencies and use build
-    flags so zero code changes are required for existing ButterKnife files.
+  - Clean Architecture: 26 unreferenced/dead prototype files, 25 dead layouts, and
+    ButterKnife library removed completely.
+  - Switch Statements: android.nonFinalResIds=false enabled in gradle.properties to
+    preserve existing Java switch-case statements on R.id without rewriting.
 
 ================================================================================
-SECTION 1: BUILD TOOLCHAIN & JAVA 17 COMPATIBILITY (CHOICE A)
+SECTION 1: BUILD TOOLCHAIN & JAVA 17 COMPATIBILITY
 ================================================================================
-Goal: Compile for Android 16 (API 36) while keeping existing libraries intact.
+Goal: Compile for Android 16 (API 36) with modern Gradle 8.7 and AGP 8.6.0.
 
 1. Gradle Wrapper & Plugin:
    - gradle/wrapper/gradle-wrapper.properties:
      distributionUrl=https\://services.gradle.org/distributions/gradle-8.7-all.zip
    - build.gradle:
-     classpath 'com.android.tools.build:gradle:8.6.0' (or 8.5.2)
+     classpath 'com.android.tools.build:gradle:8.6.0'
      classpath 'com.google.gms:google-services:4.4.0'
 
-2. ButterKnife Support on Java 17 (Choice A - Zero Code Changes):
+2. Clean Gradle Properties:
    - gradle.properties:
+     android.suppressUnsupportedCompileSdk=36
      android.nonFinalResIds=false
-     org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8 --add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED --add-exports=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED --add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED --add-opens=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED
-   - app/build.gradle:
-     tasks.withType(JavaCompile).configureEach {
-         options.fork = true
-         options.forkOptions.jvmArgs += [
-             '--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED',
-             '--add-exports=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED',
-             '--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED',
-             '--add-exports=jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED',
-             '--add-exports=jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED',
-             '--add-opens=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED'
-         ]
-     }
+     org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
 
 3. App Build Configuration:
    - app/build.gradle:

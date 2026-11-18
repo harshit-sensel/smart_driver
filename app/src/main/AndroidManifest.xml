@@ -32,7 +32,6 @@
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
-    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
 
     <uses-feature android:name="android.hardware.camera" />
@@ -89,17 +88,6 @@
 
 
         <service
-            android:name=".service.SyncTaskService"
-            android:exported="false"
-            android:permission="com.google.android.gms.permission.BIND_NETWORK_TASK_SERVICE">
-            <intent-filter>
-                <action android:name="com.google.android.gms.gcm.ACTION_TASK_READY" />
-            </intent-filter>
-        </service> <!-- [END manifest_service] -->
-        <service
-            android:name=".service.SyncIntentService"
-            android:exported="false" />
-        <service
             android:name=".service.GetChecklistForVehicleTypeService"
             android:foregroundServiceType="mediaPlayback"
             android:exported="false" />
@@ -115,7 +103,6 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".MyService" />
         <service android:name=".MyService1"
             android:enabled="true"
             android:exported="false"
@@ -217,12 +204,6 @@
             android:hardwareAccelerated="true"
             android:label="Select Place"
             android:theme="@style/myTheme1" />
-        <activity
-            android:name=".DriverViolationsMap"
-            android:configChanges="orientation|screenSize"
-            android:hardwareAccelerated="true"
-            android:label="Your violations"
-            android:theme="@style/myTheme1" />
         <!--<activity
             android:name=".Daily_Checklist"
             android:label="Vehicle Checklist"
@@ -291,14 +272,6 @@
             android:label="Important Message"
             android:launchMode="singleInstance"
             android:showOnLockScreen="true"
-            android:theme="@style/myTheme1" />
-        <activity
-            android:name=".activity.ImageSelectorActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/myTheme1" />
-        <activity
-            android:name=".activity.ReportActivity"
-            android:screenOrientation="portrait"
             android:theme="@style/myTheme1" />
         <activity
             android:name=".Zerofatality"

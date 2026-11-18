@@ -39,16 +39,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.ContextThemeWrapper;
 import androidx.core.app.ActivityCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-import androidx.work.Constraints;
-import androidx.work.ExistingPeriodicWorkPolicy;
-import androidx.work.NetworkType;
-import androidx.work.PeriodicWorkRequest;
-import androidx.work.WorkManager;
-
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.gcm.GcmNetworkManager;
-import com.google.android.gms.gcm.PeriodicTask;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -88,7 +80,6 @@ public class Gridmenu extends AppCompatActivity {
     public static Context context;
     public static String LATLONG;
 
-    private GcmNetworkManager mGcmNetworkManager;
 
     public static String[] gridViewStrings;
 
@@ -320,7 +311,6 @@ public class Gridmenu extends AppCompatActivity {
             }
         }).start();
 
-        mGcmNetworkManager = GcmNetworkManager.getInstance(this);
         checkPlayServicesAvailable();
     }
 
