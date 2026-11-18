@@ -1,0 +1,210 @@
+================================================================================
+MASTER MODERNIZATION SPECIFICATION: SENSEL SMART DRIVER (TOTALENERGIES FLEET)
+EXHAUSTIVE MINIMAL CHANGES GUIDE FOR FULL COMPATIBILITY (ANDROID 7.0 TO 16)
+================================================================================
+
+Core Philosophy:
+  - Minimal changes: Only touch code that modern Android strictly breaks or crashes.
+  - Zero rewrites: Keep existing working business logic, SOAP polling, and architecture.
+  - Choice A selected for ButterKnife: Keep ButterKnife dependencies and use build
+    flags so zero code changes are required for existing ButterKnife files.
+
+================================================================================
+SECTION 1: BUILD TOOLCHAIN & JAVA 17 COMPATIBILITY (CHOICE A)
+================================================================================
+Goal: Compile for Android 16 (API 36) while keeping existing libraries intact.
+
+1. Gradle Wrapper & Plugin:
+   - gradle/wrapper/gradle-wrapper.properties:
+     distributionUrl=https\://services.gradle.org/distributions/gradle-8.7-all.zip
+   - build.gradle:
+     classpath 'com.android.tools.build:gradle:8.6.0' (or 8.5.2)
+     classpath 'com.google.gms:google-services:4.4.0'
+
+2. ButterKnife Support on Java 17 (Choice A - Zero Code Changes):
+   - gradle.properties:
+     android.nonFinalResIds=false
+     org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8 --add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED --add-exports=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED --add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED --add-opens=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED
+   - app/build.gradle:
+     tasks.withType(JavaCompile).configureEach {
+         options.fork = true
+         options.forkOptions.jvmArgs += [
+             '--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED',
+             '--add-exports=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED',
+             '--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED',
+             '--add-exports=jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED',
+             '--add-exports=jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED',
+             '--add-opens=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED'
+         ]
+     }
+
+3. App Build Configuration:
+   - app/build.gradle:
+     compileSdkVersion 36
+     buildToolsVersion "36.0.0"
+     defaultConfig {
+         minSdkVersion 24       (Android 7.0 Nougat)
+         targetSdkVersion 36    (Android 16)
+     }
+     buildFeatures {
+         buildConfig = true    (Restores BuildConfig.VERSION_CODE & FLAVOR)
+     }
+     compileOptions {
+         sourceCompatibility JavaVersion.VERSION_17
+         targetCompatibility JavaVersion.VERSION_17
+     }
+     packaging {
+         jniLibs {
+             useLegacyPackaging true
+         }
+     }
+
+4. Delete Duplicate Asset:
+   - Remove redundant loose file: app/src/main/res/drawable/file_add.png
+     (Prevents AAPT2 duplicate resource build failure).
+
+================================================================================
+SECTION 2: DASHBOARD TILE & MOVEMENT LOCKSCREEN (LockScreenActivity)
+================================================================================
+1. Audio Voice Warning Files (Scoped Storage Fix for Android 10 to 16):
+   - Change voice alert download and playback path from:
+       Environment.getExternalStorageDirectory() + "/driverapp/"
+     To app-specific storage:
+       new File(context.getExternalFilesDir(null), "driverapp")
+     (Requires zero runtime storage permissions; works on Android 7 to 16).
+   - Add fallback to bundled raw audio (R.raw.over_speed, R.raw.continues_driving)
+     so warnings play even before custom audio download finishes.
+   - Files: LockScreenActivity.java (DownloadFileFromURL & MediaPlayer calls)
+
+2. Screen Wakeup & Keyguard Dismissal (Android 8 to 16):
+   - In AndroidManifest.xml under <activity android:name=".LockScreenActivity">:
+       android:showWhenLocked="true"
+       android:turnScreenOn="true"
+   - In LockScreenActivity.java (onCreate):
+       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+           setShowWhenLocked(true);
+           setTurnScreenOn(true);
+           KeyguardManager km = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
+           if (km != null) km.requestDismissKeyguard(this, null);
+       } else {
+           getWindow().addFlags(
+               WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
+               WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON |
+               WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
+           );
+       }
+       getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+3. Single Instance / Bring to Front:
+   - In SaveMyAppsService.java when speed > 10 km/h:
+       i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+
+================================================================================
+SECTION 3: CAMERA PHOTO CAPTURES & FILE SHARING (Android 7 to 16)
+================================================================================
+1. Package Visibility Filter (Android 11 to 16):
+   - Issue: In Daily_Checklist1.java:
+       takePictureIntent.resolveActivity(getPackageManager())
+     On Android 11+, this returns NULL unless <queries> is in AndroidManifest.xml,
+     causing the Camera to silently fail to open!
+   - Fix in AndroidManifest.xml:
+       <queries>
+           <intent>
+               <action android:name="android.media.action.IMAGE_CAPTURE" />
+           </intent>
+           <intent>
+               <action android:name="android.intent.action.VIEW" />
+               <data android:mimeType="application/pdf" />
+           </intent>
+       </queries>
+
+2. FileProvider Authority & Path Alignment:
+   - Issue: AndroidManifest.xml currently has "com.example.android.fileprovider",
+     while Daily_Checklist, Unload_QTY, DeviationReport, and NotifyTransporter call
+     getPackageName() + ".provider" ("com.sensel.driverapp.provider").
+     Also provider_paths.xml lacks <external-files-path>, throwing an immediate
+     IllegalArgumentException crash when taking photos.
+   - Fix in AndroidManifest.xml:
+       android:authorities="${applicationId}.provider"
+   - Fix in Daily_Checklist1.java (Line 762):
+       Change "com.example.android.fileprovider" to getPackageName() + ".provider"
+   - Fix in app/src/main/res/xml/provider_paths.xml:
+       <paths>
+           <external-files-path name="external_files_dir" path="." />
+           <cache-path name="cache_dir" path="." />
+           <external-path name="external_files" path="." />
+       </paths>
+
+3. Driver Safety Manual PDF Viewer (JavaScriptInterface.java):
+   - Issue: ShowPDF() uses Uri.fromFile(file), crashing on Android 7+ with
+     FileUriExposedException.
+   - Fix: Use FileProvider.getUriForFile() with Intent.FLAG_GRANT_READ_URI_PERMISSION
+     and read from context.getExternalFilesDir(null).
+
+================================================================================
+SECTION 4: BACKGROUND ALARMS, NOTIFICATIONS & TIMERS (Android 8 to 16)
+================================================================================
+1. Notification Channel (Android 8+):
+   - In AlarmReceiver.java: Register notification channel "driverapp_alerts"
+     ("Driver Alerts", IMPORTANCE_HIGH) and pass it to NotificationCompat.Builder
+     so alerts appear in the Android status bar.
+
+2. FLAG_IMMUTABLE (Android 12+ Crash Prevention):
+   - Add PendingIntent.FLAG_IMMUTABLE to PendingIntents in:
+     * AlarmReceiver.java
+     * RestTime.java
+     * WrokStartandWorkEnd.java
+     * RestTimeBroadcast.java
+     * LocationUpdatesService.java (Line 247)
+
+3. PendingIntent Target Fix (Timer Broadcast Execution):
+   - In RestTime.java and WrokStartandWorkEnd.java:
+     Use PendingIntent.getBroadcast() instead of getActivity() when targeting
+     RestTimeBroadcast.class and WorktimeUploader.class.
+
+================================================================================
+SECTION 5: BACKGROUND SERVICES & LOCATION (Android 14 to 16)
+================================================================================
+1. Foreground Service Types:
+   - In AndroidManifest.xml, declare foregroundServiceType="location" for:
+     * SaveMyAppsService
+     * LocationUpdatesService
+   - In LocationUpdatesService.java:
+     Pass CHANNEL_ID directly to new NotificationCompat.Builder(this, CHANNEL_ID).
+
+================================================================================
+SECTION 6: PERMISSIONS & UI STABILITY
+================================================================================
+1. Runtime Notifications Permission (Splash.java on Android 13+):
+   - Request Manifest.permission.POST_NOTIFICATIONS on Android 13+ (API 33+)
+     instead of deprecated WRITE_EXTERNAL_STORAGE.
+
+2. Screen Overlay Permission / Display Over Other Apps (Gridmenu.java on Android 10 to 16):
+   - Issue: The permission <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+     is declared in the Manifest, but on Android 10+, the OS will NOT allow background
+     services (SaveMyAppsService and MyService1) to pop the LockScreenActivity or App_lock
+     over other apps unless the user explicitly grants "Display over other apps" in Settings.
+   - Minimal Fix in Gridmenu.java (onResume / checkSpecialPermissions):
+     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) {
+         // Show a polite dialog explaining that 'Display over other apps' is needed
+         // to lock the phone while moving for safety, and launch:
+         Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                 Uri.parse("package:" + getPackageName()));
+         startActivity(intent);
+     }
+
+3. ERV Search Crash Prevention (ERV_Driver.java):
+   - Use androidx.appcompat.R.id.search_src_text with null check to prevent NPE.
+
+================================================================================
+SECTION 7: FEATURES VERIFIED TO WORK AS-IS (DO NOT TOUCH)
+================================================================================
+- Google Maps Web Loader: Already modernized to active API key (Commit 07e0006).
+- Native Journey Plan Maps: Google Play Services native maps operational.
+- SOAP Web Services: 60-second polling works; no need to rewrite to FCM.
+- App Lock Service: MyService1 with UsageStatsManager left untouched.
+- Core Business Logic: All fleet calculations, JRM logic, and forms intact.
+- Cleartext HTTP: android:usesCleartextTraffic="true" is already in place.
+- Exported Components: All intent-filters already have explicit android:exported.
+- Device ID Checks: Fallback to Settings.Secure.ANDROID_ID is already implemented.
+================================================================================

@@ -114,8 +114,10 @@ public class ERV_Driver extends AppCompatActivity{
         SearchView searchView = (SearchView) menuItem.getActionView();
         searchView.setQueryHint(this.getString(R.string.search));
 
-        ((EditText) searchView.findViewById(R.id.search_src_text))
-                .setHintTextColor(getResources().getColor(R.color.white));
+        EditText searchEditText = searchView.findViewById(androidx.appcompat.R.id.search_src_text);
+        if (searchEditText != null) {
+            searchEditText.setHintTextColor(getResources().getColor(R.color.white));
+        }
         searchView.setOnQueryTextListener(onQuerySearchView);
         return super.onCreateOptionsMenu(menu);
     }
