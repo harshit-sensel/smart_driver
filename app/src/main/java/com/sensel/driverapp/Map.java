@@ -76,7 +76,7 @@ public class Map extends AppCompatActivity {
             myWebView.setWebViewClient(new WebViewClient() {
 
                 public void onPageFinished(WebView view, String url) {
-                    if (Splash.isBirthday.equals("false")) {
+                    if (!"true".equalsIgnoreCase(Splash.isBirthday)) {
 
                         ShowPlace();
                     }
@@ -91,7 +91,7 @@ public class Map extends AppCompatActivity {
             settings.setAllowFileAccess(true);
             JavaScriptInterface jsInterface = new JavaScriptInterface(this, myWebView, getApplicationContext());
             myWebView.addJavascriptInterface(jsInterface, "JSInterface");
-            if (Splash.isBirthday.equals("true")) {
+            if ("true".equalsIgnoreCase(Splash.isBirthday)) {
                 myWebView.getSettings().setUseWideViewPort(true);
                 myWebView.loadUrl("file:///android_asset/simple.html");
                 setTitle("Best Birthday Wishes");
@@ -137,7 +137,7 @@ public class Map extends AppCompatActivity {
                     myWebView.setWebViewClient(new WebViewClient() {
 
                         public void onPageFinished(WebView view, String url) {
-                            if (Splash.isBirthday.equals("false")) {
+                            if (!"true".equalsIgnoreCase(Splash.isBirthday)) {
                                 ShowPlace();
                             }
                             progressDialog.dismiss();
@@ -151,7 +151,7 @@ public class Map extends AppCompatActivity {
                     settings.setAllowFileAccess(true);
                     JavaScriptInterface jsInterface = new JavaScriptInterface(this, myWebView, getApplicationContext());
                     myWebView.addJavascriptInterface(jsInterface, "JSInterface");
-                    if (Splash.isBirthday.equals("true")) {
+                    if ("true".equalsIgnoreCase(Splash.isBirthday)) {
                         myWebView.getSettings().setUseWideViewPort(true);
                         myWebView.loadUrl("file:///android_asset/simple.html");
                         setTitle("Best Birthday Wishes");
@@ -194,7 +194,7 @@ public class Map extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                if(!Splash.isBirthday.equals("true"))
+                if (!"true".equalsIgnoreCase(Splash.isBirthday))
                 {
                     finish();
                 }

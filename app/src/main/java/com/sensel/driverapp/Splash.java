@@ -167,7 +167,10 @@ public class Splash extends Activity {
                                 editor.putString("birthday", "false");
                                 editor.putLong("lastverified", currentTimeMillis() / 1000);
                                 isBirthday = webserviceCall.IsBirthday(deviceid);
-                                if (isBirthday.equals("true"))
+                                if (isBirthday != null) {
+                                    isBirthday = isBirthday.trim().toLowerCase();
+                                }
+                                if ("true".equalsIgnoreCase(isBirthday))
                                     editor.putString("birthday", "true");
                                 editor.apply();
                                 String driver_incentives = webserviceCall.GetDriver_Incentives(deviceid);
@@ -212,7 +215,7 @@ public class Splash extends Activity {
                                     setupPreferenceValues();
 
                                     Intent i = new Intent(Splash.this, Gridmenu.class);
-                                    if (isBirthday.equals("true")) {
+                                    if ("true".equalsIgnoreCase(isBirthday)) {
                                         i = new Intent(Splash.this, Map.class);
                                     }
                                     startActivity(i);
@@ -426,7 +429,7 @@ public class Splash extends Activity {
                         finish();
                     } else {
                         Intent i = new Intent(Splash.this, Gridmenu.class);
-                        if (isBirthday.equals("true"))
+                        if ("true".equalsIgnoreCase(isBirthday))
                             i = new Intent(Splash.this, Map.class);
                         startActivity(i);
                         finish();
@@ -459,7 +462,10 @@ public class Splash extends Activity {
                                 editor.putString("birthday", "false");
                                 editor.putLong("lastverified", currentTimeMillis() / 1000);
                                 isBirthday = webserviceCall.IsBirthday(deviceid);
-                                if (isBirthday.equals("true"))
+                                if (isBirthday != null) {
+                                    isBirthday = isBirthday.trim().toLowerCase();
+                                }
+                                if ("true".equalsIgnoreCase(isBirthday))
                                     editor.putString("birthday", "true");
                                 editor.apply();
                                 //show alert based on priority
@@ -498,7 +504,7 @@ public class Splash extends Activity {
                                 SESSIONID=obj.getString("session");
                                 ACCOUNTID=obj.getString("account");
                                 Intent i = new Intent(Splash.this, Gridmenu.class);
-                                if (isBirthday.equals("true"))
+                                if ("true".equalsIgnoreCase(isBirthday))
                                     i = new Intent(Splash.this, Map.class);
                                 startActivity(i);
                                 finish();
