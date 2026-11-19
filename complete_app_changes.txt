@@ -92,6 +92,7 @@ SECTION 2: DASHBOARD TILE & MOVEMENT LOCKSCREEN (LockScreenActivity)
 
 ================================================================================
 SECTION 3: CAMERA PHOTO CAPTURES & FILE SHARING (Android 7 to 16)
+[STATUS: VERIFIED & TESTED ON DEVICE - ANDROID 16]
 ================================================================================
 1. Package Visibility Filter (Android 11 to 16):
    - Issue: In Daily_Checklist1.java:
@@ -106,24 +107,41 @@ SECTION 3: CAMERA PHOTO CAPTURES & FILE SHARING (Android 7 to 16)
        </queries>
 
 2. FileProvider Authority & Path Alignment:
-   - Issue: AndroidManifest.xml currently has "com.example.android.fileprovider",
+   - Issue: AndroidManifest.xml previously had "com.example.android.fileprovider",
      while Daily_Checklist, Unload_QTY, DeviationReport, and NotifyTransporter call
      getPackageName() + ".provider" ("com.sensel.driverapp.provider").
-     Also provider_paths.xml lacks <external-files-path>, throwing an immediate
-     IllegalArgumentException crash when taking photos.
+     Additionally, provider_paths.xml lacked <external-files-path>, throwing an immediate
+     IllegalArgumentException: "Couldn't find meta-data for provider with authority com.sensel.driverapp.provider"
+     when launching camera in Unload_QTY and checklist forms.
    - Fix in AndroidManifest.xml:
-       android:authorities="${applicationId}.provider"
+       <provider
+           android:name="androidx.core.content.FileProvider"
+           android:authorities="${applicationId}.provider"
+           android:exported="false"
+           android:grantUriPermissions="true">
+           <meta-data
+               android:name="android.support.FILE_PROVIDER_PATHS"
+               android:resource="@xml/provider_paths" />
+       </provider>
    - Fix in Daily_Checklist1.java (Line 762):
-       Change "com.example.android.fileprovider" to getPackageName() + ".provider"
+       Changed "com.example.android.fileprovider" to:
+       getPackageName() + ".provider"
    - Fix in app/src/main/res/xml/provider_paths.xml:
        <paths>
-           <external-files-path name="external_files_dir" path="." />
-           <cache-path name="cache_dir" path="." />
            <external-path name="external_files" path="." />
+           <external-files-path name="external_files_dir" path="." />
+           <cache-path name="cached_files" path="." />
        </paths>
+   - Scope of Screens Supported:
+     * Daily_Checklist1.java (Daily Checklist - Tested & Verified on Android 16)
+     * Unload_QTY.java (Unload Quantity - Tested & Verified on Android 16)
+     * DeviationReport.java (Deviation Report - Shares identical FileProvider)
+     * NotifyTransporter.java (Send Notification - Shares identical FileProvider)
+     * Daily_Checklist.java (Daily Checklist legacy)
+     * ImageSelectorActivity.java (Image Selector)
 
 3. Driver Safety Manual (Driver_Manual.java):
-   - Verified: Loads online HTML chapters directly from Sensel server in WebView.
+   - Verified: Loads online HTML chapters directly from Sensel server in WebView over HTTPS.
    - Cleaned: Removed unreferenced legacy ShowPDF() prototype method from JavaScriptInterface.java.
 
 ================================================================================
