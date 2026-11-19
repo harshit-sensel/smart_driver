@@ -103,10 +103,6 @@ SECTION 3: CAMERA PHOTO CAPTURES & FILE SHARING (Android 7 to 16)
            <intent>
                <action android:name="android.media.action.IMAGE_CAPTURE" />
            </intent>
-           <intent>
-               <action android:name="android.intent.action.VIEW" />
-               <data android:mimeType="application/pdf" />
-           </intent>
        </queries>
 
 2. FileProvider Authority & Path Alignment:
@@ -126,11 +122,9 @@ SECTION 3: CAMERA PHOTO CAPTURES & FILE SHARING (Android 7 to 16)
            <external-path name="external_files" path="." />
        </paths>
 
-3. Driver Safety Manual PDF Viewer (JavaScriptInterface.java):
-   - Issue: ShowPDF() uses Uri.fromFile(file), crashing on Android 7+ with
-     FileUriExposedException.
-   - Fix: Use FileProvider.getUriForFile() with Intent.FLAG_GRANT_READ_URI_PERMISSION
-     and read from context.getExternalFilesDir(null).
+3. Driver Safety Manual (Driver_Manual.java):
+   - Verified: Loads online HTML chapters directly from Sensel server in WebView.
+   - Cleaned: Removed unreferenced legacy ShowPDF() prototype method from JavaScriptInterface.java.
 
 ================================================================================
 SECTION 4: BACKGROUND ALARMS, NOTIFICATIONS & TIMERS (Android 8 to 16)

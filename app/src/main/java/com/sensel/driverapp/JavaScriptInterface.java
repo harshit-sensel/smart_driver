@@ -2,7 +2,6 @@ package com.sensel.driverapp;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -13,7 +12,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Environment;
 
 import androidx.appcompat.view.ContextThemeWrapper;
 
@@ -25,9 +23,6 @@ import android.webkit.WebView;
 import android.widget.Toast;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
 
 /**
  * Created by Mallikarjun on 22-10-2015.
@@ -129,40 +124,6 @@ public class JavaScriptInterface {
     @JavascriptInterface
     public void displayMessege(String msg) {
         Toast.makeText(con, msg, Toast.LENGTH_LONG).show();
-    }
-
-    @JavascriptInterface
-    public void ShowPDF() {
-
-
-        File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + "Driver.pdf");
-        Intent target = new Intent(Intent.ACTION_VIEW);
-        target.setDataAndType(Uri.fromFile(file), "application/pdf");
-        target.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-
-        Intent intent = Intent.createChooser(target, "Open File");
-        try {
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            con.getApplicationContext().startActivity(intent);
-        } catch (ActivityNotFoundException e) {
-            Toast.makeText(con, "PDF Reader applications are not exists,Please install application and try again", Toast.LENGTH_LONG).show();
-        }
-
-    }
-
-    private void copyInputStreamToFile(InputStream in, File file) {
-        try {
-            OutputStream out = new FileOutputStream(file);
-            byte[] buf = new byte[1024];
-            int len;
-            while ((len = in.read(buf)) > 0) {
-                out.write(buf, 0, len);
-            }
-            out.close();
-            in.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     @JavascriptInterface
