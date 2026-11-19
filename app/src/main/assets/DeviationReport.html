@@ -100,19 +100,26 @@
             });
             all_markers.push(marker);
 
-            var geocoder = new google.maps.Geocoder();
-            geocoder.geocode({ latLng: latLng }, function (results, status) {
-                if (status === google.maps.GeocoderStatus.OK) {
-                    var address = getFormattedAddress(results);
-                    if (address) {
-                        JSInterface.setPlace(
-                            "marker",
-                            marker.getPosition().lat() + "," + marker.getPosition().lng(),
-                            address
-                        );
+            var coords = marker.getPosition().lat() + "," + marker.getPosition().lng();
+            JSInterface.setPlace("marker", coords, coords);
+
+            try {
+                var geocoder = new google.maps.Geocoder();
+                geocoder.geocode({ latLng: latLng }, function (results, status) {
+                    if (status === google.maps.GeocoderStatus.OK) {
+                        var address = getFormattedAddress(results);
+                        if (address) {
+                            JSInterface.setPlace(
+                                "marker",
+                                coords,
+                                address
+                            );
+                        }
                     }
-                }
-            });
+                });
+            } catch (e) {
+                console.log("Geocoding error: ", e);
+            }
             return marker;
         }
 
