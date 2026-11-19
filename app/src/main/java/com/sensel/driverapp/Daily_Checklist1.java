@@ -241,6 +241,10 @@ public class Daily_Checklist1 extends AppCompatActivity {
             imgView.setTag(R.id.index_tag, globalItemCounter);
             imgView.setTag(R.id.description_tag, item.getString("description"));
 
+            // Disabled by default until "No" is selected
+            imgView.setEnabled(false);
+            imgView.setAlpha(0.4f);
+
             // RadioGroup coloring and tag logic
             radioGroup.setOnCheckedChangeListener((group, checkedId) -> {
                 if (checkedId == R.id.no) {
@@ -614,6 +618,9 @@ public class Daily_Checklist1 extends AppCompatActivity {
         return res.toString();
     }
     public void onButtonShowPopupWindowClick(final View view) {
+        if (!view.isEnabled()) {
+            return;
+        }
         try {
             selectedImageIndex = (int) view.getTag(R.id.index_tag);
             Log.d("Popup", "Clicked on item index: " + selectedImageIndex);
