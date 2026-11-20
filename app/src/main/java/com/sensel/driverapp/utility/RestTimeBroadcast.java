@@ -86,7 +86,7 @@ public class RestTimeBroadcast extends BroadcastReceiver {
                 createNotificationChannel();
                 Intent nintent = new Intent(mContext, RestTime.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                PendingIntent pendingIntent = PendingIntent.getActivity(mContext, 0, nintent, FLAG_MUTABLE);
+                PendingIntent pendingIntent = PendingIntent.getActivity(mContext, 0, nintent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
                 NotificationCompat.Builder builder = new NotificationCompat.Builder(mContext, CHANNEL_ID)
                         .setSmallIcon(R.mipmap.icon)

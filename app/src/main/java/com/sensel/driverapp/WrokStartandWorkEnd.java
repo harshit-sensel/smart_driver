@@ -331,7 +331,7 @@ public class WrokStartandWorkEnd extends AppCompatActivity {
 
         AlarmManager alarmManager=(AlarmManager) getSystemService(Context.ALARM_SERVICE);
         Intent intent=new Intent(this, WorktimeBrodcast.class);
-        PendingIntent pendingIntent=PendingIntent.getBroadcast(this, 2,intent,FLAG_MUTABLE);
+        PendingIntent pendingIntent=PendingIntent.getBroadcast(this, 2, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         alarmManager.setRepeating(AlarmManager.RTC_WAKEUP,
                 time,30*60*1000,
                 pendingIntent);//constat need to declare as varable interaltime
@@ -357,14 +357,11 @@ public class WrokStartandWorkEnd extends AppCompatActivity {
         /*Intent intent=new Intent(this, WorktimeUploader.class);
         PendingIntent pendingIntent=PendingIntent.getBroadcast(this, 5,intent,PendingIntent.FLAG_MUTABLE);*/
         Intent notifyIntent = new Intent(this, WorktimeUploader.class);
-        notifyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-
-        // Creates the PendingIntent with FLAG_IMMUTABLE
-        PendingIntent pendingIntent = PendingIntent.getActivity(
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(
                 this,
-                0,
+                5,
                 notifyIntent,
-                PendingIntent.FLAG_IMMUTABLE
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
 
         alarmManager.setRepeating(AlarmManager.RTC_WAKEUP,

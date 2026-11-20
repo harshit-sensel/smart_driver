@@ -146,24 +146,26 @@ SECTION 3: CAMERA PHOTO CAPTURES & FILE SHARING (Android 7 to 16)
 
 ================================================================================
 SECTION 4: BACKGROUND ALARMS, NOTIFICATIONS & TIMERS (Android 8 to 16)
+[STATUS: COMPLETED]
 ================================================================================
 1. Notification Channel (Android 8+):
-   - In AlarmReceiver.java: Register notification channel "driverapp_alerts"
-     ("Driver Alerts", IMPORTANCE_HIGH) and pass it to NotificationCompat.Builder
-     so alerts appear in the Android status bar.
+   - In AlarmReceiver.java: Registered high-importance notification channel "driverapp_alerts"
+     ("Driver Alerts", IMPORTANCE_HIGH) and passed it to NotificationCompat.Builder
+     so alerts appear in the Android status bar and play notification sounds on Android 8–16.
 
 2. FLAG_IMMUTABLE (Android 12+ Crash Prevention):
-   - Add PendingIntent.FLAG_IMMUTABLE to PendingIntents in:
-     * AlarmReceiver.java
-     * RestTime.java
-     * WrokStartandWorkEnd.java
-     * RestTimeBroadcast.java
-     * LocationUpdatesService.java (Line 247)
+   - Added PendingIntent.FLAG_IMMUTABLE to PendingIntents across all alarm & notification points:
+     * AlarmReceiver.java (Line 111): FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE
+     * LocationUpdatesService.java (Line 240): FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE
+     * RestTime.java (Line 256): FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE
+     * WrokStartandWorkEnd.java (Lines 334 & 359): FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE
+     * RestTimeBroadcast.java (Line 89): FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE
 
 3. PendingIntent Target Fix (Timer Broadcast Execution):
    - In RestTime.java and WrokStartandWorkEnd.java:
-     Use PendingIntent.getBroadcast() instead of getActivity() when targeting
-     RestTimeBroadcast.class and WorktimeUploader.class.
+     Changed PendingIntent.getActivity() to PendingIntent.getBroadcast() with matching
+     request codes when targeting RestTimeBroadcast.class and WorktimeUploader.class
+     (ensuring onReceive() executes for rest alarms and 15-minute background shift uploads).
 
 ================================================================================
 SECTION 5: BACKGROUND SERVICES & LOCATION (Android 14 to 16)
@@ -178,9 +180,10 @@ SECTION 5: BACKGROUND SERVICES & LOCATION (Android 14 to 16)
 ================================================================================
 SECTION 6: PERMISSIONS & UI STABILITY
 ================================================================================
-1. Runtime Notifications Permission (Splash.java on Android 13+):
-   - Request Manifest.permission.POST_NOTIFICATIONS on Android 13+ (API 33+)
-     instead of deprecated WRITE_EXTERNAL_STORAGE.
+1. Runtime Notifications Permission (Splash.java on Android 13+) [STATUS: COMPLETED]:
+   - Added runtime permission request for Manifest.permission.POST_NOTIFICATIONS on
+     Android 13+ (API 33+) in Splash.java with standard system permission prompt
+     so notifications are Allowed in App Info.
 
 2. Screen Overlay Permission / Display Over Other Apps (Gridmenu.java on Android 10 to 16):
    - Issue: The permission <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />

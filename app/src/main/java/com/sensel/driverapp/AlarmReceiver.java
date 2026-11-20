@@ -108,9 +108,22 @@ public class AlarmReceiver extends BroadcastReceiver {
                                 if (count > 0 && previouscount != count) {
                                     NotificationManagerCompat notificationManager = NotificationManagerCompat.from(cont);
                                     Intent nid = new Intent(cont, Notification1.class);
-                                    PendingIntent ci = PendingIntent.getActivity(cont, NOTIFICATION_ID, nid, PendingIntent.FLAG_UPDATE_CURRENT);
+                                    PendingIntent ci = PendingIntent.getActivity(cont, NOTIFICATION_ID, nid, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
-                                    NotificationCompat.Builder summaryNotification = new NotificationCompat.Builder(cont);
+                                    String CHANNEL_ID = "driverapp_alerts";
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                        android.app.NotificationManager nm = (android.app.NotificationManager) cont.getSystemService(Context.NOTIFICATION_SERVICE);
+                                        if (nm != null && nm.getNotificationChannel(CHANNEL_ID) == null) {
+                                            android.app.NotificationChannel channel = new android.app.NotificationChannel(
+                                                    CHANNEL_ID,
+                                                    "Driver Alerts",
+                                                    android.app.NotificationManager.IMPORTANCE_HIGH
+                                            );
+                                            channel.setDescription("Critical driving alerts and fleet notifications");
+                                            nm.createNotificationChannel(channel);
+                                        }
+                                    }
+                                    NotificationCompat.Builder summaryNotification = new NotificationCompat.Builder(cont, CHANNEL_ID);
                                     summaryNotification.setContentTitle("Smart_Driver app");
                                     summaryNotification.setContentText(count + "  new notification(s)");
                                     summaryNotification.setSmallIcon(R.mipmap.icon);

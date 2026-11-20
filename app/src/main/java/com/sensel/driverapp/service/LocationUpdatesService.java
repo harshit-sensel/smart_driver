@@ -238,7 +238,7 @@ public class LocationUpdatesService extends Service {
 
         // The PendingIntent that leads to a call to onStartCommand() in this service.
         PendingIntent servicePendingIntent = PendingIntent.getService(this, 0, intent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
         // Creates the PendingIntent with FLAG_IMMUTABLE
