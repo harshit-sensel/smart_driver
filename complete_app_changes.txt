@@ -170,12 +170,38 @@ SECTION 4: BACKGROUND ALARMS, NOTIFICATIONS & TIMERS (Android 8 to 16)
 ================================================================================
 SECTION 5: BACKGROUND SERVICES & LOCATION (Android 14 to 16)
 ================================================================================
-1. Foreground Service Types:
-   - In AndroidManifest.xml, declare foregroundServiceType="location" for:
-     * SaveMyAppsService
-     * LocationUpdatesService
-   - In LocationUpdatesService.java:
-     Pass CHANNEL_ID directly to new NotificationCompat.Builder(this, CHANNEL_ID).
+1. Active Foreground Services Plan (Choice B Implementation):
+   - SaveMyAppsService (Core Fleet & Speed Tracking):
+     * Change from "dataSync|location" to purely foregroundServiceType="location"
+       in AndroidManifest.xml and SaveMyAppsService.java (line 97).
+     * Reason: On Android 15 and 16, dataSync has a strict 6-hour timeout kill.
+       Declaring it strictly as "location" eliminates this timeout, allowing
+       continuous 8-12+ hour driver shift tracking without OS interruption.
+
+   - MyService1 (App Locker & Restricted Package Monitor):
+     * In AndroidManifest.xml:
+       - Declare with foregroundServiceType="specialUse"
+       - Add property:
+         <property
+             android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+             android:value="Fleet driver app lock and safety monitor" />
+       - Add permission:
+         <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+       - Reason: Google's specialUse type has no 6-hour timeout on Android 15/16.
+     * In MyService1.java:
+       - Change notification ID from 1 to 2 (resolves notification clash with SaveMyAppsService).
+       - In startForeground(), pass ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE on Android 14+.
+     * In App_lock popup:
+       - Handled in Section 6 Item 2 via "Display over other apps" (Settings.canDrawOverlays).
+
+   - Download_LatLong (Route Coordinate Downloader):
+     * Retains foregroundServiceType="dataSync" (runs for 2-5 seconds, calls stopSelf()).
+     * 100% compliant and unaffected by timeouts.
+
+2. Legacy Dead Code Cleanup (Completed):
+   - Removed unused GetChecklistForVehicleTypeService (including bogus mediaPlayback type).
+   - Removed unused LocationUpdatesService and LocationUtils.java helper.
+   - Removed both service tags from AndroidManifest.xml.
 
 ================================================================================
 SECTION 6: PERMISSIONS & UI STABILITY

@@ -93,10 +93,6 @@
             android:theme="@style/panicTheme" />
 
 
-        <service
-            android:name=".service.GetChecklistForVehicleTypeService"
-            android:foregroundServiceType="mediaPlayback"
-            android:exported="false" />
         <activity
             android:name=".Splash"
             android:label="@string/app_name"
@@ -294,11 +290,6 @@
             android:label="Rest time"
             android:screenOrientation="portrait"
             android:theme="@style/myTheme1" />
-
-        <service
-            android:name=".service.LocationUpdatesService"
-            android:enabled="true"
-            android:exported="false" />
 
         <service
             android:name=".service.Download_LatLong"
