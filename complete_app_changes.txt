@@ -57,7 +57,7 @@ Goal: Compile for Android 16 (API 36) with modern Gradle 8.7 and AGP 8.6.0.
 ================================================================================
 SECTION 2: DASHBOARD TILE & MOVEMENT LOCKSCREEN (LockScreenActivity)
 ================================================================================
-1. Audio Voice Warning Files (Scoped Storage Fix for Android 10 to 16):
+1. Audio Voice Warning Files (Scoped Storage Fix for Android 10 to 16) [STATUS: COMPLETED]:
    - Change voice alert download and playback path from:
        Environment.getExternalStorageDirectory() + "/driverapp/"
      To app-specific storage:
@@ -133,7 +133,7 @@ SECTION 3: CAMERA PHOTO CAPTURES & FILE SHARING (Android 7 to 16)
            <cache-path name="cached_files" path="." />
        </paths>
    - Scope of Screens Supported:
-     * Daily_Checklist1.java (Daily Checklist - Tested & Verified on Android 16)
+     * Daily_Checklist1.java (Daily Checklist - Verified on Android 16: Already Scoped Storage compliant using getExternalFilesDir() & FileProvider; NO external storage issues; legacy dead stubs cleaned up)
      * Unload_QTY.java (Unload Quantity - Tested & Verified on Android 16)
      * DeviationReport.java (Deviation Report - Shares identical FileProvider)
      * NotifyTransporter.java (Send Notification - Shares identical FileProvider)

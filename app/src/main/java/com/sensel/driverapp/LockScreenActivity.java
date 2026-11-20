@@ -407,10 +407,10 @@ public class LockScreenActivity extends Activity {
 
                                                 };
                                                 languageThread.start();
-                                                new DownloadFileFromURL().execute(Config.DOMAINURL1 + "/Uploads/TotalGasAudioFiles/" + language + "_continuous_driving_voice.mp3");
-                                                new DownloadFileFromURL().execute(Config.DOMAINURL1 + "/Uploads/TotalGasAudioFiles/" + language + "_slowdown_voice.mp3");
-                                                new DownloadFileFromURL().execute(Config.DOMAINURL1 + "/Uploads/TotalGasAudioFiles/" + language + "_max_driving_voice.mp3");
-                                                new DownloadFileFromURL().execute(Config.DOMAINURL1 + "/Uploads/TotalGasAudioFiles/" + language + "_night_driving_voice.mp3");
+                                                new DownloadFileFromURL(LockScreenActivity.this).execute(Config.DOMAINURL1 + "/Uploads/TotalGasAudioFiles/" + language + "_continuous_driving_voice.mp3");
+                                                new DownloadFileFromURL(LockScreenActivity.this).execute(Config.DOMAINURL1 + "/Uploads/TotalGasAudioFiles/" + language + "_slowdown_voice.mp3");
+                                                new DownloadFileFromURL(LockScreenActivity.this).execute(Config.DOMAINURL1 + "/Uploads/TotalGasAudioFiles/" + language + "_max_driving_voice.mp3");
+                                                new DownloadFileFromURL(LockScreenActivity.this).execute(Config.DOMAINURL1 + "/Uploads/TotalGasAudioFiles/" + language + "_night_driving_voice.mp3");
                                                 SharedPreferences.Editor editor = pref.edit();
                                                 editor.putLong("lastaudiodownloaded", System.currentTimeMillis());
                                                 editor.apply();
@@ -467,10 +467,10 @@ public class LockScreenActivity extends Activity {
 
                                             };
                                             languageThread.start();
-                                            new DownloadFileFromURL().execute(Config.DOMAINURL1 + "/Uploads/TotalGasAudioFiles/" + language + "_continuous_driving_voice.mp3");
-                                            new DownloadFileFromURL().execute(Config.DOMAINURL1 + "/Uploads/TotalGasAudioFiles/" + language + "_slowdown_voice.mp3");
-                                            new DownloadFileFromURL().execute(Config.DOMAINURL1 + "/Uploads/TotalGasAudioFiles/" + language + "_max_driving_voice.mp3");
-                                            new DownloadFileFromURL().execute(Config.DOMAINURL1 + "/Uploads/TotalGasAudioFiles/" + language + "_night_driving_voice.mp3");
+                                            new DownloadFileFromURL(LockScreenActivity.this).execute(Config.DOMAINURL1 + "/Uploads/TotalGasAudioFiles/" + language + "_continuous_driving_voice.mp3");
+                                            new DownloadFileFromURL(LockScreenActivity.this).execute(Config.DOMAINURL1 + "/Uploads/TotalGasAudioFiles/" + language + "_slowdown_voice.mp3");
+                                            new DownloadFileFromURL(LockScreenActivity.this).execute(Config.DOMAINURL1 + "/Uploads/TotalGasAudioFiles/" + language + "_max_driving_voice.mp3");
+                                            new DownloadFileFromURL(LockScreenActivity.this).execute(Config.DOMAINURL1 + "/Uploads/TotalGasAudioFiles/" + language + "_night_driving_voice.mp3");
                                             SharedPreferences.Editor editor = pref.edit();
                                             editor.putLong("lastaudiodownloaded", System.currentTimeMillis());
                                             editor.apply();
@@ -690,26 +690,25 @@ public class LockScreenActivity extends Activity {
 
                                                 }
                                             }, 28000);
-                                            //Added By Madhuri 31122024
-                                            //MediaPlayer music = MediaPlayer.create(LockScreenActivity.this, R.raw.slowdown_voice);
-                                            //music.start();
-
-                                            MediaPlayer music = MediaPlayer.create(LockScreenActivity.this, R.raw.slowdown_voice);
-                                            music.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                                                @Override
-                                                public void onCompletion(MediaPlayer mp) {
-                                                    Log.d("Audio", "Announcement completed.");
-                                                    // Avoid any navigation here unless required
-                                                }
-                                            });
-                                            music.start();
-                                            insertAudioLog("APP-OVERSPEEDING");
-
-                                            /*File file = new File(Environment.getExternalStorageDirectory() + "/driverapp/slowdown_voice.mp3");
+                                            File dir = new File(getExternalFilesDir(null), "driverapp");
+                                            File file = new File(dir, "slowdown_voice.mp3");
+                                            MediaPlayer music;
                                             if (file.exists()) {
-                                                MediaPlayer.create(getApplicationContext(), Uri.parse(file.getAbsolutePath())).start();
+                                                music = MediaPlayer.create(getApplicationContext(), Uri.parse(file.getAbsolutePath()));
+                                            } else {
+                                                music = MediaPlayer.create(LockScreenActivity.this, R.raw.slowdown_voice);
+                                            }
+                                            if (music != null) {
+                                                music.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                                                    @Override
+                                                    public void onCompletion(MediaPlayer mp) {
+                                                        Log.d("Audio", "Announcement completed.");
+                                                        mp.release();
+                                                    }
+                                                });
+                                                music.start();
                                                 insertAudioLog("APP-OVERSPEEDING");
-                                            }*/
+                                            }
                                         }
                                     } else {
                                         blinkstatus = false;
@@ -784,9 +783,22 @@ public class LockScreenActivity extends Activity {
 
                                 cirprogressBar.setProgress(progresspercent);
                                 if (maxdrivingaudio && ((hr == dayHr && min > dayMin) || (hr > dayHr))) {
-                                    File file = new File(Environment.getExternalStorageDirectory() + "/driverapp/max_driving_voice.mp3");
+                                    File dir = new File(getExternalFilesDir(null), "driverapp");
+                                    File file = new File(dir, "max_driving_voice.mp3");
+                                    MediaPlayer mp;
                                     if (file.exists()) {
-                                        MediaPlayer.create(getApplicationContext(), Uri.parse(file.getAbsolutePath())).start();
+                                        mp = MediaPlayer.create(getApplicationContext(), Uri.parse(file.getAbsolutePath()));
+                                    } else {
+                                        mp = MediaPlayer.create(getApplicationContext(), R.raw.max_driving);
+                                    }
+                                    if (mp != null) {
+                                        mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                                            @Override
+                                            public void onCompletion(MediaPlayer mediaPlayer) {
+                                                mediaPlayer.release();
+                                            }
+                                        });
+                                        mp.start();
                                         insertAudioLog("APP-MAXDRIVING");
                                     }
                                     maxdrivingaudio = false;
@@ -837,10 +849,22 @@ public class LockScreenActivity extends Activity {
                                 conprogressBar.setProgress(cprogresspercent);
 
                                 if (condrivingaudio && ((cdec_h == tripHr && cdecimal_min >= tripMin) || cdec_h > tripHr)) {
-
-                                    File file = new File(Environment.getExternalStorageDirectory() + "/driverapp/continuous_driving_voice.mp3");
+                                    File dir = new File(getExternalFilesDir(null), "driverapp");
+                                    File file = new File(dir, "continuous_driving_voice.mp3");
+                                    MediaPlayer mp;
                                     if (file.exists()) {
-                                        MediaPlayer.create(getApplicationContext(), Uri.parse(file.getAbsolutePath())).start();
+                                        mp = MediaPlayer.create(getApplicationContext(), Uri.parse(file.getAbsolutePath()));
+                                    } else {
+                                        mp = MediaPlayer.create(getApplicationContext(), R.raw.continues_driving);
+                                    }
+                                    if (mp != null) {
+                                        mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                                            @Override
+                                            public void onCompletion(MediaPlayer mediaPlayer) {
+                                                mediaPlayer.release();
+                                            }
+                                        });
+                                        mp.start();
                                         insertAudioLog("APP-CONTINUOUS_DRIVING");
                                     }
                                     resttime.setText("Plan to take rest");
@@ -853,9 +877,22 @@ public class LockScreenActivity extends Activity {
                                 if (!nightdrivingallowed) {
                                     int currenttime = Calendar.getInstance().get(Calendar.HOUR_OF_DAY) * 100 + Calendar.getInstance().get(Calendar.MINUTE);
                                     if (nightaudio && ((currenttime > nightStart) || (currenttime < nightEnd))) {
-                                        File file = new File(Environment.getExternalStorageDirectory() + "/driverapp/night_driving_voice.mp3");
+                                        File dir = new File(getExternalFilesDir(null), "driverapp");
+                                        File file = new File(dir, "night_driving_voice.mp3");
+                                        MediaPlayer mp;
                                         if (file.exists()) {
-                                            MediaPlayer.create(getApplicationContext(), Uri.parse(file.getAbsolutePath())).start();
+                                            mp = MediaPlayer.create(getApplicationContext(), Uri.parse(file.getAbsolutePath()));
+                                        } else {
+                                            mp = MediaPlayer.create(getApplicationContext(), R.raw.night_driving);
+                                        }
+                                        if (mp != null) {
+                                            mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                                                @Override
+                                                public void onCompletion(MediaPlayer mediaPlayer) {
+                                                    mediaPlayer.release();
+                                                }
+                                            });
+                                            mp.start();
                                             insertAudioLog("APP-NIGHTDRIVING");
                                         }
                                         nightaudio = false;
@@ -1520,6 +1557,14 @@ public class LockScreenActivity extends Activity {
 }
 
 class DownloadFileFromURL extends AsyncTask<String, String, String> {
+    private Context context;
+
+    public DownloadFileFromURL() {
+    }
+
+    public DownloadFileFromURL(Context context) {
+        this.context = context;
+    }
 
     /**
      * Before starting background thread
@@ -1539,7 +1584,9 @@ class DownloadFileFromURL extends AsyncTask<String, String, String> {
         try {
             String filename = f_url[0].substring(f_url[0].lastIndexOf('/') + 1);
             filename = filename.substring(filename.indexOf('_') + 1);
-            File file = new File(Environment.getExternalStorageDirectory() + "/driverapp/" + filename);
+            File baseDir = context != null ? context.getExternalFilesDir(null) : null;
+            File dir = new File(baseDir != null ? baseDir : Environment.getExternalStorageDirectory(), "driverapp");
+            File file = new File(dir, filename);
             System.out.println("Downloading");
             URL url = new URL(f_url[0]);
 
@@ -1553,10 +1600,9 @@ class DownloadFileFromURL extends AsyncTask<String, String, String> {
 
             // Output stream to write file
             if (!file.exists() || lenghtOfFile != file.length()) {
-                file = new File(Environment.getExternalStorageDirectory() + "/driverapp");
-                if (!file.exists())
-                    file.mkdirs();
-                OutputStream output = new FileOutputStream(file.getAbsolutePath() + "/" + filename);
+                if (!dir.exists())
+                    dir.mkdirs();
+                OutputStream output = new FileOutputStream(file);
                 byte data[] = new byte[1024];
 
                 long total = 0;
