@@ -16,17 +16,6 @@ public class RestarterBroadcastReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         mcontext=context;
 
-//
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//            context.startForegroundService(new Intent(context,SaveMyAppsService.class));
-//            context.startForegroundService(new Intent(context,MyService1.class));
-//        } else {
-//            context.startService(new Intent(context, SaveMyAppsService.class)); //for locking while driving
-//            context.startService(new Intent(context, MyService1.class));//for app lock for selected apps
-//        }
-
-
-
         try {
             if(!isMyServiceRunning(SaveMyAppsService.class,mcontext)){
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
