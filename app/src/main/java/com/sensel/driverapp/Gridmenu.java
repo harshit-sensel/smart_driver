@@ -242,6 +242,16 @@ public class Gridmenu extends AppCompatActivity {
         PendingIntent pendingIntent1 = PendingIntent.getBroadcast(this, 0, intent1, PendingIntent.FLAG_IMMUTABLE);
         service.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), 10000, pendingIntent1);
 
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(new Intent(this, SaveMyAppsService.class));
+            } else {
+                startService(new Intent(this, SaveMyAppsService.class));
+            }
+        } catch (Exception e) {
+            Log.e("Gridmenu", "Error starting service: " + e.getMessage());
+        }
+
 
         //Lock mobile while driving service
 

@@ -27,6 +27,7 @@ public class RestarterBroadcastReceiver extends BroadcastReceiver {
 
 
 
+        try {
             if(!isMyServiceRunning(SaveMyAppsService.class,mcontext)){
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     mcontext.startForegroundService(new Intent(mcontext, SaveMyAppsService.class));
@@ -34,13 +35,8 @@ public class RestarterBroadcastReceiver extends BroadcastReceiver {
                     mcontext.startService(new Intent(mcontext, SaveMyAppsService.class));
                 }
             }
-
-        if(!isMyServiceRunning(SaveMyAppsService.class,mcontext)){
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                context.startForegroundService(new Intent(context,MyService1.class));
-            } else {
-                context.startService(new Intent(context, MyService1.class));
-            }
+        } catch (Exception e) {
+            Log.e("RestarterBroadcast", "Cannot start service from background: " + e.getMessage());
         }
     }
 
