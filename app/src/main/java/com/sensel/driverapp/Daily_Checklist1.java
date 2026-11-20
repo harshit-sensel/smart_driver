@@ -112,8 +112,6 @@ public class Daily_Checklist1 extends AppCompatActivity {
     private static final int MY_PERMISSIONS_REQUEST_STORAGE = 103;
     private static final int CAMERA_CAPTURE_IMAGE_REQUEST_CODE = 100;
     private static final int MY_PERMISSIONS_REQUEST_LOCATION = 10;
-    private Uri fileUri;
-    public static final int MEDIA_TYPE_IMAGE = 1;
     public static boolean checkList_flag=false;
     String currentPhotoPath;
 
@@ -729,7 +727,6 @@ public class Daily_Checklist1 extends AppCompatActivity {
                             new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
                             MY_PERMISSIONS_REQUEST_STORAGE);
                 } else {
-                    //captureImage();
                     dispatchTakePictureIntent();
                 }
             }
@@ -742,7 +739,6 @@ public class Daily_Checklist1 extends AppCompatActivity {
                             new String[]{Manifest.permission.CAMERA},
                             MY_PERMISSIONS_REQUEST_CAMERA);
                 } else {
-                    //captureImage();
                     dispatchTakePictureIntent();
                 }
 
@@ -772,62 +768,6 @@ public class Daily_Checklist1 extends AppCompatActivity {
                 startActivityForResult(takePictureIntent, CAMERA_CAPTURE_IMAGE_REQUEST_CODE);
             }
         }
-    }
-    public void captureImage(){
-        StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
-        StrictMode.setVmPolicy(builder.build());
-
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
-                == PackageManager.PERMISSION_DENIED) {
-            // Request the permission if it hasn't been granted
-            ActivityCompat.requestPermissions(this, new String[] { Manifest.permission.CAMERA },
-                    MY_PERMISSIONS_REQUEST_CAMERA);
-        } else {
-            // Launch the camera app
-            Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-            fileUri = getOutputMediaFileUri(MEDIA_TYPE_IMAGE);
-            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri);
-            if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-                startActivityForResult(takePictureIntent, CAMERA_CAPTURE_IMAGE_REQUEST_CODE);
-            }
-        }
-
-    }
-    public Uri getOutputMediaFileUri(int type) {
-        return Uri.fromFile(getOutputMediaFile(type));
-    }
-    private static File getOutputMediaFile(int type) {
-        Log.d("Media","OUTPUT");
-        // External sdcard location
-        File mediaStorageDir = new File(
-                Environment
-                        .getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
-                Config.IMAGE_DIRECTORY_NAME);
-        Log.d("Media","OUTPUT"+mediaStorageDir);
-
-        // Create the storage directory if it does not exist
-        if (!mediaStorageDir.exists()) {
-            mediaStorageDir.mkdirs();
-
-            if (!mediaStorageDir.mkdirs()) {
-                Log.d(Daily_Checklist1.class.getSimpleName(), "Oops! Failed create "
-                        + Config.IMAGE_DIRECTORY_NAME + " directory");
-                return null;
-            }
-        }
-
-        // Create a media file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss",
-                Locale.getDefault()).format(new Date());
-        File mediaFile;
-        if (type == MEDIA_TYPE_IMAGE) {
-            mediaFile = new File(mediaStorageDir.getPath() + File.separator
-                    + "IMG_" + timeStamp + ".jpg");
-        } else {
-            return null;
-        }
-
-        return mediaFile;
     }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -872,9 +812,9 @@ public class Daily_Checklist1 extends AppCompatActivity {
                         ActivityCompat.requestPermissions(Daily_Checklist1.this,
                                 new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                                 MY_PERMISSIONS_REQUEST_STORAGE);
-                    } else
-                        //  captureImage();
+                    } else {
                         dispatchTakePictureIntent();
+                    }
                 } else {
 
                     final AlertDialog ad = new AlertDialog.Builder(this).create();
