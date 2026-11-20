@@ -922,7 +922,6 @@ public class LockScreenActivity extends Activity {
 
             Getspeed();
             speed = 0;
-            onBackPressed();
         }
 
 
