@@ -176,10 +176,9 @@ SECTION 5: BACKGROUND SERVICES & LOCATION (Android 14 to 16)
      * Starts in Gridmenu.onCreate() while in foreground with defensive try-catch.
      * Displays single clean persistent notification (ID 1):
        "Smart Driver Service - Service running in the background".
-     * Change from "dataSync|location" to purely foregroundServiceType="location"
-       in AndroidManifest.xml and SaveMyAppsService.java (line 97) to eliminate the
-       6-hour dataSync timeout kill on Android 15/16, allowing continuous 8-12+ hour
-       driver shift tracking without OS interruption.
+     * Configured purely as foregroundServiceType="location" in AndroidManifest.xml
+       and SaveMyAppsService.java (line 97) to eliminate the 6-hour dataSync timeout kill
+       on Android 15/16, allowing continuous 8-12+ hour driver shift tracking without OS interruption.
 
    - Download_LatLong (Route Coordinate Downloader):
      * Retains foregroundServiceType="dataSync" (runs for 2-5 seconds, calls stopSelf()).
