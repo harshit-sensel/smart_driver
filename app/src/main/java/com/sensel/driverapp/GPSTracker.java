@@ -12,6 +12,7 @@ import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Looper;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -101,7 +102,7 @@ public class GPSTracker extends Service implements LocationListener {
                             locationManager.requestLocationUpdates(
                                     LocationManager.NETWORK_PROVIDER,
                                     MIN_TIME_BW_UPDATES,
-                                    MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
+                                    MIN_DISTANCE_CHANGE_FOR_UPDATES, this, Looper.getMainLooper());
                         Log.d("Network", "Network Enabled");
                         if (locationManager != null) {
                             location = locationManager
@@ -130,7 +131,7 @@ public class GPSTracker extends Service implements LocationListener {
                             locationManager.requestLocationUpdates(
                                     LocationManager.GPS_PROVIDER,
                                     MIN_TIME_BW_UPDATES,
-                                    MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
+                                    MIN_DISTANCE_CHANGE_FOR_UPDATES, this, Looper.getMainLooper());
                             Log.d("GPS", "GPS Enabled");
                             if (locationManager != null) {
                                 location = locationManager

@@ -107,7 +107,7 @@
         <service
             android:name=".SaveMyAppsService"
             android:enabled="true"
-            android:stopWithTask="true"
+            android:stopWithTask="false"
             android:exported="false"
             android:foregroundServiceType="location"/>
 

@@ -17,6 +17,7 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.core.app.NotificationCompat;
@@ -93,10 +94,18 @@ public class SaveMyAppsService extends android.app.Service
                     .setContentText("Service running in the background")
                     .build();
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) { // Android 14+
-                startForeground(1, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION);
-            } else {
-                startForeground(1, notification);
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) { // Android 14+
+                    startForeground(1, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION);
+                } else {
+                    startForeground(1, notification);
+                }
+            } catch (SecurityException e) {
+                Log.e("SaveMyAppsService", "Cannot start location FGS from background without background location permission: " + e.getMessage());
+                stopSelf();
+                return START_NOT_STICKY;
+            } catch (Exception e) {
+                Log.e("SaveMyAppsService", "Error in startForeground: " + e.getMessage());
             }
         }
 

@@ -50,6 +50,7 @@ public class Splash extends Activity {
     private static final int MY_PERMISSIONS_REQUEST_STORAGE = 102;
     private static final int MY_PERMISSIONS_REQUEST_CAMERA = 103;
     private static final int MY_PERMISSIONS_REQUEST_NOTIFICATIONS = 104;
+    private static final int MY_PERMISSIONS_REQUEST_BACKGROUND_LOCATION = 105;
     static long time_span = 0;
     Animation topAnim, bottomAnim;
     public static  String SESSIONID="Error";
@@ -100,6 +101,8 @@ public class Splash extends Activity {
             ActivityCompat.requestPermissions(Splash.this, new String[]{Manifest.permission.READ_PHONE_STATE}, MY_PERMISSIONS_REQUEST_READ_CONTACTS);
         } else if (ContextCompat.checkSelfPermission(Splash.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(Splash.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSIONS_REQUEST_READ_LOCATION);
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && ContextCompat.checkSelfPermission(Splash.this, Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            promptBackgroundLocation();
         } else if (Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(Splash.this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(Splash.this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, MY_PERMISSIONS_REQUEST_NOTIFICATIONS);
         }
@@ -282,8 +285,9 @@ public class Splash extends Activity {
                                 ActivityCompat.requestPermissions(Splash.this,
                                         new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                                         MY_PERMISSIONS_REQUEST_READ_LOCATION);
-
-
+                    } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && ContextCompat.checkSelfPermission(Splash.this,
+                            Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        promptBackgroundLocation();
                     } else if (Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(Splash.this,
                             Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
                         ActivityCompat.requestPermissions(Splash.this,
@@ -310,13 +314,11 @@ public class Splash extends Activity {
             case MY_PERMISSIONS_REQUEST_READ_LOCATION: {
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    if (Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(Splash.this,
-                            Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                        ActivityCompat.requestPermissions(Splash.this,
-                                new String[]{Manifest.permission.POST_NOTIFICATIONS},
-                                MY_PERMISSIONS_REQUEST_NOTIFICATIONS);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
+                            ContextCompat.checkSelfPermission(Splash.this, Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        promptBackgroundLocation();
                     } else {
-                        main();
+                        checkNextPermissionAfterLocation();
                     }
 
                 } else {
@@ -332,6 +334,10 @@ public class Splash extends Activity {
                     });
                     ad.show();
                 }
+                return;
+            }
+            case MY_PERMISSIONS_REQUEST_BACKGROUND_LOCATION: {
+                checkNextPermissionAfterLocation();
                 return;
             }
             case MY_PERMISSIONS_REQUEST_NOTIFICATIONS: {
@@ -549,6 +555,45 @@ public class Splash extends Activity {
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }
+    }
+
+    private void checkNextPermissionAfterLocation() {
+        if (Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(Splash.this,
+                Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(Splash.this,
+                    new String[]{Manifest.permission.POST_NOTIFICATIONS},
+                    MY_PERMISSIONS_REQUEST_NOTIFICATIONS);
+        } else {
+            main();
+        }
+    }
+
+    private void promptBackgroundLocation() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(Splash.this);
+        builder.setTitle("Background Location Permission");
+        builder.setMessage("Smart Driver tracks vehicle speed, rest timers, and safety hazard spots even when the app is closed or minimized.\n\nPlease select 'Allow all the time' in the next prompt.");
+        builder.setPositiveButton("Continue", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    ActivityCompat.requestPermissions(Splash.this,
+                            new String[]{Manifest.permission.ACCESS_BACKGROUND_LOCATION},
+                            MY_PERMISSIONS_REQUEST_BACKGROUND_LOCATION);
+                } else {
+                    checkNextPermissionAfterLocation();
+                }
+            }
+        });
+        builder.setNegativeButton("Not Now", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+                checkNextPermissionAfterLocation();
+            }
+        });
+        builder.setCancelable(false);
+        builder.show();
     }
 
 }
