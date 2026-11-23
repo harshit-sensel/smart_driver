@@ -619,10 +619,8 @@ public class CustomAndroidGridViewAdapter extends BaseAdapter {
                                                     i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                                     mContext.startActivity(i);
                                                 } catch (Exception e) {
-                                                    String error;
-                                                    error = e.toString();
                                                     progressDialog.dismiss();
-                                                    Toast.makeText(mContext, "Something went wrong on getting your working hours" + error, Toast.LENGTH_LONG).show();  //j
+                                                    Toast.makeText(mContext, "Something went wrong on getting your working hours.", Toast.LENGTH_LONG).show();
                                                     Log.e("ex", e.toString());
 
                                                 }
@@ -632,15 +630,7 @@ public class CustomAndroidGridViewAdapter extends BaseAdapter {
                                             @Override
                                             public void onErrorResponse(VolleyError error) {
                                                 Log.e("error", error.toString());
-                                                String errormessage;
-                                                try {
-                                                    errormessage = error.toString();
-                                                    Toast.makeText(mContext, "Something went wrong on getting your working hours" + errormessage, Toast.LENGTH_LONG).show();
-                                                } catch (Exception e) {
-                                                    Toast.makeText(mContext, "Something went wrong on getting your working hours", Toast.LENGTH_LONG).show();
-                                                }
-
-
+                                                Toast.makeText(mContext, "Something went wrong on getting your working hours.", Toast.LENGTH_LONG).show();
                                                 progressDialog.dismiss();
 
                                             }
