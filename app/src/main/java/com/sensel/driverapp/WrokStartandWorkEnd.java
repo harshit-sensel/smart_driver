@@ -31,6 +31,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -455,101 +456,109 @@ public class WrokStartandWorkEnd extends AppCompatActivity {
     }
 
 
-    private void Upload(){
-       // Toast.makeText(context,"entered Upload block",Toast.LENGTH_LONG).show();
+    private void Upload() {
         ProgressDialog nDialog = new ProgressDialog(WrokStartandWorkEnd.this);
+        uploadInternal(nDialog);
+    }
 
-
-        Dbhelper database;
-        database=new Dbhelper(getApplicationContext());
-
-        Cursor res=database.getdata();
-        //Toast.makeText(context,database.getdata().toString(),Toast.LENGTH_LONG).show();
-        if(res.getCount()>0){
-            nDialog.setMessage("Uploading");
-            nDialog.setTitle("Please wait");
-            nDialog.setIndeterminate(false);
-            nDialog.setCancelable(false);
-            nDialog.show();
+    private void uploadInternal(final ProgressDialog nDialog) {
+        final Dbhelper database = new Dbhelper(getApplicationContext());
+        Cursor res = database.getdata();
+        if (res != null && res.getCount() > 0) {
+            if (!nDialog.isShowing() && !isFinishing()) {
+                nDialog.setMessage("Uploading");
+                nDialog.setTitle("Please wait");
+                nDialog.setIndeterminate(false);
+                nDialog.setCancelable(false);
+                nDialog.show();
+            }
             try {
-                String status="" ;
-                String time="";
+                String status = "";
+                String time = "";
+                while (res.moveToNext()) {
+                    status = res.getString(0);
+                    time = res.getString(1);
+                }
+                res.close();
+
                 JSONObject mainObj = new JSONObject();
-                mainObj.put("IMEI",getIMEI());
-                //             mainObj.put("IMEI","867498045562996");
-                while (res.moveToNext()){
-                    status=res.getString(0);
-                    time=res.getString(1);
+                mainObj.put("IMEI", getIMEI());
 
+                String uploadURL = "";
+                if (status.contains("startwork")) {
+                    mainObj.put("startTime", time);
+                    uploadURL = Config.DOMAINURL1 + "/SenselRestService.svc/rest/v3/PostWorkStartData";
+                } else {
+                    mainObj.put("endTime", time);
+                    uploadURL = Config.DOMAINURL1 + "/SenselRestService.svc/rest/v3/PostWorkEndData";
                 }
 
+                Log.e("object", mainObj.toString());
 
-               // Toast.makeText(context,"Entered for start work",Toast.LENGTH_LONG).show();
-                String uploadURL="";
-                if(status.contains("startwork")){
-                    mainObj.put("startTime",time);
-                    uploadURL= Config.DOMAINURL1+"/SenselRestService.svc/rest/v3/PostWorkStartData";
-                }
-                else {
-                    mainObj.put("endTime",time);
-                    uploadURL=Config.DOMAINURL1+"/SenselRestService.svc/rest/v3/PostWorkEndData";
-                }
-
-                Log.e("object",mainObj.toString());
-
-                RequestQueue requestQueue= Volley.newRequestQueue(context);
+                RequestQueue requestQueue = Volley.newRequestQueue(context);
                 JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
                         Request.Method.POST,
                         uploadURL,
                         mainObj,
-
                         new Response.Listener<JSONObject>() {
                             @Override
                             public void onResponse(JSONObject response) {
                                 Log.e("response", response.toString());
-                                String s=response.toString();
                                 try {
-                                    JSONObject jsonObj = new JSONObject(s);
-                                    String name = jsonObj.getString("result");
-                                   // Toast.makeText(context,name.toString(),Toast.LENGTH_LONG).show();
-                                    if(name.contains("Success") || name.contains("Vehicle not assigned")){
-                                       // Toast.makeText(context,name.toString(),Toast.LENGTH_LONG).show();
+                                    String name = response.getString("result");
+                                    if (name.contains("Success") || name.contains("Vehicle not assigned")) {
                                         database.updateyes();
                                         database.deletedata();
-
-                                        //todo consider {} to delete
+                                        // Sequentially upload next pending row if any
+                                        uploadInternal(nDialog);
+                                        return;
                                     }
                                 } catch (JSONException e) {
-                                    Log.e("ex",e.toString());
+                                    Log.e("ex", e.toString());
                                 }
-                                finally {
+                                if (nDialog.isShowing() && !isFinishing()) {
                                     nDialog.dismiss();
-                                    finish();
                                 }
-
+                                finish();
                             }
                         },
                         new Response.ErrorListener() {
                             @Override
                             public void onErrorResponse(VolleyError error) {
-                                nDialog.dismiss();
+                                if (nDialog.isShowing() && !isFinishing()) {
+                                    nDialog.dismiss();
+                                }
                                 finish();
                                 Log.e("error", error.toString());
-
                             }
                         }
                 );
 
+                jsonObjectRequest.setRetryPolicy(new DefaultRetryPolicy(
+                        15000,
+                        0,
+                        DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+                ));
+
                 requestQueue.add(jsonObjectRequest);
 
-            }
-            catch (Exception e){
+            } catch (Exception e) {
                 database.updateno();
-
-                Log.e("ex",e.toString());
+                if (nDialog.isShowing() && !isFinishing()) {
+                    nDialog.dismiss();
+                }
+                finish();
+                Log.e("ex", e.toString());
             }
+        } else {
+            if (res != null) {
+                res.close();
+            }
+            if (nDialog.isShowing() && !isFinishing()) {
+                nDialog.dismiss();
+            }
+            finish();
         }
-
     }
 
 

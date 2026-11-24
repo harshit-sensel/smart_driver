@@ -7,7 +7,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.os.Build;
 import android.os.Handler;
+import android.provider.Settings;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -31,89 +34,107 @@ public class WorktimeUploader extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-
-        Dbhelper DB;
         Log.e("uploading", "----------");
-        DB=new Dbhelper(context);
-        Cursor res=DB.getdata();
-        if (res.getCount()==0){
+        uploadNext(context);
+    }
 
-           // WrokStartandWorkEnd.stopUploadBroadcast();
-
-            Log.e("db","nodata");
+    private void uploadNext(final Context context) {
+        final Dbhelper DB = new Dbhelper(context);
+        Cursor res = DB.getdata();
+        if (res == null || res.getCount() == 0) {
+            if (res != null) {
+                res.close();
+            }
+            Log.e("db", "nodata");
+            return;
         }
-        else {
-            try {
-                String status="" ;
-                String time="";
-                JSONObject mainObj = new JSONObject();
-                mainObj.put("IMEI",IMEINO);
-   //             mainObj.put("IMEI","867498045562996");
-                while (res.moveToNext()){
-                    status=res.getString(0);
-                    time=res.getString(1);
 
-                }
+        try {
+            String status = "";
+            String time = "";
+            while (res.moveToNext()) {
+                status = res.getString(0);
+                time = res.getString(1);
+            }
+            res.close();
 
+            String imei = IMEINO;
+            if (imei == null || imei.trim().isEmpty()) {
+                imei = getDeviceIMEI(context);
+            }
 
+            JSONObject mainObj = new JSONObject();
+            mainObj.put("IMEI", imei);
 
-                String uploadURL="";
-                if(status.contains("startwork")){
-                    mainObj.put("startTime",time);
-                    uploadURL= Config.DOMAINURL1+"/SenselRestService.svc/rest/v3/PostWorkStartData";
-                }
-                else {
-                    mainObj.put("endTime",time);
-                    uploadURL=Config.DOMAINURL1+"/SenselRestService.svc/rest/v3/PostWorkEndData";
-                }
+            String uploadURL = "";
+            if (status.contains("startwork")) {
+                mainObj.put("startTime", time);
+                uploadURL = Config.DOMAINURL1 + "/SenselRestService.svc/rest/v3/PostWorkStartData";
+            } else {
+                mainObj.put("endTime", time);
+                uploadURL = Config.DOMAINURL1 + "/SenselRestService.svc/rest/v3/PostWorkEndData";
+            }
 
-                Log.e("object",mainObj.toString());
+            Log.e("object", mainObj.toString());
 
-                RequestQueue requestQueue= Volley.newRequestQueue(context);
-                JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
-                        Request.Method.POST,
-                        uploadURL,
-                        mainObj,
-
-                        new Response.Listener<JSONObject>() {
-                            @Override
-                            public void onResponse(JSONObject response) {
-                                Log.e("response", response.toString());
-                                String s=response.toString();
-                                try {
-                                    JSONObject jsonObj = new JSONObject(s);
-                                    String name = jsonObj.getString("result");
-                                    if(name.contains("Success") || name.contains("Vehicle not assigned")){
-                                        DB.updateyes();
-                                        DB.deletedata();
-
-                                        //todo consider {} to delete
-                                    }
-                                } catch (JSONException e) {
-                                    Log.e("ex",e.toString());
+            RequestQueue requestQueue = Volley.newRequestQueue(context);
+            JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
+                    Request.Method.POST,
+                    uploadURL,
+                    mainObj,
+                    new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            Log.e("response", response.toString());
+                            try {
+                                String name = response.getString("result");
+                                if (name.contains("Success") || name.contains("Vehicle not assigned")) {
+                                    DB.updateyes();
+                                    DB.deletedata();
+                                    // Successfully uploaded and deleted, process the next pending row
+                                    uploadNext(context);
                                 }
-
-                            }
-                        },
-                        new Response.ErrorListener() {
-                            @Override
-                            public void onErrorResponse(VolleyError error) {
-                                Log.e("error", error.toString());
-
+                            } catch (JSONException e) {
+                                Log.e("ex", e.toString());
                             }
                         }
-                );
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            Log.e("error", error.toString());
+                        }
+                    }
+            );
 
-                requestQueue.add(jsonObjectRequest);
+            jsonObjectRequest.setRetryPolicy(new DefaultRetryPolicy(
+                    15000,
+                    0,
+                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+            ));
 
-            }
-            catch (Exception e){
-                DB.updateno();
+            requestQueue.add(jsonObjectRequest);
 
-                Log.e("ex",e.toString());
-            }
+        } catch (Exception e) {
+            DB.updateno();
+            Log.e("ex", e.toString());
         }
     }
 
-
+    private String getDeviceIMEI(Context context) {
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+            try {
+                TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+                if (tm != null) {
+                    String device_id = tm.getDeviceId();
+                    if (device_id != null && !device_id.isEmpty()) {
+                        return device_id;
+                    }
+                }
+            } catch (Exception ignored) {
+            }
+        }
+        String android_id = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+        return android_id != null ? android_id : "";
+    }
 }
