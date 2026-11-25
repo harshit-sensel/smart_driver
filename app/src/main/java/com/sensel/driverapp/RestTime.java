@@ -107,7 +107,7 @@ public class RestTime extends AppCompatActivity {
 
                         Calendar cal = Calendar.getInstance();
                         cal.setTime(new Date());
-                        cal.add(Calendar.MINUTE, 2); // TEST: 2 minutes for testing notification
+                        cal.add(Calendar.MINUTE, resttime);
                         cal.getTime();
                         logoffdate=dateFormat.format(cal.getTime());
 
