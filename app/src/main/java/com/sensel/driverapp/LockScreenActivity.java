@@ -669,25 +669,17 @@ public class LockScreenActivity extends Activity {
                                             blinkstatus = true;
                                             speedblink();
                                         }
+                                        /* Audio is centrally managed by VoiceAlertManager / SaveMyAppsService to prevent double playback
                                         if ((int) ((System.currentTimeMillis() - lastspeedaudio) / 1000) > 20) {
                                             lastspeedaudio = System.currentTimeMillis();
                                             MediaPlayer mp = new MediaPlayer();
-                                            //Commented by Madhuri --as myWebView is unnecessary code-25-01-2024
-
-                                            //myWebView.getSettings().setUseWideViewPort(true);
-                                            //myWebView.loadUrl("file:///android_asset/simple.html");
                                             Handler handlerUI = new Handler();
                                             handlerUI.postDelayed(new Runnable() {
                                                 @Override
                                                 public void run() {
-                                                    //Added By Madhuri 31122024
-                                                    /*Intent i = new Intent(LockScreenActivity.this, Gridmenu.class);
-                                                    startActivity(i);
-                                                    finish();*/
                                                     Intent intent = new Intent(LockScreenActivity.this, LockScreenActivity.class);
                                                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                                                     LockScreenActivity.this.startActivity(intent);
-
                                                 }
                                             }, 28000);
                                             File dir = new File(getExternalFilesDir(null), "driverapp");
@@ -710,15 +702,16 @@ public class LockScreenActivity extends Activity {
                                                 insertAudioLog("APP-OVERSPEEDING");
                                             }
                                         }
+                                        */
                                     } else {
                                         blinkstatus = false;
                                     }
                                     if (maxSpeed == 25) {
                                         speedometer.setBackgroundColor(Color.RED);
-                                        setupMediaPlayer(getApplicationContext(), 25);
+                                        // Audio centrally handled by VoiceAlertManager
                                     } else if (maxSpeed == 35) {
                                         speedometer.setBackgroundColor(Color.YELLOW);
-                                        setupMediaPlayer(getApplicationContext(), 35);
+                                        // Audio centrally handled by VoiceAlertManager
                                     } else if (parking) {
                                         speedometer.setBackgroundColor(Color.GREEN);
                                     } else {
@@ -782,6 +775,7 @@ public class LockScreenActivity extends Activity {
                                     cirprogressBar.setProgressTintList(ColorStateList.valueOf(Color.RED));
 
                                 cirprogressBar.setProgress(progresspercent);
+                                /* Audio centrally handled by VoiceAlertManager
                                 if (maxdrivingaudio && ((hr == dayHr && min > dayMin) || (hr > dayHr))) {
                                     File dir = new File(getExternalFilesDir(null), "driverapp");
                                     File file = new File(dir, "max_driving_voice.mp3");
@@ -803,6 +797,7 @@ public class LockScreenActivity extends Activity {
                                     }
                                     maxdrivingaudio = false;
                                 }
+                                */
                                 if (cmin == 0) {
                                     if (chr != 0) {
                                         chr--;
@@ -848,6 +843,7 @@ public class LockScreenActivity extends Activity {
                                     conprogressBar.setProgressTintList(ColorStateList.valueOf(Color.RED));
                                 conprogressBar.setProgress(cprogresspercent);
 
+                                /* Audio centrally handled by VoiceAlertManager
                                 if (condrivingaudio && ((cdec_h == tripHr && cdecimal_min >= tripMin) || cdec_h > tripHr)) {
                                     File dir = new File(getExternalFilesDir(null), "driverapp");
                                     File file = new File(dir, "continuous_driving_voice.mp3");
@@ -871,10 +867,18 @@ public class LockScreenActivity extends Activity {
                                     condrivingaudio = false;
                                 } else
                                     resttime.setText("Vehicle is moving");
+                                */
+                                if ((cdec_h == tripHr && cdecimal_min >= tripMin) || cdec_h > tripHr) {
+                                    resttime.setText("Plan to take rest");
+                                    condrivingaudio = false;
+                                } else {
+                                    resttime.setText("Vehicle is moving");
+                                }
                                 rest = 0;
                                 restaudio = true;
 
                                 if (!nightdrivingallowed) {
+                                    /* Audio centrally handled by VoiceAlertManager
                                     int currenttime = Calendar.getInstance().get(Calendar.HOUR_OF_DAY) * 100 + Calendar.getInstance().get(Calendar.MINUTE);
                                     if (nightaudio && ((currenttime > nightStart) || (currenttime < nightEnd))) {
                                         File dir = new File(getExternalFilesDir(null), "driverapp");
@@ -897,6 +901,7 @@ public class LockScreenActivity extends Activity {
                                         }
                                         nightaudio = false;
                                     }
+                                    */
                                 }
                             } else {
                                 maxdrivingaudio = true;
@@ -929,41 +934,11 @@ public class LockScreenActivity extends Activity {
     }
 
     private void setupMediaPlayer(Context mContext, int limit) {
-        if (limit == 25) {
-            MediaPlayer mediaPlayer =
-                    MediaPlayer.create(mContext, R.raw.speedlimit25);
-            mediaPlayer.start();
-        }
-
-        if (limit == 35) {
-            MediaPlayer mediaPlayer =
-                    MediaPlayer.create(mContext, R.raw.speedlimit35);
-            mediaPlayer.start();
-        }
-
-
+        VoiceAlertManager.checkAndPlayHazardSpot(mContext, limit, lat, lng);
     }
 
     private void VoiceAlertForParking(Context mContext, int limit) {
-        if (limit == 15) {
-            MediaPlayer mediaPlayer =
-                    MediaPlayer.create(mContext, R.raw.park15km);
-            mediaPlayer.start();
-        }
-
-        if (limit == 10) {
-            MediaPlayer mediaPlayer =
-                    MediaPlayer.create(mContext, R.raw.park10km);
-            mediaPlayer.start();
-        }
-
-        if (limit == 3) {
-            MediaPlayer mediaPlayer =
-                    MediaPlayer.create(mContext, R.raw.park3km);
-            mediaPlayer.start();
-        }
-
-
+        VoiceAlertManager.checkAndPlayParking(mContext, limit, lat, lng);
     }
 
     public static void workProgessbarUpdator(int workdone) {
@@ -1021,31 +996,29 @@ public class LockScreenActivity extends Activity {
                     public void run() {
 
                         try {
-                            String currdate;
-                            java.text.DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
-                            Date date = new Date();
-                            currdate = dateFormat.format(date);
-                            if (endtime.compareTo(currdate) > 0) {
+                            if (endtime != null && !endtime.isEmpty()) {
                                 SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
                                 Date d1 = sdf.parse(endtime);
-                                Date d2 = sdf.parse(currdate);
+                                Date d2 = new Date();
 
-                                long difference_In_Time = d1.getTime() - d2.getTime();
-                                long difference_In_Minutes = (difference_In_Time / 1000) / 60;
+                                if (d1.after(d2)) {
+                                    long difference_In_Time = d1.getTime() - d2.getTime();
+                                    long difference_In_Minutes = (difference_In_Time / 1000) / 60;
 
-                                Log.e("d", String.valueOf(difference_In_Minutes));
+                                    Log.e("d", String.valueOf(difference_In_Minutes));
 
-
-                                Long l = new Long(difference_In_Minutes);
-                                hrs = l.intValue();
-                                LockScreenActivity.workProgessbarUpdator(hrs);
-                                workProgessbarUpdator(hrs);
+                                    Long l = new Long(difference_In_Minutes);
+                                    hrs = l.intValue();
+                                    LockScreenActivity.workProgessbarUpdator(hrs);
+                                    workProgessbarUpdator(hrs);
+                                } else {
+                                    LockScreenActivity.workProgessbarUpdator(0);
+                                    workProgessbarUpdator(0);
+                                }
                             } else {
                                 LockScreenActivity.workProgessbarUpdator(0);
                                 workProgessbarUpdator(0);
                             }
-
-
                         } catch (Exception e) {
 
                             Log.e("ex", e.toString());

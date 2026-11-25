@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ServiceInfo;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
@@ -418,10 +419,18 @@ public class SaveMyAppsService extends android.app.Service
             public void run() {
                 LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
                 if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) && Gridmenu.points!=null && Gridmenu.points.length == 8 && !Gridmenu.points[7].contains("NA")) {
-                    if(isNetworkAvailable() && vehicle_speed[3].contains("1")) {
+                    float phoneSpeed = GPSTracker.currentSpeed;
+                    if (phoneSpeed <= 0 && LockScreenActivity.speed > 0 && LockScreenActivity.speed != 100000) {
+                        phoneSpeed = LockScreenActivity.speed;
+                    }
+
+                    if(isNetworkAvailable() && vehicle_speed != null && vehicle_speed.length > 3 && vehicle_speed[3] != null && vehicle_speed[3].contains("1") && vehicle_speed[1] != null) {
                         if (Float.valueOf(vehicle_speed[1]) > 10) {
+                            if (phoneSpeed > 10) {
+                                evaluateAndPlayVoiceAlerts(phoneSpeed);
+                            }
                             if (powerManager.isScreenOn()) {
-                                if (LockScreenActivity.speed > 10) {
+                                if (phoneSpeed > 10) {
                                     Intent i = new Intent(context, LockScreenActivity.class);
                                     i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                     LockScreenActivity.flag = false;
@@ -429,7 +438,11 @@ public class SaveMyAppsService extends android.app.Service
                                         ActivityLog("Mobile Locked");
                                         blocked = true;
                                     }
-                                    context.startActivity(i);
+                                    try {
+                                        context.startActivity(i);
+                                    } catch (Exception e) {
+                                        Log.e("SaveMyAppsService", "startActivity: " + e.getMessage());
+                                    }
                                 } else {
                                     LockScreenActivity.flag = true;
                                     blocked = false;
@@ -445,7 +458,8 @@ public class SaveMyAppsService extends android.app.Service
                     }
                     else{
                         if(powerManager.isScreenOn()) {
-                            if (LockScreenActivity.speed > 10) {
+                            if (phoneSpeed > 10) {
+                                evaluateAndPlayVoiceAlerts(phoneSpeed);
                                 Intent i = new Intent(context, LockScreenActivity.class);
                                 i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                 LockScreenActivity.flag = false;
@@ -453,7 +467,11 @@ public class SaveMyAppsService extends android.app.Service
                                     ActivityLog("Mobile Locked");
                                     blocked = true;
                                 }
-                                context.startActivity(i);
+                                try {
+                                    context.startActivity(i);
+                                } catch (Exception e) {
+                                    Log.e("SaveMyAppsService", "startActivity: " + e.getMessage());
+                                }
                             } else {
                                 LockScreenActivity.flag = true;
                                 blocked = false;
@@ -472,6 +490,113 @@ public class SaveMyAppsService extends android.app.Service
                 }
         //}, 0, 1, TimeUnit.SECONDS); //for every second check
     }, 0, 5, TimeUnit.SECONDS); //for every second check
+    }
+
+    private void evaluateAndPlayVoiceAlerts(float phoneSpeed) {
+        try {
+            double lat = 0;
+            double lng = 0;
+            if (GPSTracker.lastLocation != null) {
+                lat = GPSTracker.lastLocation.getLatitude();
+                lng = GPSTracker.lastLocation.getLongitude();
+            } else if (GPSTracker.LATLONG != null && GPSTracker.LATLONG.contains(",")) {
+                String[] parts = GPSTracker.LATLONG.split(",");
+                try {
+                    lat = Double.parseDouble(parts[0]);
+                    lng = Double.parseDouble(parts[1]);
+                } catch (Exception ignored) {}
+            }
+
+            if (lat == 0 && lng == 0) {
+                return;
+            }
+
+            int maxSpeed = pref.getInt("maxSpeed", 60);
+            int hazardSpeedLimit = maxSpeed;
+            boolean nightDrivingAllowed = false;
+
+            // Query JRM hazard spots from local SQLite
+            SQLiteDatabase jrmDb = openOrCreateDatabase("totaljrmdb", Context.MODE_PRIVATE, null);
+            jrmDb.execSQL("CREATE TABLE IF NOT EXISTS jrmspots(minlat DECIMAL(9,6),maxlat DECIMAL(9,6),minlng DECIMAL(9,6),maxlng DECIMAL(9,6),type VARCHAR);");
+            String query = "SELECT DISTINCT type FROM jrmspots WHERE minlat<'" + lat + "' and maxlat>'" + lat + "' and minlng<'" + lng + "' and maxlng>'" + lng + "'";
+            Cursor cursor = jrmDb.rawQuery(query, null);
+            if (cursor != null && cursor.getCount() > 0) {
+                cursor.moveToFirst();
+                do {
+                    String type = cursor.getString(0);
+                    if (type != null) {
+                        if (type.contains("Accident")) {
+                            hazardSpeedLimit = 25;
+                        } else if (type.contains("Blind") && hazardSpeedLimit != 25) {
+                            hazardSpeedLimit = 35;
+                        }
+                        if (type.contains("night")) {
+                            nightDrivingAllowed = true;
+                        }
+                    }
+                } while (cursor.moveToNext());
+                cursor.close();
+            }
+            jrmDb.close();
+
+            // 1 & 2. Hazard spots announcement (speedlimit25 / speedlimit35)
+            if (hazardSpeedLimit == 25) {
+                VoiceAlertManager.checkAndPlayHazardSpot(context, 25, lat, lng);
+            } else if (hazardSpeedLimit == 35) {
+                VoiceAlertManager.checkAndPlayHazardSpot(context, 35, lat, lng);
+            }
+
+            // 3. Overspeed alert (slowdown_voice.mp3)
+            int effectiveMaxSpeed = hazardSpeedLimit;
+            if (phoneSpeed > effectiveMaxSpeed) {
+                VoiceAlertManager.checkAndPlayOverspeed(context, phoneSpeed, effectiveMaxSpeed, lat, lng);
+            }
+
+            // 4. Fatigue alerts (Continuous driving & Max driving)
+            String run_time = pref.getString("runAndContinuousTime", "");
+            if (run_time != null && run_time.contains("#")) {
+                String[] data = run_time.split("#");
+                if (data.length >= 3) {
+                    try {
+                        String[] dayParts = data[0].split(" ");
+                        int dayDrivenHr = Integer.parseInt(dayParts[0].split("h")[0]);
+                        int dayDrivenMin = Integer.parseInt(dayParts[2].split("m")[0]);
+
+                        int dayHrLimit = pref.getInt("dayHr", 8);
+                        int dayMinLimit = pref.getInt("dayMin", 0);
+                        if ((dayDrivenHr > dayHrLimit) || (dayDrivenHr == dayHrLimit && dayDrivenMin >= dayMinLimit)) {
+                            VoiceAlertManager.checkAndPlayFatigueAlert(context, "MAX_DRIVING", lat, lng);
+                        }
+
+                        String[] tripParts = data[2].split(" ");
+                        int tripDrivenHr = Integer.parseInt(tripParts[0].split("h")[0]);
+                        int tripDrivenMin = Integer.parseInt(tripParts[2].split("m")[0]);
+
+                        int tripHrLimit = pref.getInt("tripHr", 4);
+                        int tripMinLimit = pref.getInt("tripMin", 0);
+                        if ((tripDrivenHr > tripHrLimit) || (tripDrivenHr == tripHrLimit && tripDrivenMin >= tripMinLimit)) {
+                            VoiceAlertManager.checkAndPlayFatigueAlert(context, "CONTINUOUS_DRIVING", lat, lng);
+                        }
+                    } catch (Exception ex) {
+                        Log.e("SaveMyAppsService", "Error parsing runAndContinuousTime: " + ex.getMessage());
+                    }
+                }
+            }
+
+            // 5. Night driving alert
+            if (!nightDrivingAllowed) {
+                int nightStart = pref.getInt("nightStart", 2200);
+                int nightEnd = pref.getInt("nightEnd", 500);
+                int currentTime = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY) * 100
+                        + java.util.Calendar.getInstance().get(java.util.Calendar.MINUTE);
+                if (currentTime > nightStart || currentTime < nightEnd) {
+                    VoiceAlertManager.checkAndPlayFatigueAlert(context, "NIGHT_DRIVING", lat, lng);
+                }
+            }
+
+        } catch (Exception e) {
+            Log.e("SaveMyAppsService", "Error in evaluateAndPlayVoiceAlerts: " + e.getMessage());
+        }
     }
 
     private boolean isNetworkAvailable() {

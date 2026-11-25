@@ -29,6 +29,8 @@ public class GPSTracker extends Service implements LocationListener {
     // Get Class Name
     private static String TAG = GPSTracker.class.getName();
     public static String LATLONG = "0,0";
+    public static float currentSpeed = 0f;
+    public static Location lastLocation = null;
     private final Context mContext;
     public static Activity mActivity;
     private static final int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 100;
@@ -108,8 +110,12 @@ public class GPSTracker extends Service implements LocationListener {
                             location = locationManager
                                     .getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
                             if (location != null) {
+                                lastLocation = location;
                                 latitude = location.getLatitude();
                                 longitude = location.getLongitude();
+                                if (location.hasSpeed()) {
+                                    currentSpeed = (location.getSpeed() * 3600) / 1000f;
+                                }
                             }
                         }
                     }
@@ -137,8 +143,12 @@ public class GPSTracker extends Service implements LocationListener {
                                 location = locationManager
                                         .getLastKnownLocation(LocationManager.GPS_PROVIDER);
                                 if (location != null) {
+                                    lastLocation = location;
                                     latitude = location.getLatitude();
                                     longitude = location.getLongitude();
+                                    if (location.hasSpeed()) {
+                                        currentSpeed = (location.getSpeed() * 3600) / 1000f;
+                                    }
                                 }
                             }
                         }
@@ -157,10 +167,15 @@ public class GPSTracker extends Service implements LocationListener {
     @Override
     public void onLocationChanged(Location location) {
         if (location != null) {
+            this.location = location;
+            lastLocation = location;
             latitude = location.getLatitude();
             longitude = location.getLongitude();
-            Log.e("lat",LATLONG);
-            LATLONG=latitude+","+longitude;
+            LATLONG = latitude + "," + longitude;
+            if (location.hasSpeed()) {
+                currentSpeed = (location.getSpeed() * 3600) / 1000f;
+            }
+            Log.e("lat", LATLONG);
         }
     }
 
