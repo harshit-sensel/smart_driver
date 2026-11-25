@@ -73,10 +73,14 @@ public class WorktimeBrodcast extends BroadcastReceiver {
                             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
                     );
                     if (alarmManager != null) {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, endDate.getTime(), pendingIntent);
-                        } else {
-                            alarmManager.setExact(AlarmManager.RTC_WAKEUP, endDate.getTime(), pendingIntent);
+                        try {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                                alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, endDate.getTime(), pendingIntent);
+                            } else {
+                                alarmManager.set(AlarmManager.RTC_WAKEUP, endDate.getTime(), pendingIntent);
+                            }
+                        } catch (Exception e) {
+                            Log.e("WorktimeBrodcast", "Error rescheduling alarm: " + e.getMessage());
                         }
                     }
                     Log.d("WorktimeBrodcast", "Rescheduled alarm after reboot for " + endtime);

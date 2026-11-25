@@ -212,8 +212,14 @@ public class WrokStartandWorkEnd extends AppCompatActivity {
                             dialog.dismiss();
                         //    Toast.makeText(context,"Done",Toast.LENGTH_LONG).show();
                            // finish();
+                        } catch (Exception e){
+                            Log.e("WrokStartandWorkEnd", "Error in start work: ", e);
+                            try {
+                                if (dialog != null && dialog.isShowing()) {
+                                    dialog.dismiss();
+                                }
+                            } catch (Exception ignored) {}
                         }
-                        catch (Exception e){ }
                     }
                 });
 
@@ -339,17 +345,21 @@ public class WrokStartandWorkEnd extends AppCompatActivity {
     }
 
     private void setRepeataction(long triggerAtMillis) {
-        AlarmManager alarmManager=(AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        Intent intent=new Intent(this, WorktimeBrodcast.class);
-        PendingIntent pendingIntent=PendingIntent.getBroadcast(this, 2, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-        if (alarmManager != null) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent);
-            } else {
-                alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent);
+        try {
+            AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+            Intent intent = new Intent(this, WorktimeBrodcast.class);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 2, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+            if (alarmManager != null) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent);
+                } else {
+                    alarmManager.set(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent);
+                }
             }
+            Log.e("alarm", "Work alarm set for " + triggerAtMillis);
+        } catch (Exception e) {
+            Log.e("alarm", "Error setting work alarm: " + e.getMessage());
         }
-        Log.e("alarm","Work alarm set for " + triggerAtMillis);
     }
 
     private void stoplararm(){

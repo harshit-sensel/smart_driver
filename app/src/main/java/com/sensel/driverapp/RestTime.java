@@ -149,10 +149,15 @@ public class RestTime extends AppCompatActivity {
                             finish();
                             Toast.makeText(context,"Done",Toast.LENGTH_LONG).show();
 
+                        } catch (Exception e){
+                            Log.e("RestTime", "Error starting rest: ", e);
+                            try {
+                                if (dialog != null && dialog.isShowing()) {
+                                    dialog.dismiss();
+                                }
+                            } catch (Exception ignored) {}
+                            finish();
                         }
-
-
-                        catch (Exception e){ }
 
 
                     }
@@ -257,22 +262,26 @@ public class RestTime extends AppCompatActivity {
     }
 
     private void setRepeataction(long triggerAtMillis) {
-        AlarmManager alarmManager=(AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        Intent notifyIntent = new Intent(this, RestTimeBroadcast.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(
-                this,
-                3,
-                notifyIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
-        );
-        if (alarmManager != null) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent);
-            } else {
-                alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent);
+        try {
+            AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+            Intent notifyIntent = new Intent(this, RestTimeBroadcast.class);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                    this,
+                    3,
+                    notifyIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+            );
+            if (alarmManager != null) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent);
+                } else {
+                    alarmManager.set(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent);
+                }
             }
+            Log.e("alarm", "Rest alarm set for " + triggerAtMillis);
+        } catch (Exception e) {
+            Log.e("alarm", "Error setting rest alarm: " + e.getMessage());
         }
-        Log.e("alarm","Rest alarm set for " + triggerAtMillis);
     }
 
 
