@@ -11,6 +11,7 @@ import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -201,7 +202,9 @@ public class WrokStartandWorkEnd extends AppCompatActivity {
 
                             long time= System.currentTimeMillis();
 
-                            //setRepeataction(time);
+                            if (d1 != null) {
+                                setRepeataction(d1.getTime());
+                            }
 
                             uploaderBroadcast(time);
 
@@ -235,7 +238,7 @@ public class WrokStartandWorkEnd extends AppCompatActivity {
                     @Override
                     public void onClick(View v) {
 
-                        //stoplararm();
+                        stoplararm();
 
                         DB=new Dbhelper(getApplicationContext());
                         try{
@@ -335,27 +338,34 @@ public class WrokStartandWorkEnd extends AppCompatActivity {
         }
     }
 
-    private void setRepeataction(long time) {
-
+    private void setRepeataction(long triggerAtMillis) {
         AlarmManager alarmManager=(AlarmManager) getSystemService(Context.ALARM_SERVICE);
         Intent intent=new Intent(this, WorktimeBrodcast.class);
         PendingIntent pendingIntent=PendingIntent.getBroadcast(this, 2, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP,
-                time,30*60*1000,
-                pendingIntent);//constat need to declare as varable interaltime
-        Log.e("alarm","set");
+        if (alarmManager != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent);
+            } else {
+                alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent);
+            }
+        }
+        Log.e("alarm","Work alarm set for " + triggerAtMillis);
     }
 
     private void stoplararm(){
-        PendingIntent alarmIntent;
-        alarmIntent = PendingIntent.getBroadcast(this, 2,
+        PendingIntent alarmIntent = PendingIntent.getBroadcast(this, 2,
                 new Intent(this, WorktimeBrodcast.class),
-                PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
         AlarmManager alarmManager=(AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        alarmManager.cancel(alarmIntent);
+        if (alarmManager != null && alarmIntent != null) {
+            alarmManager.cancel(alarmIntent);
+        }
 
-
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        if (notificationManager != null) {
+            notificationManager.cancel(WorktimeBrodcast.NOTIFICATION_ID);
+        }
     }
 
 

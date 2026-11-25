@@ -1,5 +1,6 @@
 package com.sensel.driverapp.utility;
 
+import android.app.AlarmManager;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -32,7 +33,8 @@ import static android.app.PendingIntent.FLAG_MUTABLE;
 import static android.content.Context.MODE_PRIVATE;
 
 public class WorktimeBrodcast extends BroadcastReceiver {
-    private static final String CHANNEL_ID ="channel_0111";
+    private static final String CHANNEL_ID = "channel_0111";
+    public static final int NOTIFICATION_ID = 1001;
     public static Long totalmins;
     public static int hrs;
     public static int mincounter;
@@ -41,103 +43,86 @@ public class WorktimeBrodcast extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.e("brodcast","called");
-        mContext=context;
-
+        Log.e("WorktimeBrodcast", "onReceive called");
+        mContext = context;
 
         try {
-            String currdate;
-
-            //getting current date
-            DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
-            Date date = new Date();
-            currdate=dateFormat.format(date);
             SharedPreferences prefs = context.getSharedPreferences("WORKSTARTEND", MODE_PRIVATE);
+            String buttonState = prefs.getString("workbtn", "start");
             String endtime = prefs.getString("enddate", "");
-            totalmins=prefs.getLong("minsdiffrence",0);
 
-            Log.e("total",String.valueOf(totalmins));
-
-
-            if(endtime.compareTo(currdate)>0){
-                mincounter++;
-                SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
-                Date d1 = sdf.parse(endtime);
-                Date d2 = sdf.parse(currdate);
-
-                long difference_In_Time = d1.getTime() - d2.getTime();
-                long difference_In_Minutes = (difference_In_Time  / 1000) / 60;
-
-                Log.e("d",String.valueOf(difference_In_Minutes));
-
-
-
-                Long l= new Long(difference_In_Minutes);
-                hrs=l.intValue();
-//                LockScreenActivity.workProgessbarUpdator(hrs);
-//                WrokStartandWorkEnd.workProgessbarUpdator(hrs);
+            // If work is not currently active, do nothing
+            if (!"stop".equalsIgnoreCase(buttonState) || endtime == null || endtime.trim().isEmpty()) {
+                Log.d("WorktimeBrodcast", "Work is not active or enddate empty, ignoring.");
+                return;
             }
 
-            else{
-//                LockScreenActivity.workProgessbarUpdator(0);
-//                WrokStartandWorkEnd.workProgessbarUpdator(0);
+            SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+            Date endDate = sdf.parse(endtime);
+            Date now = new Date();
 
-                createNotificationChannel();
-
-
-                Intent nintent = new Intent(mContext, WrokStartandWorkEnd.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                PendingIntent pendingIntent = PendingIntent.getActivity(mContext, 0, nintent, PendingIntent.FLAG_IMMUTABLE);
-
-                NotificationCompat.Builder builder = new NotificationCompat.Builder(mContext, CHANNEL_ID)
-                        .setSmallIcon(R.mipmap.icon)
-                        .setContentTitle("Work time ends")
-                        .setContentText("Click to close the work")
-                        .setPriority(NotificationCompat.PRIORITY_HIGH)
-                        // Set the intent that will fire when the user taps the notification
-                        .setContentIntent(pendingIntent)
-                        .setAutoCancel(true);
-
-                NotificationManagerCompat notificationManager = NotificationManagerCompat.from(mContext);
-
-                notificationManager.notify(2, builder.build());
-
-                setupMediaPlayer(mContext);
-
+            // If phone rebooted and endtime has not arrived yet, reschedule the alarm
+            if (Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction())) {
+                if (endDate != null && endDate.after(now)) {
+                    AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+                    Intent workIntent = new Intent(context, WorktimeBrodcast.class);
+                    PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                            context,
+                            2,
+                            workIntent,
+                            PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+                    );
+                    if (alarmManager != null) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, endDate.getTime(), pendingIntent);
+                        } else {
+                            alarmManager.setExact(AlarmManager.RTC_WAKEUP, endDate.getTime(), pendingIntent);
+                        }
+                    }
+                    Log.d("WorktimeBrodcast", "Rescheduled alarm after reboot for " + endtime);
+                    return;
+                }
             }
 
+            // End time has arrived: show clean system notification
+            createNotificationChannel();
+
+            Intent nintent = new Intent(mContext, WrokStartandWorkEnd.class);
+            nintent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            PendingIntent pendingIntent = PendingIntent.getActivity(
+                    mContext,
+                    0,
+                    nintent,
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+            );
+
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(mContext, CHANNEL_ID)
+                    .setSmallIcon(R.mipmap.icon)
+                    .setContentTitle("Work Shift Completed")
+                    .setContentText("Your work shift has completed. Tap to end work.")
+                    .setPriority(NotificationCompat.PRIORITY_HIGH)
+                    .setContentIntent(pendingIntent)
+                    .setAutoCancel(true);
+
+            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(mContext);
+            notificationManager.notify(NOTIFICATION_ID, builder.build());
+
+        } catch (Exception e) {
+            Log.e("WorktimeBrodcast", "Error in onReceive: " + e.toString());
         }
-        catch (Exception e){
-
-            Log.e("ex",e.toString());
-
-        }
-
-
-
-    }
-
-    private void setupMediaPlayer(Context mContext) {
-
-        MediaPlayer mediaPlayer =
-                MediaPlayer.create(mContext,R.raw.max_driving);
-        mediaPlayer.start();
     }
 
     private void createNotificationChannel() {
-        // Create the NotificationChannel, but only on API 26+ because
-        // the NotificationChannel class is new and not in the support library
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-
             int importance = NotificationManager.IMPORTANCE_HIGH;
             NotificationChannel channel = new NotificationChannel(CHANNEL_ID,
-                    "Work time ends",
+                    "Work Shift Alert",
                     importance);
-            channel.setDescription("Click to close the work");
-            // Register the channel with the system; you can't change the importance
-            // or other notification behaviors after this
+            channel.setDescription("Alert when work shift ends");
             NotificationManager notificationManager = mContext.getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(channel);
+            if (notificationManager != null) {
+                notificationManager.createNotificationChannel(channel);
+            }
         }
     }
 }

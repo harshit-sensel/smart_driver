@@ -8,12 +8,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.Dialog;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
@@ -139,8 +141,9 @@ public class RestTime extends AppCompatActivity {
 
                             Log.e("difference_In_Time",String.valueOf(difference_In_Time));
 
-                            long time= System.currentTimeMillis();
-                            //setRepeataction(time);
+                            if (d1 != null) {
+                                setRepeataction(d1.getTime());
+                            }
 
                             dialog.dismiss();
                             finish();
@@ -253,11 +256,8 @@ public class RestTime extends AppCompatActivity {
 
     }
 
-    private void setRepeataction(long time) {
-
+    private void setRepeataction(long triggerAtMillis) {
         AlarmManager alarmManager=(AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        /*Intent intent=new Intent(this, RestTimeBroadcast.class);
-        PendingIntent pendingIntent=PendingIntent.getBroadcast(this, 3,intent,PendingIntent.FLAG_MUTABLE);*/
         Intent notifyIntent = new Intent(this, RestTimeBroadcast.class);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(
                 this,
@@ -265,25 +265,31 @@ public class RestTime extends AppCompatActivity {
                 notifyIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
-        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP,
-                time,1*60*1000,
-                pendingIntent);
-        Log.e("alarm","set");
+        if (alarmManager != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent);
+            } else {
+                alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent);
+            }
+        }
+        Log.e("alarm","Rest alarm set for " + triggerAtMillis);
     }
 
 
     private void stoplararm(){
-        PendingIntent alarmIntent;
-        /*alarmIntent = PendingIntent.getBroadcast(this, 3,
+        PendingIntent alarmIntent = PendingIntent.getBroadcast(this, 3,
                 new Intent(this, RestTimeBroadcast.class),
-                PendingIntent.FLAG_CANCEL_CURRENT);*/
-        alarmIntent = PendingIntent.getBroadcast(this, 3,
-                new Intent(this, RestTimeBroadcast.class),
-                PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
         AlarmManager alarmManager=(AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        alarmManager.cancel(alarmIntent);
+        if (alarmManager != null && alarmIntent != null) {
+            alarmManager.cancel(alarmIntent);
+        }
+
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        if (notificationManager != null) {
+            notificationManager.cancel(RestTimeBroadcast.NOTIFICATION_ID);
+        }
     }
 
     private void countdowntimer(){
