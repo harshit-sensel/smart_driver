@@ -169,7 +169,7 @@ public class WrokStartandWorkEnd extends AppCompatActivity {
                         Calendar cal = Calendar.getInstance();
                         cal.setTime(new Date());
 
-                        cal.add(Calendar.MINUTE, CustomAndroidGridViewAdapter.worktime);
+                        cal.add(Calendar.MINUTE, 2); // TEST: 2 minutes for testing notification
                         cal.getTime();
                         logoffdate=dateFormat.format(cal.getTime());
 
