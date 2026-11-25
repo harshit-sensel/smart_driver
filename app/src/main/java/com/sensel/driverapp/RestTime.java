@@ -177,6 +177,11 @@ public class RestTime extends AppCompatActivity {
                     public void onClick(View v) {
                         stoplararm();
 
+                        if (timer != null) {
+                            timer.cancel();
+                            timer = null;
+                        }
+                        restProgessbarUpdator(0);
 
                         SharedPreferences sharedPref = getApplicationContext().getSharedPreferences(prefname,MODE_PRIVATE);
 
@@ -292,34 +297,23 @@ public class RestTime extends AppCompatActivity {
             @Override
             public void run() {
                 try{
-                    String currdate;
-
-                    //getting current date
-                    DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
-                    Date date = new Date();
-                    currdate=dateFormat.format(date);
-
-
-
-                    if(endtime.compareTo(currdate)>0){
+                    if (endtime != null && !endtime.isEmpty()) {
                         SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
                         Date d1 = sdf.parse(endtime);
-                        Date d2 = sdf.parse(currdate);
+                        Date d2 = new Date();
 
-                        long difference_In_Time = d1.getTime() - d2.getTime();
-                        long difference_In_Minutes = (difference_In_Time  / 1000) / 60;
+                        if (d1.after(d2)) {
+                            long difference_In_Time = d1.getTime() - d2.getTime();
+                            long difference_In_Minutes = (difference_In_Time  / 1000) / 60;
 
-                        //Log.e("diffrence",String.valueOf(difference_In_Minutes));
-
-
-                        Long l= new Long(difference_In_Minutes);
-                        hrs=l.intValue();
-                        restProgessbarUpdator(hrs);
-
-
-                    }
-
-                    else{
+                            Long l= new Long(difference_In_Minutes);
+                            hrs=l.intValue();
+                            restProgessbarUpdator(hrs);
+                        }
+                        else{
+                            restProgessbarUpdator(0);
+                        }
+                    } else {
                         restProgessbarUpdator(0);
                     }
 
@@ -331,5 +325,14 @@ public class RestTime extends AppCompatActivity {
                 }
             }
         }, 0,60000);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (timer != null) {
+            timer.cancel();
+            timer = null;
+        }
     }
 }

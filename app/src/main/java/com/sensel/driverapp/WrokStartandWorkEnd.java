@@ -272,6 +272,13 @@ public class WrokStartandWorkEnd extends AppCompatActivity {
                             Log.e("exception",e.toString());
                         }
 
+                        if (timer != null) {
+                            timer.cancel();
+                            timer = null;
+                        }
+                        workProgessbarUpdator(0);
+                        LockScreenActivity.workProgessbarUpdator(0);
+
                         SharedPreferences sharedPref = getApplicationContext().getSharedPreferences(prefname,MODE_PRIVATE);
                         SharedPreferences.Editor editor = sharedPref.edit();
 
@@ -581,33 +588,30 @@ public class WrokStartandWorkEnd extends AppCompatActivity {
             public void run() {
 
         try {
-            String currdate;
-            DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
-            Date date = new Date();
-            currdate=dateFormat.format(date);
-            if(endtime.compareTo(currdate)>0){
+            if (endtime != null && !endtime.isEmpty()) {
                 SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
                 Date d1 = sdf.parse(endtime);
-                Date d2 = sdf.parse(currdate);
+                Date d2 = new Date();
 
-                long difference_In_Time = d1.getTime() - d2.getTime();
-                long difference_In_Minutes = (difference_In_Time  / 1000) / 60;
+                if (d1.after(d2)) {
+                    long difference_In_Time = d1.getTime() - d2.getTime();
+                    long difference_In_Minutes = (difference_In_Time  / 1000) / 60;
 
-                //Log.e("diffrence",String.valueOf(difference_In_Minutes));
+                    //Log.e("diffrence",String.valueOf(difference_In_Minutes));
 
-
-
-                Long l= new Long(difference_In_Minutes);
-                hrs=l.intValue();
-                LockScreenActivity.workProgessbarUpdator(hrs);
-                workProgessbarUpdator(hrs);
-            }
-            else {
+                    Long l= new Long(difference_In_Minutes);
+                    hrs=l.intValue();
+                    LockScreenActivity.workProgessbarUpdator(hrs);
+                    workProgessbarUpdator(hrs);
+                }
+                else {
+                    LockScreenActivity.workProgessbarUpdator(0);
+                    workProgessbarUpdator(0);
+                }
+            } else {
                 LockScreenActivity.workProgessbarUpdator(0);
                 workProgessbarUpdator(0);
             }
-
-
         }
         catch (Exception e){
 
@@ -618,6 +622,15 @@ public class WrokStartandWorkEnd extends AppCompatActivity {
             }
         }, 0,60000);
 
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (timer != null) {
+            timer.cancel();
+            timer = null;
+        }
     }
 
 }
