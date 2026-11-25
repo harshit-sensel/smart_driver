@@ -350,11 +350,7 @@ public class WrokStartandWorkEnd extends AppCompatActivity {
             Intent intent = new Intent(this, WorktimeBrodcast.class);
             PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 2, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
             if (alarmManager != null) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent);
-                } else {
-                    alarmManager.set(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent);
-                }
+                alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent);
             }
             Log.e("alarm", "Work alarm set for " + triggerAtMillis);
         } catch (Exception e) {

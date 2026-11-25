@@ -71,11 +71,7 @@ public class RestTimeBroadcast extends BroadcastReceiver {
                     );
                     if (alarmManager != null) {
                         try {
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                                alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, endDate.getTime(), pendingIntent);
-                            } else {
-                                alarmManager.set(AlarmManager.RTC_WAKEUP, endDate.getTime(), pendingIntent);
-                            }
+                            alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, endDate.getTime(), pendingIntent);
                         } catch (Exception e) {
                             Log.e("RestTimeBroadcast", "Error rescheduling alarm: " + e.getMessage());
                         }
