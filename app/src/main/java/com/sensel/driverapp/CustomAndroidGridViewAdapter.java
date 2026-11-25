@@ -319,7 +319,7 @@ public class CustomAndroidGridViewAdapter extends BaseAdapter {
                             } else if (Gridmenu.points.length == 8) {
                                 Intent i = new Intent(mContext, Driver_Feedback.class);
                                 i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                // ActivityLog("Customer Feedback");
+                                ActivityLog("Customer Feedback");
                                 mContext.startActivity(i);
                             } else
                                 Toast.makeText(mContext, "No vehicle assigned", Toast.LENGTH_SHORT).show();
@@ -418,6 +418,7 @@ public class CustomAndroidGridViewAdapter extends BaseAdapter {
                         if (isNetworkAvailable()) {
                             Intent i = new Intent(mContext, Driver_Manual_List.class);
                             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            ActivityLog("Driver Manual");
                             mContext.startActivity(i);
                         } else
                             Toast.makeText(mContext, "No internet", Toast.LENGTH_SHORT).show();
@@ -426,6 +427,7 @@ public class CustomAndroidGridViewAdapter extends BaseAdapter {
                         if (isNetworkAvailable()) {
                             Intent i = new Intent(mContext, See_Route.class);
                             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            ActivityLog("See JRM Route");
                             mContext.startActivity(i);
                         } else
                             Toast.makeText(mContext, "No internet", Toast.LENGTH_SHORT).show();
@@ -435,6 +437,7 @@ public class CustomAndroidGridViewAdapter extends BaseAdapter {
                             Toast.makeText(mContext, "Please restart app", Toast.LENGTH_SHORT).show();
                             //Toast.makeText(mContext, "Could not find vehicle id, please restart app", Toast.LENGTH_SHORT).show();
                         } else if (Gridmenu.points.length == 8) {
+                            ActivityLog("Dashboard");
                             LockScreenActivity.isdashboard = true;
                             Intent i = new Intent(mContext, LockScreenActivity.class);
                             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -529,6 +532,7 @@ public class CustomAndroidGridViewAdapter extends BaseAdapter {
                             Toast.makeText(mContext, "Please restart app", Toast.LENGTH_SHORT).show();
                             //Toast.makeText(mContext, "Could not find vehicle id, please restart app", Toast.LENGTH_SHORT).show();
                         } else if (Gridmenu.points.length == 8) {
+                            ActivityLog("Rest Timer");
                             Intent iRest = new Intent(mContext, RestTime.class);
                             iRest.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                             mContext.startActivity(iRest);
@@ -548,6 +552,7 @@ public class CustomAndroidGridViewAdapter extends BaseAdapter {
                             Toast.makeText(mContext, "Please restart app", Toast.LENGTH_SHORT).show();
                             //Toast.makeText(mContext, "Could not find vehicle id, please restart app", Toast.LENGTH_SHORT).show();
                         } else if (Gridmenu.points.length == 8) {
+                            ActivityLog("Panic button");
                             Intent panic = new Intent(mContext, PanicActivity.class);
                             panic.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                             mContext.startActivity(panic);
@@ -557,6 +562,7 @@ public class CustomAndroidGridViewAdapter extends BaseAdapter {
                         break;
 
                     case "Journey Plan":
+                        ActivityLog("Journey Plan");
                         Intent journey = new Intent(mContext, JourneyPlanner.class);
                         journey.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         mContext.startActivity(journey);
@@ -570,6 +576,7 @@ public class CustomAndroidGridViewAdapter extends BaseAdapter {
                             Toast.makeText(mContext, "Please restart app", Toast.LENGTH_SHORT).show();
                             //Toast.makeText(mContext, "Could not find vehicle id, please restart app", Toast.LENGTH_SHORT).show();
                         } else if (Gridmenu.points.length == 8) {
+                            ActivityLog("Start & End Work");
                             if (isNetworkAvailable()) {
                                 JSONObject obj = new JSONObject();
                                 try {
