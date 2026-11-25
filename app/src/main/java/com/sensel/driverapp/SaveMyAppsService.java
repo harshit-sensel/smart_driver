@@ -23,6 +23,8 @@ import android.widget.Toast;
 
 import androidx.core.app.NotificationCompat;
 
+import com.sensel.driverapp.utility.JourneyPlanDB;
+
 import org.ksoap2.serialization.PropertyInfo;
 
 import java.text.SimpleDateFormat;
@@ -594,8 +596,71 @@ public class SaveMyAppsService extends android.app.Service
                 }
             }
 
+            // 6. Safe parking distance alerts (15 km, 10 km, 3 km)
+            checkAndPlaySafeParkingAlerts(context, lat, lng);
+
         } catch (Exception e) {
             Log.e("SaveMyAppsService", "Error in evaluateAndPlayVoiceAlerts: " + e.getMessage());
+        }
+    }
+
+    private void checkAndPlaySafeParkingAlerts(Context context, double userLat, double userLng) {
+        try {
+            JourneyPlanDB journeyPlanDB = new JourneyPlanDB(context.getApplicationContext());
+            Cursor cursor = journeyPlanDB.getdata();
+            if (cursor == null || cursor.getCount() == 0) {
+                if (cursor != null) cursor.close();
+                return;
+            }
+
+            double AVERAGE_RADIUS_OF_EARTH_KM = 6371;
+            int tempdistance = 9999;
+            String nearestSpotName = null;
+            int nearestSpotId = -1;
+
+            while (cursor.moveToNext()) {
+                String isComplete = cursor.getString(6);
+                if (isComplete != null && isComplete.contains("No")) {
+                    String latLongStr = cursor.getString(5);
+                    if (latLongStr != null && latLongStr.contains(",")) {
+                        String[] parts = latLongStr.split(",");
+                        double parkLat = Double.parseDouble(parts[0].trim());
+                        double parkLng = Double.parseDouble(parts[1].trim());
+
+                        double latDistance = Math.toRadians(userLat - parkLat);
+                        double lngDistance = Math.toRadians(userLng - parkLng);
+
+                        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
+                                + Math.cos(Math.toRadians(userLat)) * Math.cos(Math.toRadians(parkLat))
+                                * Math.sin(lngDistance / 2) * Math.sin(lngDistance / 2);
+
+                        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                        int distance = (int) Math.round(AVERAGE_RADIUS_OF_EARTH_KM * c);
+
+                        if (distance < tempdistance) {
+                            tempdistance = distance;
+                            nearestSpotName = cursor.getString(1);
+                            nearestSpotId = cursor.getInt(0);
+                        }
+                    }
+                }
+            }
+            cursor.close();
+
+            if (tempdistance != 9999 && nearestSpotName != null) {
+                if (tempdistance < 15 && tempdistance >= 10) {
+                    VoiceAlertManager.checkAndPlayParking(context, 15, userLat, userLng);
+                } else if (tempdistance < 10 && tempdistance >= 3) {
+                    VoiceAlertManager.checkAndPlayParking(context, 10, userLat, userLng);
+                } else if (tempdistance < 3 && tempdistance > 1) {
+                    VoiceAlertManager.checkAndPlayParking(context, 3, userLat, userLng);
+                } else if (tempdistance <= 1) {
+                    VoiceAlertManager.checkAndPlayParking(context, 3, userLat, userLng);
+                    journeyPlanDB.updateParkingDone(nearestSpotName, nearestSpotId);
+                }
+            }
+        } catch (Exception e) {
+            Log.e("SaveMyAppsService", "Error in checkAndPlaySafeParkingAlerts: " + e.getMessage());
         }
     }
 

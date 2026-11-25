@@ -934,11 +934,13 @@ public class LockScreenActivity extends Activity {
     }
 
     private void setupMediaPlayer(Context mContext, int limit) {
-        VoiceAlertManager.checkAndPlayHazardSpot(mContext, limit, lat, lng);
+        // Audio is centrally handled by SaveMyAppsService / VoiceAlertManager
+        // VoiceAlertManager.checkAndPlayHazardSpot(mContext, limit, lat, lng);
     }
 
     private void VoiceAlertForParking(Context mContext, int limit) {
-        VoiceAlertManager.checkAndPlayParking(mContext, limit, lat, lng);
+        // Audio is centrally handled by SaveMyAppsService / VoiceAlertManager
+        // VoiceAlertManager.checkAndPlayParking(mContext, limit, lat, lng);
     }
 
     public static void workProgessbarUpdator(int workdone) {
