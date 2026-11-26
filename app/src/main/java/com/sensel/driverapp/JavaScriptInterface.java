@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.LocationManager;
 import android.media.MediaPlayer;
 import android.net.ConnectivityManager;
@@ -23,6 +25,8 @@ import android.webkit.WebView;
 import android.widget.Toast;
 
 import java.io.File;
+import java.util.List;
+import java.util.Locale;
 
 /**
  * Created by Mallikarjun on 22-10-2015.
@@ -170,6 +174,36 @@ public class JavaScriptInterface {
         DeviationReport.latlng = latlng;
         DeviationReport.drawing_mode = type;
         DeviationReport.place = address;
+
+        // Native Android Geocoder fallback: resolve real street address without requiring Google Cloud Geocoding API
+        if (latlng != null && latlng.contains(",")) {
+            final String currentCoords = latlng;
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Context ctx = activity != null ? activity : con;
+                        if (ctx != null && Geocoder.isPresent()) {
+                            String[] parts = currentCoords.split(",");
+                            double lat = Double.parseDouble(parts[0].trim());
+                            double lng = Double.parseDouble(parts[1].trim());
+
+                            Geocoder geocoder = new Geocoder(ctx, Locale.getDefault());
+                            List<Address> addresses = geocoder.getFromLocation(lat, lng, 1);
+                            if (addresses != null && !addresses.isEmpty()) {
+                                Address addr = addresses.get(0);
+                                String fullAddress = addr.getAddressLine(0);
+                                if (fullAddress != null && currentCoords.equals(DeviationReport.latlng)) {
+                                    DeviationReport.place = fullAddress;
+                                }
+                            }
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG, "Native Geocoder resolution error: " + e.getMessage());
+                    }
+                }
+            }).start();
+        }
     }
 
     @JavascriptInterface

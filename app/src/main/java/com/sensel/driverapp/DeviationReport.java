@@ -34,6 +34,11 @@ import androidx.appcompat.view.ContextThemeWrapper;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.core.content.FileProvider;
 
+import android.location.Address;
+import android.location.Geocoder;
+import java.util.List;
+import java.util.Locale;
+
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -167,9 +172,50 @@ public class DeviationReport extends AppCompatActivity {
         myWebView.addJavascriptInterface(jsInterface, "JSInterface");
         myWebView.loadUrl("file:///android_asset/DeviationReport.html");
 
-        EditText placename=(EditText) findViewById(R.id.place);
-        if(place!=null)
-        placename.setText(place);
+        final EditText placename = (EditText) findViewById(R.id.place);
+        if (place != null) {
+            placename.setText(place);
+        }
+
+        // Fast-tap fallback: if place is still coordinates, resolve street address in background
+        if (latlng != null && latlng.contains(",")) {
+            final String currentCoords = latlng;
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        if (Geocoder.isPresent()) {
+                            String[] parts = currentCoords.split(",");
+                            double lat = Double.parseDouble(parts[0].trim());
+                            double lng = Double.parseDouble(parts[1].trim());
+
+                            Geocoder geocoder = new Geocoder(DeviationReport.this, Locale.getDefault());
+                            List<Address> addresses = geocoder.getFromLocation(lat, lng, 1);
+                            if (addresses != null && !addresses.isEmpty()) {
+                                Address addr = addresses.get(0);
+                                final String resolvedAddress = addr.getAddressLine(0);
+                                if (resolvedAddress != null && currentCoords.equals(latlng)) {
+                                    place = resolvedAddress;
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            if (placename != null) {
+                                                String currentText = placename.getText().toString().trim();
+                                                if (currentText.isEmpty() || currentText.equals(currentCoords)) {
+                                                    placename.setText(resolvedAddress);
+                                                }
+                                            }
+                                        }
+                                    });
+                                }
+                            }
+                        }
+                    } catch (Exception e) {
+                        Log.e("DeviationReport", "Native geocoding fallback error: " + e.getMessage());
+                    }
+                }
+            }).start();
+        }
 
         myWebView.setOnTouchListener(new View.OnTouchListener() {
             @Override
