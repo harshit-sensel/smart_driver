@@ -213,6 +213,7 @@ public class Gridmenu extends AppCompatActivity {
         }
 
         Log.e("device", device_id);
+        syncDriverLanguage();
         //check locate vehicle option for emergency vehicle drivers
         if (points != null) {
             if (points.length == 8) {
@@ -395,31 +396,88 @@ public class Gridmenu extends AppCompatActivity {
         return language;
     }
 
-    public String whichlanguge(String wlang) {
-
-        String language = wlang;
-        switch (language) {
+    public String getLangCodeFromServerValue(String serverValue) {
+        if (serverValue == null) return "en";
+        switch (serverValue.toLowerCase().trim()) {
+            case "english":
+            case "english-english":
             case "en":
-                language = "English";
-                break;
-            case "ml":
-                language = "മലയാളം";
-                break;
-            case "kn":
-                language = "ಕನ್ನಡ";
-                break;
-            case "ta":
-                language = "தமிழ்";
-                break;
+                return "en";
+            case "english-hindi":
+            case "hindi":
             case "hi":
-                language = "हिंदी";
-                break;
+                return "hi";
+            case "english-tamil":
+            case "tamil":
+            case "ta":
+                return "ta";
+            case "english-malayalam":
+            case "malayalam":
+            case "ml":
+                return "ml";
+            case "engilsh-kannada":
+            case "english-kannada":
+            case "kannada":
+            case "kn":
+                return "kn";
+            case "english-telugu":
+            case "telugu":
+            case "te":
+                return "te";
             default:
-                language = "English";
-                break;
-
+                return "en";
         }
-        return language;
+    }
+
+    public String whichlanguge(String wlang) {
+        String langCode = getLangCodeFromServerValue(wlang);
+        switch (langCode) {
+            case "en":
+                return "English";
+            case "ml":
+                return "മലയാളം";
+            case "kn":
+                return "ಕನ್ನಡ";
+            case "ta":
+                return "தமிழ்";
+            case "hi":
+                return "हिंदी";
+            case "te":
+                return "తెలుగు";
+            default:
+                return "English";
+        }
+    }
+
+    private void syncDriverLanguage() {
+        if (device_id == null || device_id.isEmpty()) {
+            return;
+        }
+        Thread langThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    WebserviceCall webserviceCall = new WebserviceCall();
+                    String langResult = webserviceCall.GetDriver_Language(device_id);
+                    if (langResult != null && !langResult.contains("Exception") && langResult.length() > 2) {
+                        final String langCode = getLangCodeFromServerValue(langResult);
+                        final String displayLang = whichlanguge(langCode);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                setLocate(langCode);
+                                if (getSupportActionBar() != null) {
+                                    getSupportActionBar().setSubtitle(displayLang);
+                                }
+                            }
+                        });
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "Language sync error: " + e.getMessage());
+                }
+            }
+        });
+        langThread.start();
     }
 
     private void checkPlayServicesAvailable() {
