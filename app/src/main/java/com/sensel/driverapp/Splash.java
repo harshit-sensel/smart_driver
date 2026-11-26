@@ -67,6 +67,7 @@ public class Splash extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        AppErrorLogger.install(this);
         setContentView(R.layout.splashscreen);
 
         ImageView mainicon = (ImageView) findViewById(R.id.main_icon);
