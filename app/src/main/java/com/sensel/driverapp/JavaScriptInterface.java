@@ -183,4 +183,48 @@ public class JavaScriptInterface {
     public String GetPlace() {
         return DeviationReport.latlng;
     }
+
+    @JavascriptInterface
+    public void openGoogleMaps(final String lat, final String lng) {
+        Context targetContext = activity != null ? activity : con;
+        if (targetContext == null) {
+            return;
+        }
+        try {
+            // 1. Launch Google Maps in direct Turn-by-Turn GPS Navigation Mode
+            Uri gmmIntentUri = Uri.parse("google.navigation:q=" + lat + "," + lng);
+            Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+            mapIntent.setPackage("com.google.android.apps.maps");
+            mapIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            if (targetContext.getPackageManager() != null && mapIntent.resolveActivity(targetContext.getPackageManager()) != null) {
+                targetContext.startActivity(mapIntent);
+                return;
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to launch Google Maps navigation: " + e.getMessage());
+        }
+
+        try {
+            // 2. Generic geo intent (any installed map app)
+            Uri geoUri = Uri.parse("geo:" + lat + "," + lng + "?q=" + lat + "," + lng);
+            Intent geoIntent = new Intent(Intent.ACTION_VIEW, geoUri);
+            geoIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            if (targetContext.getPackageManager() != null && geoIntent.resolveActivity(targetContext.getPackageManager()) != null) {
+                targetContext.startActivity(geoIntent);
+                return;
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to launch geo intent: " + e.getMessage());
+        }
+
+        try {
+            // 3. Browser fallback (works on 100% of devices)
+            Uri webUri = Uri.parse("https://www.google.com/maps/dir/?api=1&destination=" + lat + "," + lng);
+            Intent webIntent = new Intent(Intent.ACTION_VIEW, webUri);
+            webIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            targetContext.startActivity(webIntent);
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to open web maps fallback: " + e.getMessage());
+        }
+    }
 }
