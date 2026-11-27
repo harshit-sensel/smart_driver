@@ -207,7 +207,7 @@ public class VoiceAlertManager {
         }
     }
 
-    private static void syncAudioLogs(final Context context) {
+    public static void syncAudioLogs(final Context context) {
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = cm != null ? cm.getActiveNetworkInfo() : null;
         if (netInfo == null || !netInfo.isConnected()) {

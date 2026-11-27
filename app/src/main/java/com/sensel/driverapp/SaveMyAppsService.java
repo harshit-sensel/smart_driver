@@ -304,6 +304,10 @@ public class SaveMyAppsService extends android.app.Service
                         if (runAndContinuousTime.contains("#")) {
                             editor.putString("runAndContinuousTime", runAndContinuousTime);
                             editor.apply();
+
+                            // Sweep offline queues in background
+                            GpsTrackingManager.syncPendingGpsData(context, deviceid);
+                            VoiceAlertManager.syncAudioLogs(context);
                             if (runtimeRefreshRate != pref.getInt("runtimeRefreshRate", runtimeRefreshRate)) {
                                 runtimeRefreshRate = pref.getInt("runtimeRefreshRate", runtimeRefreshRate);
                                 if (runtimeRefreshRate > 0) {
@@ -459,9 +463,11 @@ public class SaveMyAppsService extends android.app.Service
                         }
                     }
                     else{
+                        if (phoneSpeed > 10) {
+                            evaluateAndPlayVoiceAlerts(phoneSpeed);
+                        }
                         if(powerManager.isScreenOn()) {
                             if (phoneSpeed > 10) {
-                                evaluateAndPlayVoiceAlerts(phoneSpeed);
                                 Intent i = new Intent(context, LockScreenActivity.class);
                                 i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                 LockScreenActivity.flag = false;
@@ -512,6 +518,9 @@ public class SaveMyAppsService extends android.app.Service
             if (lat == 0 && lng == 0) {
                 return;
             }
+
+            // Record continuous background GPS breadcrumb (throttled to 30s) and sync to server
+            GpsTrackingManager.recordAndSync(context, lat, lng, phoneSpeed, deviceid);
 
             int maxSpeed = pref.getInt("maxSpeed", 60);
             int hazardSpeedLimit = maxSpeed;

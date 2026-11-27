@@ -373,6 +373,9 @@ public class LockScreenActivity extends Activity {
                 }
             }, 0, 10 * 60 * 1000);
 
+            // Flush any offline GPS breadcrumbs immediately when Dashboard opens
+            GpsTrackingManager.syncPendingGpsData(LockScreenActivity.this, deviceid);
+
             scheduledExecutorServiceForAudio = Executors.newScheduledThreadPool(5);
 
             taskForAudio = new Runnable() {
@@ -1348,90 +1351,7 @@ public class LockScreenActivity extends Activity {
                         speedval.setTypeface(myTypeface);
                         speedval.setText(Integer.toString(speed));
                         locationchangedtime = location.getTime();
-                        if ((int) ((locationchangedtime - lastlocationtime) / 1000) >= gpsupdaterate) {
-                            lastlocationtime = locationchangedtime;
-                            DecimalFormat df = new DecimalFormat("#.##");
-                            SQLiteDatabase db = null;
-                            try {
-                                db = openOrCreateDatabase("totaljrmdb", Context.MODE_PRIVATE, null);
-                                db.execSQL("CREATE TABLE IF NOT EXISTS gpsdata(lat DECIMAL(9,6),lng DECIMAL(9,6),speed DECIMAL(5,2),timestamp DATETIME);");
-                                String Query = "INSERT INTO gpsdata(lat ,lng , speed, timestamp) VALUES ('" + lat + "','" + lng + "','" + df.format(mspeed) + "','" + DateFormat.format("yyyy-MM-dd H:mm:ss", new Date(locationchangedtime)).toString() + "');";
-                                db.execSQL(Query);
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            } finally {
-                                if (db != null) {
-                                    try { db.close(); } catch (Exception ignored) {}
-                                }
-                            }
-                            if (isNetworkAvailable()) {
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        SQLiteDatabase selectDb = null;
-                                        Cursor cursor = null;
-                                        try {
-                                            selectDb = openOrCreateDatabase("totaljrmdb", Context.MODE_PRIVATE, null);
-                                            String query = "SELECT * FROM gpsdata order by timestamp desc limit 100";
-                                            cursor = selectDb.rawQuery(query, null);
-                                            gpsdata = "";
-                                            gpsdateArray = new String[100];
-                                            if (cursor != null && cursor.getCount() > 0) {
-                                                cursor.moveToFirst();
-                                                int i = 0;
-                                                do {
-                                                    gpsdateArray[i] = cursor.getString(3);
-                                                    gpsdata = gpsdata + cursor.getString(0) + "#" + cursor.getString(1) + "#" + cursor.getString(2) + "#" + cursor.getString(3) + "|";
-                                                    i++;
-                                                } while (cursor.moveToNext());
-                                            }
-                                        } catch (Exception e) {
-                                            e.printStackTrace();
-                                        } finally {
-                                            if (cursor != null) {
-                                                try { cursor.close(); } catch (Exception ignored) {}
-                                            }
-                                            if (selectDb != null) {
-                                                try { selectDb.close(); } catch (Exception ignored) {}
-                                            }
-                                        }
-                                        new Thread(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                try {
-                                                    String result = insertMobileGpsData(deviceid, gpsdata);
-                                                    if (result.contains("Data Inserted successfully")) {
-                                                        String data = "delete from gpsdata where timestamp in (";
-                                                        for (int i = 0; i < gpsdateArray.length; i++) {
-                                                            if (gpsdateArray[i] != null) {
-                                                                if (i != 0)
-                                                                    data = data + ",";
-                                                                data = data + "'" + gpsdateArray[i] + "'";
-                                                            } else
-                                                                break;
-                                                        }
-                                                        data = data + ");";
-                                                        SQLiteDatabase deleteDb = null;
-                                                        try {
-                                                            deleteDb = openOrCreateDatabase("totaljrmdb", Context.MODE_PRIVATE, null);
-                                                            deleteDb.execSQL(data);
-                                                        } catch (Exception e) {
-                                                            e.printStackTrace();
-                                                        } finally {
-                                                            if (deleteDb != null) {
-                                                                try { deleteDb.close(); } catch (Exception ignored) {}
-                                                            }
-                                                        }
-                                                    }
-                                                } catch (Exception ex) {
-                                                    ex.printStackTrace();
-                                                }
-                                            }
-                                        }).start();
-                                    }
-                                });
-                            }
-                        }
+                        lastlocationtime = locationchangedtime;
                     }
                     if (flag && !isdashboard) {
                         onBackPressed();
