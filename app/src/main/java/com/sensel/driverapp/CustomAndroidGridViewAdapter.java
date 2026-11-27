@@ -615,7 +615,8 @@ public class CustomAndroidGridViewAdapter extends BaseAdapter {
                                                     // Save language separately in "lang_setting"
                                                     SharedPreferences langPref = mContext.getSharedPreferences("lang_setting", mContext.MODE_PRIVATE);
                                                     SharedPreferences.Editor langEditor = langPref.edit();
-                                                    langEditor.putString("my_lang", language);
+                                                    String normalizedLang = normalizeLanguageCode(language);
+                                                    langEditor.putString("my_lang", normalizedLang);
                                                     langEditor.apply();
 
                                                     Log.e("woktime", String.valueOf(worktime));
@@ -690,6 +691,39 @@ public class CustomAndroidGridViewAdapter extends BaseAdapter {
             progressDialog.setMessage("Slow loading, please wait...");
         }
     };
+
+    private String normalizeLanguageCode(String serverValue) {
+        if (serverValue == null) return "en";
+        switch (serverValue.toLowerCase().trim()) {
+            case "english":
+            case "english-english":
+            case "en":
+                return "en";
+            case "english-hindi":
+            case "hindi":
+            case "hi":
+                return "hi";
+            case "english-tamil":
+            case "tamil":
+            case "ta":
+                return "ta";
+            case "english-malayalam":
+            case "malayalam":
+            case "ml":
+                return "ml";
+            case "engilsh-kannada":
+            case "english-kannada":
+            case "kannada":
+            case "kn":
+                return "kn";
+            case "english-telugu":
+            case "telugu":
+            case "te":
+                return "te";
+            default:
+                return "en";
+        }
+    }
 
     private void ActivityLog(final String activity) {
         GPSTracker gpsTracker = new GPSTracker(mContext);

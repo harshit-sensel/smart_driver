@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -68,6 +69,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 public class JourneyPlanner extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -110,6 +112,12 @@ public class JourneyPlanner extends AppCompatActivity implements OnMapReadyCallb
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Apply language before loading layout
+        String lang = getSharedPreferences("lang_setting", MODE_PRIVATE).getString("my_lang", "en");
+        String langCode = getLangCodeFromServerValue(lang);
+        setLocate(langCode);
+
         setContentView(R.layout.activity_journey_planner);
 
         JourneyPlanDB journeyPlanDB = new JourneyPlanDB(getApplicationContext());
@@ -339,6 +347,14 @@ public class JourneyPlanner extends AppCompatActivity implements OnMapReadyCallb
                             try {
                                 TRIP_ID = response.getString("TripId");
 
+                                if (response.has("Language")) {
+                                    String tripLang = response.getString("Language");
+                                    String tripLangCode = getLangCodeFromServerValue(tripLang);
+                                    SharedPreferences.Editor langEditor = getSharedPreferences("lang_setting", MODE_PRIVATE).edit();
+                                    langEditor.putString("my_lang", tripLangCode);
+                                    langEditor.apply();
+                                }
+
 
                                 if (!TRIP_ID.contains("No")) {
                                     TRIP_TYPE = response.getString("TripType");
@@ -475,6 +491,47 @@ public class JourneyPlanner extends AppCompatActivity implements OnMapReadyCallb
 
     }
 
+
+    public String getLangCodeFromServerValue(String serverValue) {
+        if (serverValue == null) return "en";
+        switch (serverValue.toLowerCase().trim()) {
+            case "english":
+            case "english-english":
+            case "en":
+                return "en";
+            case "english-hindi":
+            case "hindi":
+            case "hi":
+                return "hi";
+            case "english-tamil":
+            case "tamil":
+            case "ta":
+                return "ta";
+            case "english-malayalam":
+            case "malayalam":
+            case "ml":
+                return "ml";
+            case "engilsh-kannada":
+            case "english-kannada":
+            case "kannada":
+            case "kn":
+                return "kn";
+            case "english-telugu":
+            case "telugu":
+            case "te":
+                return "te";
+            default:
+                return "en";
+        }
+    }
+
+    public void setLocate(String lang) {
+        Locale locale = new Locale(lang);
+        Locale.setDefault(locale);
+        Configuration config = new Configuration();
+        config.setLocale(locale);
+        getBaseContext().getResources().updateConfiguration(config, getBaseContext().getResources().getDisplayMetrics());
+    }
 
     private void Error_alert(String errormessage, String title) {
 

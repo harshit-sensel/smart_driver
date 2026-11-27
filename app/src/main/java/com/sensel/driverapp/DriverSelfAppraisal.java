@@ -49,19 +49,32 @@ public class DriverSelfAppraisal extends AppCompatActivity {
         }
     }
     public String getLangCodeFromServerValue(String serverValue) {
-        switch (serverValue.toLowerCase()) {
+        if (serverValue == null) return "en";
+        switch (serverValue.toLowerCase().trim()) {
             case "english":
             case "english-english":
+            case "en":
                 return "en";
             case "english-hindi":
+            case "hindi":
+            case "hi":
                 return "hi";
             case "english-tamil":
+            case "tamil":
+            case "ta":
                 return "ta";
             case "english-malayalam":
+            case "malayalam":
+            case "ml":
                 return "ml";
             case "engilsh-kannada":
+            case "english-kannada":
+            case "kannada":
+            case "kn":
                 return "kn";
             case "english-telugu":
+            case "telugu":
+            case "te":
                 return "te";
             default:
                 return "en"; // fallback
