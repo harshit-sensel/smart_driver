@@ -147,6 +147,10 @@ public class LockScreenActivity extends Activity {
     public static Long totalmins;
     public static int hrs;
     public Timer timer;
+    private Timer prefRefreshTimer;
+    private Timer audioInsertTimer;
+    private Timer hazardTimer;
+    private Timer restTimer;
 
 
     //jrp variables
@@ -265,21 +269,41 @@ public class LockScreenActivity extends Activity {
         speedometer.addColoredRange(50, 80, Color.YELLOW);
         speedometer.addColoredRange(80, 120, Color.RED);
         pref = getApplicationContext().getSharedPreferences("totaljrm", MODE_PRIVATE);
-        if (!flag && isNetworkAvailable()) {
+        // 1. Immediately populate UI on Frame 1 from local storage (Zero delay!)
+        String cachedRunTime = pref.getString("runAndContinuousTime", "");
+        if (cachedRunTime != null && cachedRunTime.contains("#") && !cachedRunTime.contains("VehicleId")) {
+            updateRuntimeUI(cachedRunTime);
+        } else {
+            if (Gridmenu.points != null && Gridmenu.points.length == 8 && !Gridmenu.points[7].contains("NA") && !Gridmenu.points[7].trim().isEmpty()) {
+                vehicle.setText(Gridmenu.points[7].trim());
+            } else if (Gridmenu.vehicleid != null && !Gridmenu.vehicleid.trim().isEmpty()) {
+                vehicle.setText(Gridmenu.vehicleid.trim());
+            }
+        }
+
+        // 2. Fetch fresh runtime in background immediately when screen opens
+        if (isNetworkAvailable()) {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    String runAndContinuousTime = GetRunAndContinuousTime(deviceid);
-                    SharedPreferences.Editor editor = pref.edit();
-                    if (runAndContinuousTime.contains("#")) {
-                        editor.putString("runAndContinuousTime", runAndContinuousTime);
-                        editor.apply();
+                    try {
+                        String runAndContinuousTime = GetRunAndContinuousTime(deviceid);
+                        if (runAndContinuousTime != null && runAndContinuousTime.contains("#") && !runAndContinuousTime.contains("Exception") && !runAndContinuousTime.contains("No updates")) {
+                            pref.edit().putString("runAndContinuousTime", runAndContinuousTime).apply();
+                            updateRuntimeUI(runAndContinuousTime);
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
                 }
             }).start();
         }
-        if (speed == 100000) {
-            new Timer().scheduleAtFixedRate(new TimerTask() {
+
+        // 3. Stop any existing timers before starting fresh lifecycle-managed timers
+        stopDashboardTimers();
+
+        prefRefreshTimer = new Timer();
+        prefRefreshTimer.scheduleAtFixedRate(new TimerTask() {
                 @Override
                 public void run() {
                     runOnUiThread(new Runnable() {
@@ -336,7 +360,8 @@ public class LockScreenActivity extends Activity {
                 }
             }, 0, 2 * 60 * 1000);
 
-            new Timer().scheduleAtFixedRate(new TimerTask() {
+            audioInsertTimer = new Timer();
+            audioInsertTimer.scheduleAtFixedRate(new TimerTask() {
                 @Override
                 public void run() {
                     runOnUiThread(new Runnable() {
@@ -499,108 +524,17 @@ public class LockScreenActivity extends Activity {
                 public void run() {
                     try {
                         isLocationAvailable();
-                        String run_time = pref.getString("runAndContinuousTime", "0h  0min#01-01-2017 00:00:01 AM#0h  0min#0#VehicleId");
-                        if (run_time.contains("0h  0min#01-01-2017 00:00:01 AM#0h  0min#0#VehicleId")) {
-                            String runAndContinuousTime = GetRunAndContinuousTime(deviceid);
-                            SharedPreferences.Editor editor = pref.edit();
-                            if (runAndContinuousTime.contains("#")) {
-                                editor.putString("runAndContinuousTime", runAndContinuousTime);
-                                editor.apply();
-                                run_time = pref.getString("runAndContinuousTime", "0h  0min#01-01-2017 00:00:01 AM#0h  0min#0#VehicleId");
+                        if (isNetworkAvailable()) {
+                            String fresh = GetRunAndContinuousTime(deviceid);
+                            if (fresh != null && fresh.contains("#") && !fresh.contains("Exception") && !fresh.contains("No updates")) {
+                                pref.edit().putString("runAndContinuousTime", fresh).apply();
+                                updateRuntimeUI(fresh);
+                                return;
                             }
                         }
-                        if (run_time.contains("#")) {
-                            final String[] data = run_time.split("#");
-                            if (!lastruntime.contains(data[1].toString())) {
-                                lastruntime = data[1].toString();
-                                String[] res = data[0].split(" ");
-                                String[] h = res[0].split("h");
-                                String[] m = res[2].split("m");
-                                dec_h = Integer.parseInt(h[0]);
-                                decimal_min = Integer.parseInt(m[0]);
-
-                                if ((Integer.parseInt(h[0]) < dayHr) || (Integer.parseInt(h[0]) == dayHr && Integer.parseInt(m[0]) < dayMin)) {
-                                    if (dayMin >= Integer.parseInt(m[0])) {
-                                        min = dayMin - Integer.parseInt(m[0]);
-                                        hr = dayHr - Integer.parseInt(h[0]);
-                                    } else {
-                                        min = dayMin + 60 - Integer.parseInt(m[0]);
-                                        hr = dayHr - 1 - Integer.parseInt(h[0]);
-                                    }
-                                } else {
-                                    hr = 0;
-                                    min = 00;
-                                }
-                                res = data[2].split(" ");
-                                h = res[0].split("h");
-                                m = res[2].split("m");
-                                cdec_h = Integer.parseInt(h[0]);
-                                cdecimal_min = Integer.parseInt(m[0]);
-
-                                if ((Integer.parseInt(h[0]) < tripHr) || (Integer.parseInt(h[0]) == tripHr && Integer.parseInt(m[0]) < tripMin)) {
-                                    if (tripMin >= Integer.parseInt(m[0])) {
-                                        cmin = tripMin - Integer.parseInt(m[0]);
-                                        chr = tripHr - Integer.parseInt(h[0]);
-                                    } else {
-                                        cmin = tripMin + 60 - Integer.parseInt(m[0]);
-                                        chr = tripHr - 1 - Integer.parseInt(h[0]);
-                                    }
-                                } else {
-                                    chr = 0;
-                                    cmin = 00;
-                                }
-                                runOnUiThread(new Runnable() {
-                                    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-                                    @Override
-                                    public void run() {
-                                        vehicle.setText(data[4]);
-                                        int progress = dec_h * 100 + ((decimal_min * 100) / 60);
-                                        int progresspercent = (progress * 100) / (dayHr * 100 + (dayMin * 100) / 60);
-                                        if (progresspercent > 100)
-                                            progresspercent = 100;
-
-                                        if (progresspercent < 80)
-                                            cirprogressBar.setProgressTintList(ColorStateList.valueOf(Color.GREEN));
-                                        else if (progresspercent < 90)
-                                            cirprogressBar.setProgressTintList(ColorStateList.valueOf(Color.rgb(243, 156, 18)));
-                                        else
-                                            cirprogressBar.setProgressTintList(ColorStateList.valueOf(Color.RED));
-
-                                        if (min < 10)
-                                            timetext.setText(hr + ":0" + min);
-                                        else
-                                            timetext.setText(hr + ":" + min);
-                                        if (decimal_min < 10)
-                                            daydriventime.setText("Day : " + dec_h + ":0" + decimal_min);
-                                        else
-                                            daydriventime.setText("Day : " + dec_h + ":" + decimal_min);
-                                        cirprogressBar.setProgress(progresspercent);
-
-                                        int cprogress = cdec_h * 100 + ((cdecimal_min * 100) / 60);
-                                        int cprogresspercent = (cprogress * 100) / (tripHr * 100 + (tripMin * 100) / 60);
-                                        if (cprogresspercent > 100)
-                                            cprogresspercent = 100;
-
-                                        if (cprogresspercent < 80)
-                                            conprogressBar.setProgressTintList(ColorStateList.valueOf(Color.GREEN));
-                                        else if (cprogresspercent < 90)
-                                            conprogressBar.setProgressTintList(ColorStateList.valueOf(Color.rgb(243, 156, 18)));
-                                        else
-                                            conprogressBar.setProgressTintList(ColorStateList.valueOf(Color.RED));
-
-                                        if (cmin < 10)
-                                            contimetext.setText(chr + ":0" + cmin);
-                                        else
-                                            contimetext.setText(chr + ":" + cmin);
-                                        if (cdecimal_min < 10)
-                                            tripdriventime.setText("Trip : " + cdec_h + ":0" + cdecimal_min);
-                                        else
-                                            tripdriventime.setText("Trip : " + cdec_h + ":" + cdecimal_min);
-                                        conprogressBar.setProgress(cprogresspercent);
-                                        rest = Integer.valueOf(data[3]);
-                                    }
-                                });
-                            }
+                        String run_time = pref.getString("runAndContinuousTime", "");
+                        if (run_time != null && run_time.contains("#")) {
+                            updateRuntimeUI(run_time);
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -616,7 +550,8 @@ public class LockScreenActivity extends Activity {
                 futureTaskForRuntime = scheduledExecutorServiceForRuntime.scheduleAtFixedRate(taskForRuntime, 0, runtimeRefreshRate, TimeUnit.SECONDS);
             }
 
-            new Timer().scheduleAtFixedRate(new TimerTask() {
+            hazardTimer = new Timer();
+            hazardTimer.scheduleAtFixedRate(new TimerTask() {
                 @Override
                 public void run() {
 
@@ -639,13 +574,15 @@ public class LockScreenActivity extends Activity {
                             } else {
                                 boolean parking = false;
                                 int maxSpeed = constmaxspeed;
-                                SQLiteDatabase db = openOrCreateDatabase("totaljrmdb", Context.MODE_PRIVATE, null);
+                                SQLiteDatabase db = null;
+                                Cursor cursor = null;
                                 nightdrivingallowed = false;
                                 try {
+                                    db = openOrCreateDatabase("totaljrmdb", Context.MODE_PRIVATE, null);
                                     db.execSQL("CREATE TABLE IF NOT EXISTS jrmspots(minlat DECIMAL(9,6),maxlat DECIMAL(9,6),minlng DECIMAL(9,6),maxlng DECIMAL(9,6),type VARCHAR);");
                                     String query = "SELECT DISTINCT type FROM jrmspots WHERE minlat<'" + lat + "' and maxlat>'" + lat + "' and minlng<'" + lng + "' and maxlng>'" + lng + "'";
-                                    Cursor cursor = db.rawQuery(query, null);
-                                    if (cursor.getCount() > 0) {
+                                    cursor = db.rawQuery(query, null);
+                                    if (cursor != null && cursor.getCount() > 0) {
                                         cursor.moveToFirst();
                                         do {
                                             if (cursor.getString(0).contains("Accident")) {
@@ -662,6 +599,12 @@ public class LockScreenActivity extends Activity {
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 } finally {
+                                    if (cursor != null) {
+                                        try { cursor.close(); } catch (Exception ignored) {}
+                                    }
+                                    if (db != null) {
+                                        try { db.close(); } catch (Exception ignored) {}
+                                    }
                                     if (cnt >= lastspeed.length)
                                         cnt = 0;
                                     if (speed > maxSpeed) {
@@ -669,49 +612,13 @@ public class LockScreenActivity extends Activity {
                                             blinkstatus = true;
                                             speedblink();
                                         }
-                                        /* Audio is centrally managed by VoiceAlertManager / SaveMyAppsService to prevent double playback
-                                        if ((int) ((System.currentTimeMillis() - lastspeedaudio) / 1000) > 20) {
-                                            lastspeedaudio = System.currentTimeMillis();
-                                            MediaPlayer mp = new MediaPlayer();
-                                            Handler handlerUI = new Handler();
-                                            handlerUI.postDelayed(new Runnable() {
-                                                @Override
-                                                public void run() {
-                                                    Intent intent = new Intent(LockScreenActivity.this, LockScreenActivity.class);
-                                                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                                    LockScreenActivity.this.startActivity(intent);
-                                                }
-                                            }, 28000);
-                                            File dir = new File(getExternalFilesDir(null), "driverapp");
-                                            File file = new File(dir, "slowdown_voice.mp3");
-                                            MediaPlayer music;
-                                            if (file.exists()) {
-                                                music = MediaPlayer.create(getApplicationContext(), Uri.parse(file.getAbsolutePath()));
-                                            } else {
-                                                music = MediaPlayer.create(LockScreenActivity.this, R.raw.slowdown_voice);
-                                            }
-                                            if (music != null) {
-                                                music.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                                                    @Override
-                                                    public void onCompletion(MediaPlayer mp) {
-                                                        Log.d("Audio", "Announcement completed.");
-                                                        mp.release();
-                                                    }
-                                                });
-                                                music.start();
-                                                insertAudioLog("APP-OVERSPEEDING");
-                                            }
-                                        }
-                                        */
                                     } else {
                                         blinkstatus = false;
                                     }
                                     if (maxSpeed == 25) {
                                         speedometer.setBackgroundColor(Color.RED);
-                                        // Audio centrally handled by VoiceAlertManager
                                     } else if (maxSpeed == 35) {
                                         speedometer.setBackgroundColor(Color.YELLOW);
-                                        // Audio centrally handled by VoiceAlertManager
                                     } else if (parking) {
                                         speedometer.setBackgroundColor(Color.GREEN);
                                     } else {
@@ -735,7 +642,8 @@ public class LockScreenActivity extends Activity {
                 }
             }, 0, 3000);//put here time 1000 milliseconds=1 second
 
-            new Timer().scheduleAtFixedRate(new TimerTask() {
+            restTimer = new Timer();
+            restTimer.scheduleAtFixedRate(new TimerTask() {
                 @Override
                 public void run() {
                     runOnUiThread(new Runnable() {
@@ -775,29 +683,6 @@ public class LockScreenActivity extends Activity {
                                     cirprogressBar.setProgressTintList(ColorStateList.valueOf(Color.RED));
 
                                 cirprogressBar.setProgress(progresspercent);
-                                /* Audio centrally handled by VoiceAlertManager
-                                if (maxdrivingaudio && ((hr == dayHr && min > dayMin) || (hr > dayHr))) {
-                                    File dir = new File(getExternalFilesDir(null), "driverapp");
-                                    File file = new File(dir, "max_driving_voice.mp3");
-                                    MediaPlayer mp;
-                                    if (file.exists()) {
-                                        mp = MediaPlayer.create(getApplicationContext(), Uri.parse(file.getAbsolutePath()));
-                                    } else {
-                                        mp = MediaPlayer.create(getApplicationContext(), R.raw.max_driving);
-                                    }
-                                    if (mp != null) {
-                                        mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                                            @Override
-                                            public void onCompletion(MediaPlayer mediaPlayer) {
-                                                mediaPlayer.release();
-                                            }
-                                        });
-                                        mp.start();
-                                        insertAudioLog("APP-MAXDRIVING");
-                                    }
-                                    maxdrivingaudio = false;
-                                }
-                                */
                                 if (cmin == 0) {
                                     if (chr != 0) {
                                         chr--;
@@ -842,32 +727,6 @@ public class LockScreenActivity extends Activity {
                                 else
                                     conprogressBar.setProgressTintList(ColorStateList.valueOf(Color.RED));
                                 conprogressBar.setProgress(cprogresspercent);
-
-                                /* Audio centrally handled by VoiceAlertManager
-                                if (condrivingaudio && ((cdec_h == tripHr && cdecimal_min >= tripMin) || cdec_h > tripHr)) {
-                                    File dir = new File(getExternalFilesDir(null), "driverapp");
-                                    File file = new File(dir, "continuous_driving_voice.mp3");
-                                    MediaPlayer mp;
-                                    if (file.exists()) {
-                                        mp = MediaPlayer.create(getApplicationContext(), Uri.parse(file.getAbsolutePath()));
-                                    } else {
-                                        mp = MediaPlayer.create(getApplicationContext(), R.raw.continues_driving);
-                                    }
-                                    if (mp != null) {
-                                        mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                                            @Override
-                                            public void onCompletion(MediaPlayer mediaPlayer) {
-                                                mediaPlayer.release();
-                                            }
-                                        });
-                                        mp.start();
-                                        insertAudioLog("APP-CONTINUOUS_DRIVING");
-                                    }
-                                    resttime.setText("Plan to take rest");
-                                    condrivingaudio = false;
-                                } else
-                                    resttime.setText("Vehicle is moving");
-                                */
                                 if ((cdec_h == tripHr && cdecimal_min >= tripMin) || cdec_h > tripHr) {
                                     resttime.setText("Plan to take rest");
                                     condrivingaudio = false;
@@ -876,33 +735,6 @@ public class LockScreenActivity extends Activity {
                                 }
                                 rest = 0;
                                 restaudio = true;
-
-                                if (!nightdrivingallowed) {
-                                    /* Audio centrally handled by VoiceAlertManager
-                                    int currenttime = Calendar.getInstance().get(Calendar.HOUR_OF_DAY) * 100 + Calendar.getInstance().get(Calendar.MINUTE);
-                                    if (nightaudio && ((currenttime > nightStart) || (currenttime < nightEnd))) {
-                                        File dir = new File(getExternalFilesDir(null), "driverapp");
-                                        File file = new File(dir, "night_driving_voice.mp3");
-                                        MediaPlayer mp;
-                                        if (file.exists()) {
-                                            mp = MediaPlayer.create(getApplicationContext(), Uri.parse(file.getAbsolutePath()));
-                                        } else {
-                                            mp = MediaPlayer.create(getApplicationContext(), R.raw.night_driving);
-                                        }
-                                        if (mp != null) {
-                                            mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                                                @Override
-                                                public void onCompletion(MediaPlayer mediaPlayer) {
-                                                    mediaPlayer.release();
-                                                }
-                                            });
-                                            mp.start();
-                                            insertAudioLog("APP-NIGHTDRIVING");
-                                        }
-                                        nightaudio = false;
-                                    }
-                                    */
-                                }
                             } else {
                                 maxdrivingaudio = true;
                                 condrivingaudio = true;
@@ -927,20 +759,11 @@ public class LockScreenActivity extends Activity {
 
             Getspeed();
             speed = 0;
-        }
-
 
         localworktimer();
     }
 
-    private void setupMediaPlayer(Context mContext, int limit) {
-        // Audio is centrally handled by SaveMyAppsService / VoiceAlertManager
-        // VoiceAlertManager.checkAndPlayHazardSpot(mContext, limit, lat, lng);
-    }
-
     private void VoiceAlertForParking(Context mContext, int limit) {
-        // Audio is centrally handled by SaveMyAppsService / VoiceAlertManager
-        // VoiceAlertManager.checkAndPlayParking(mContext, limit, lat, lng);
     }
 
     public static void workProgessbarUpdator(int workdone) {
@@ -976,6 +799,189 @@ public class LockScreenActivity extends Activity {
         }
 
 
+    }
+
+    public void updateRuntimeUI(String run_time) {
+        if (run_time == null || !run_time.contains("#")) {
+            if (Gridmenu.points != null && Gridmenu.points.length == 8) {
+                if (vehicle != null && !Gridmenu.points[7].contains("NA") && !Gridmenu.points[7].trim().isEmpty()) {
+                    runOnUiThread(() -> vehicle.setText(Gridmenu.points[7].trim()));
+                }
+            } else if (Gridmenu.vehicleid != null && !Gridmenu.vehicleid.trim().isEmpty() && vehicle != null) {
+                runOnUiThread(() -> vehicle.setText(Gridmenu.vehicleid.trim()));
+            }
+            return;
+        }
+
+        try {
+            final String[] data = run_time.split("#");
+            if (data.length < 5) return;
+
+            // Day driving time: e.g. "2h  22min" or "2h 22min"
+            String[] res = data[0].trim().split("\\s+");
+            if (res.length >= 2) {
+                String[] h = res[0].split("h");
+                String[] m = res[1].split("m");
+                dec_h = Integer.parseInt(h[0].trim());
+                decimal_min = Integer.parseInt(m[0].trim());
+            }
+
+            if ((dec_h < dayHr) || (dec_h == dayHr && decimal_min < dayMin)) {
+                if (dayMin >= decimal_min) {
+                    min = dayMin - decimal_min;
+                    hr = dayHr - dec_h;
+                } else {
+                    min = dayMin + 60 - decimal_min;
+                    hr = dayHr - 1 - dec_h;
+                }
+            } else {
+                hr = 0;
+                min = 0;
+            }
+
+            // Trip driving time: e.g. "0h  16min" or "0h 16min"
+            res = data[2].trim().split("\\s+");
+            if (res.length >= 2) {
+                String[] h = res[0].split("h");
+                String[] m = res[1].split("m");
+                cdec_h = Integer.parseInt(h[0].trim());
+                cdecimal_min = Integer.parseInt(m[0].trim());
+            }
+
+            if ((cdec_h < tripHr) || (cdec_h == tripHr && cdecimal_min < tripMin)) {
+                if (tripMin >= cdecimal_min) {
+                    cmin = tripMin - cdecimal_min;
+                    chr = tripHr - cdec_h;
+                } else {
+                    cmin = tripMin + 60 - cdecimal_min;
+                    chr = tripHr - 1 - cdec_h;
+                }
+            } else {
+                chr = 0;
+                cmin = 0;
+            }
+
+            try {
+                rest = Integer.parseInt(data[3].trim());
+            } catch (Exception ignored) {}
+
+            runOnUiThread(new Runnable() {
+                @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+                @Override
+                public void run() {
+                    if (vehicle != null && data.length >= 5 && !data[4].trim().isEmpty() && !data[4].contains("VehicleId")) {
+                        vehicle.setText(data[4].trim());
+                    } else if (Gridmenu.points != null && Gridmenu.points.length == 8 && !Gridmenu.points[7].contains("NA") && !Gridmenu.points[7].trim().isEmpty()) {
+                        if (vehicle != null) vehicle.setText(Gridmenu.points[7].trim());
+                    } else if (Gridmenu.vehicleid != null && !Gridmenu.vehicleid.trim().isEmpty() && vehicle != null) {
+                        vehicle.setText(Gridmenu.vehicleid.trim());
+                    }
+
+                    int progress = dec_h * 100 + ((decimal_min * 100) / 60);
+                    int progresspercent = (progress * 100) / (dayHr * 100 + (dayMin * 100) / 60);
+                    if (progresspercent > 100) progresspercent = 100;
+
+                    if (cirprogressBar != null) {
+                        if (progresspercent < 80)
+                            cirprogressBar.setProgressTintList(ColorStateList.valueOf(Color.GREEN));
+                        else if (progresspercent < 90)
+                            cirprogressBar.setProgressTintList(ColorStateList.valueOf(Color.rgb(243, 156, 18)));
+                        else
+                            cirprogressBar.setProgressTintList(ColorStateList.valueOf(Color.RED));
+                        cirprogressBar.setProgress(progresspercent);
+                    }
+
+                    if (timetext != null) {
+                        if (min < 10)
+                            timetext.setText(hr + ":0" + min);
+                        else
+                            timetext.setText(hr + ":" + min);
+                    }
+
+                    if (daydriventime != null) {
+                        if (decimal_min < 10)
+                            daydriventime.setText("Day : " + dec_h + ":0" + decimal_min);
+                        else
+                            daydriventime.setText("Day : " + dec_h + ":" + decimal_min);
+                    }
+
+                    int cprogress = cdec_h * 100 + ((cdecimal_min * 100) / 60);
+                    int cprogresspercent = (cprogress * 100) / (tripHr * 100 + (tripMin * 100) / 60);
+                    if (cprogresspercent > 100) cprogresspercent = 100;
+
+                    if (conprogressBar != null) {
+                        if (cprogresspercent < 80)
+                            conprogressBar.setProgressTintList(ColorStateList.valueOf(Color.GREEN));
+                        else if (cprogresspercent < 90)
+                            conprogressBar.setProgressTintList(ColorStateList.valueOf(Color.rgb(243, 156, 18)));
+                        else
+                            conprogressBar.setProgressTintList(ColorStateList.valueOf(Color.RED));
+                        conprogressBar.setProgress(cprogresspercent);
+                    }
+
+                    if (contimetext != null) {
+                        if (cmin < 10)
+                            contimetext.setText(chr + ":0" + cmin);
+                        else
+                            contimetext.setText(chr + ":" + cmin);
+                    }
+
+                    if (tripdriventime != null) {
+                        if (cdecimal_min < 10)
+                            tripdriventime.setText("Trip : " + cdec_h + ":0" + cdecimal_min);
+                        else
+                            tripdriventime.setText("Trip : " + cdec_h + ":" + cdecimal_min);
+                    }
+
+                    if (resttime != null) {
+                        if (rest >= 60) {
+                            int hour = rest / 60;
+                            int minutes = rest % 60;
+                            resttime.setText("Rest time : " + hour + "hr " + minutes + "min");
+                        } else {
+                            resttime.setText("Rest time : " + rest + "min");
+                        }
+                    }
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void stopDashboardTimers() {
+        if (prefRefreshTimer != null) {
+            try { prefRefreshTimer.cancel(); } catch (Exception ignored) {}
+            prefRefreshTimer = null;
+        }
+        if (audioInsertTimer != null) {
+            try { audioInsertTimer.cancel(); } catch (Exception ignored) {}
+            audioInsertTimer = null;
+        }
+        if (hazardTimer != null) {
+            try { hazardTimer.cancel(); } catch (Exception ignored) {}
+            hazardTimer = null;
+        }
+        if (restTimer != null) {
+            try { restTimer.cancel(); } catch (Exception ignored) {}
+            restTimer = null;
+        }
+        if (futureTaskForRuntime != null) {
+            try { futureTaskForRuntime.cancel(true); } catch (Exception ignored) {}
+            futureTaskForRuntime = null;
+        }
+        if (futureTaskForAudio != null) {
+            try { futureTaskForAudio.cancel(true); } catch (Exception ignored) {}
+            futureTaskForAudio = null;
+        }
+        if (scheduledExecutorServiceForRuntime != null) {
+            try { scheduledExecutorServiceForRuntime.shutdownNow(); } catch (Exception ignored) {}
+            scheduledExecutorServiceForRuntime = null;
+        }
+        if (scheduledExecutorServiceForAudio != null) {
+            try { scheduledExecutorServiceForAudio.shutdownNow(); } catch (Exception ignored) {}
+            scheduledExecutorServiceForAudio = null;
+        }
     }
 
     public void localworktimer() {
@@ -1061,6 +1067,12 @@ public class LockScreenActivity extends Activity {
     @Override
     public void onResume() {
         super.onResume();
+        if (pref != null) {
+            String cachedRunTime = pref.getString("runAndContinuousTime", "");
+            if (cachedRunTime != null && cachedRunTime.contains("#") && !cachedRunTime.contains("VehicleId")) {
+                updateRuntimeUI(cachedRunTime);
+            }
+        }
         localworktimer();
         //This audio manager is to increase phone volume to maximum
         AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
@@ -1175,18 +1187,26 @@ public class LockScreenActivity extends Activity {
     @Override
     public void onBackPressed() {
         if (speed < constmaxspeed) {
-            isdashboard = false;
-            moveTaskToBack(true);
+            stopDashboardTimers();
+            finish();
         }
     }
 
     @Override
     public void onDestroy() {
-
-        Intent i = new Intent(getApplicationContext(), LockScreenActivity.class);
-        //  i.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        getApplicationContext().startActivity(i);
+        stopDashboardTimers();
+        if (locationManager != null && locationListener != null) {
+            try {
+                locationManager.removeUpdates(locationListener);
+            } catch (Exception ignored) {}
+        }
+        if (!isdashboard && !flag) {
+            Intent i = new Intent(getApplicationContext(), LockScreenActivity.class);
+            //  i.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            getApplicationContext().startActivity(i);
+        }
+        isdashboard = false;
         super.onDestroy();
     }
 
@@ -1331,27 +1351,49 @@ public class LockScreenActivity extends Activity {
                         if ((int) ((locationchangedtime - lastlocationtime) / 1000) >= gpsupdaterate) {
                             lastlocationtime = locationchangedtime;
                             DecimalFormat df = new DecimalFormat("#.##");
-                            SQLiteDatabase db = openOrCreateDatabase("totaljrmdb", Context.MODE_PRIVATE, null);
-                            db.execSQL("CREATE TABLE IF NOT EXISTS gpsdata(lat DECIMAL(9,6),lng DECIMAL(9,6),speed DECIMAL(5,2),timestamp DATETIME);");
-                            String Query = "INSERT INTO gpsdata(lat ,lng , speed, timestamp) VALUES ('" + lat + "','" + lng + "','" + df.format(mspeed) + "','" + DateFormat.format("yyyy-MM-dd H:mm:ss", new Date(locationchangedtime)).toString() + "');";
-                            db.execSQL(Query);
+                            SQLiteDatabase db = null;
+                            try {
+                                db = openOrCreateDatabase("totaljrmdb", Context.MODE_PRIVATE, null);
+                                db.execSQL("CREATE TABLE IF NOT EXISTS gpsdata(lat DECIMAL(9,6),lng DECIMAL(9,6),speed DECIMAL(5,2),timestamp DATETIME);");
+                                String Query = "INSERT INTO gpsdata(lat ,lng , speed, timestamp) VALUES ('" + lat + "','" + lng + "','" + df.format(mspeed) + "','" + DateFormat.format("yyyy-MM-dd H:mm:ss", new Date(locationchangedtime)).toString() + "');";
+                                db.execSQL(Query);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            } finally {
+                                if (db != null) {
+                                    try { db.close(); } catch (Exception ignored) {}
+                                }
+                            }
                             if (isNetworkAvailable()) {
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        SQLiteDatabase db = openOrCreateDatabase("totaljrmdb", Context.MODE_PRIVATE, null);
-                                        String query = "SELECT * FROM gpsdata order by timestamp desc limit 100";
-                                        Cursor cursor = db.rawQuery(query, null);
-                                        gpsdata = "";
-                                        gpsdateArray = new String[100];
-                                        if (cursor.getCount() > 0) {
-                                            cursor.moveToFirst();
-                                            int i = 0;
-                                            do {
-                                                gpsdateArray[i] = cursor.getString(3);
-                                                gpsdata = gpsdata + cursor.getString(0) + "#" + cursor.getString(1) + "#" + cursor.getString(2) + "#" + cursor.getString(3) + "|";
-                                                i++;
-                                            } while (cursor.moveToNext());
+                                        SQLiteDatabase selectDb = null;
+                                        Cursor cursor = null;
+                                        try {
+                                            selectDb = openOrCreateDatabase("totaljrmdb", Context.MODE_PRIVATE, null);
+                                            String query = "SELECT * FROM gpsdata order by timestamp desc limit 100";
+                                            cursor = selectDb.rawQuery(query, null);
+                                            gpsdata = "";
+                                            gpsdateArray = new String[100];
+                                            if (cursor != null && cursor.getCount() > 0) {
+                                                cursor.moveToFirst();
+                                                int i = 0;
+                                                do {
+                                                    gpsdateArray[i] = cursor.getString(3);
+                                                    gpsdata = gpsdata + cursor.getString(0) + "#" + cursor.getString(1) + "#" + cursor.getString(2) + "#" + cursor.getString(3) + "|";
+                                                    i++;
+                                                } while (cursor.moveToNext());
+                                            }
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                        } finally {
+                                            if (cursor != null) {
+                                                try { cursor.close(); } catch (Exception ignored) {}
+                                            }
+                                            if (selectDb != null) {
+                                                try { selectDb.close(); } catch (Exception ignored) {}
+                                            }
                                         }
                                         new Thread(new Runnable() {
                                             @Override
@@ -1369,9 +1411,17 @@ public class LockScreenActivity extends Activity {
                                                                 break;
                                                         }
                                                         data = data + ");";
-                                                        SQLiteDatabase db = openOrCreateDatabase("totaljrmdb", Context.MODE_PRIVATE, null);
-                                                        db.execSQL(data);
-                                                        db.close();
+                                                        SQLiteDatabase deleteDb = null;
+                                                        try {
+                                                            deleteDb = openOrCreateDatabase("totaljrmdb", Context.MODE_PRIVATE, null);
+                                                            deleteDb.execSQL(data);
+                                                        } catch (Exception e) {
+                                                            e.printStackTrace();
+                                                        } finally {
+                                                            if (deleteDb != null) {
+                                                                try { deleteDb.close(); } catch (Exception ignored) {}
+                                                            }
+                                                        }
                                                     }
                                                 } catch (Exception ex) {
                                                     ex.printStackTrace();
@@ -1416,10 +1466,19 @@ public class LockScreenActivity extends Activity {
 
     public void insertAudioLog(String type) {
         Calendar c = Calendar.getInstance();
-        SQLiteDatabase db = openOrCreateDatabase("totaljrmdb", Context.MODE_PRIVATE, null);
-        db.execSQL("CREATE TABLE IF NOT EXISTS insertAudioLog(lat DECIMAL(9,6),lng DECIMAL(9,6),type VARCHAR,timestamp DATETIME);");
-        String Query = "INSERT INTO insertAudioLog(lat,lng ,type , timestamp) VALUES ('" + lat + "','" + lng + "','" + type + "','" + DateFormat.format("yyyy-MM-dd H:mm:ss", new Date(c.getTimeInMillis())).toString() + "');";
-        db.execSQL(Query);
+        SQLiteDatabase db = null;
+        try {
+            db = openOrCreateDatabase("totaljrmdb", Context.MODE_PRIVATE, null);
+            db.execSQL("CREATE TABLE IF NOT EXISTS insertAudioLog(lat DECIMAL(9,6),lng DECIMAL(9,6),type VARCHAR,timestamp DATETIME);");
+            String Query = "INSERT INTO insertAudioLog(lat,lng ,type , timestamp) VALUES ('" + lat + "','" + lng + "','" + type + "','" + DateFormat.format("yyyy-MM-dd H:mm:ss", new Date(c.getTimeInMillis())).toString() + "');";
+            db.execSQL(Query);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (db != null) {
+                try { db.close(); } catch (Exception ignored) {}
+            }
+        }
         insertaudio();
     }
 
@@ -1428,44 +1487,66 @@ public class LockScreenActivity extends Activity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    SQLiteDatabase db = openOrCreateDatabase("totaljrmdb", Context.MODE_PRIVATE, null);
-                    db.execSQL("CREATE TABLE IF NOT EXISTS insertAudioLog(lat DECIMAL(9,6),lng DECIMAL(9,6),type VARCHAR,timestamp DATETIME);");
-                    String query = "SELECT distinct timestamp,lat,lng,type FROM insertAudioLog order by timestamp desc limit 100";
-                    final Cursor cursor = db.rawQuery(query, null);
-                    if (cursor.getCount() > 0) {
-                        audiodata = "";
-                        audiodateArray = new String[100];
-                        cursor.moveToFirst();
-                        int i = 0;
-                        do {
-                            audiodateArray[i] = cursor.getString(0);
-                            i++;
-                            audiodata += cursor.getString(0) + "@&" + cursor.getString(1) + "@&" + cursor.getString(2) + "@&" + cursor.getString(3) + "&@";
-                        } while (cursor.moveToNext());
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                try {
-                                    String result = insertAudioLogDb(audiodata);
-                                    if (result.contains("Data Inserted successfully")) {
-                                        String data = "delete from insertAudioLog where timestamp in (";
-                                        for (int i = 0; i < audiodateArray.length; i++) {
-                                            if (audiodateArray[i] != null) {
-                                                if (i != 0)
-                                                    data = data + ",";
-                                                data = data + "'" + audiodateArray[i] + "'";
-                                            } else
-                                                break;
+                    SQLiteDatabase db = null;
+                    Cursor cursor = null;
+                    try {
+                        db = openOrCreateDatabase("totaljrmdb", Context.MODE_PRIVATE, null);
+                        db.execSQL("CREATE TABLE IF NOT EXISTS insertAudioLog(lat DECIMAL(9,6),lng DECIMAL(9,6),type VARCHAR,timestamp DATETIME);");
+                        String query = "SELECT distinct timestamp,lat,lng,type FROM insertAudioLog order by timestamp desc limit 100";
+                        cursor = db.rawQuery(query, null);
+                        if (cursor != null && cursor.getCount() > 0) {
+                            audiodata = "";
+                            audiodateArray = new String[100];
+                            cursor.moveToFirst();
+                            int i = 0;
+                            do {
+                                audiodateArray[i] = cursor.getString(0);
+                                i++;
+                                audiodata += cursor.getString(0) + "@&" + cursor.getString(1) + "@&" + cursor.getString(2) + "@&" + cursor.getString(3) + "&@";
+                            } while (cursor.moveToNext());
+                            new Thread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    try {
+                                        String result = insertAudioLogDb(audiodata);
+                                        if (result.contains("Data Inserted successfully")) {
+                                            String data = "delete from insertAudioLog where timestamp in (";
+                                            for (int i = 0; i < audiodateArray.length; i++) {
+                                                if (audiodateArray[i] != null) {
+                                                    if (i != 0)
+                                                        data = data + ",";
+                                                    data = data + "'" + audiodateArray[i] + "'";
+                                                } else
+                                                    break;
+                                            }
+                                            data = data + ");";
+                                            SQLiteDatabase deleteDb = null;
+                                            try {
+                                                deleteDb = openOrCreateDatabase("totaljrmdb", Context.MODE_PRIVATE, null);
+                                                deleteDb.execSQL(data);
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            } finally {
+                                                if (deleteDb != null) {
+                                                    try { deleteDb.close(); } catch (Exception ignored) {}
+                                                }
+                                            }
                                         }
-                                        data = data + ");";
-                                        SQLiteDatabase db = openOrCreateDatabase("totaljrmdb", Context.MODE_PRIVATE, null);
-                                        db.execSQL(data);
+                                    } catch (Exception ex) {
+                                        ex.printStackTrace();
                                     }
-                                } catch (Exception ex) {
-                                    ex.printStackTrace();
                                 }
-                            }
-                        }).start();
+                            }).start();
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    } finally {
+                        if (cursor != null) {
+                            try { cursor.close(); } catch (Exception ignored) {}
+                        }
+                        if (db != null) {
+                            try { db.close(); } catch (Exception ignored) {}
+                        }
                     }
                 }
             });
